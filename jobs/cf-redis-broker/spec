@@ -1,0 +1,108 @@
+---
+name: cf-redis-broker
+
+templates:
+  cf-redis-broker_ctl.erb: bin/cf-redis-broker_ctl
+  process-watcher_ctl.erb: bin/process-watcher_ctl
+  nginx_ctl.erb: bin/nginx_ctl
+
+  nginx.conf.erb: config/nginx.conf
+  broker.yml.erb: config/broker.yml
+  redis.conf.erb: config/redis.conf
+
+  cf-redis-broker.pem.erb: config/ssl/cf-redis-broker.pem
+  cf-redis-broker.key.erb: config/ssl/cf-redis-broker.key
+
+  drain.sh: bin/drain
+
+packages:
+- common
+- nginx
+- redis
+- cf-redis-broker
+
+properties:
+  redis.statefile_path:
+    default: /var/vcap/store/cf-redis-broker/statefile.json
+    description: Path to the broker statefile
+  redis.data_directory:
+    default: /var/vcap/store/cf-redis-broker/redis-data
+    description: The directory which stores the persisted broker data
+  redis.log_directory:
+    default: /var/vcap/sys/log/redis
+    description: The directory which stores the redis server logs
+  redis.host:
+    description: This host which the Redis server runs on
+  redis.conf_path:
+    default: /var/vcap/jobs/cf-redis-broker/config/redis.conf
+    description: The shared conf file for all Redis instances
+  redis.maxmemory:
+    default: 524288000
+    description: The maximum memory (in bytes) that Redis will use before evicting old data
+  redis.config_command:
+    description: The name of the obfuscated redis CONFIG command.
+  redis.save_command:
+    default: ""
+    description: The name of the obfuscated redis SAVE command.
+  redis.bg_save_command:
+    default: ""
+    description: The name of the obfuscated redis BGSAVE command.
+
+  redis.broker.process_check_interval:
+    description: Interval in seconds between checks for dead processes
+    default: 10
+  redis.broker.start_redis_timeout:
+    description: Maximum wait time in seconds for Redis to start up
+    default: 10
+  redis.broker.service_instance_limit:
+    description: The maximum number of instances allowed
+  redis.broker.auth.username:
+    default: admin
+    description: The username for HTTP Basic Auth on the Broker
+  redis.broker.auth.password:
+    default: admin
+    description: The password for HTTP Basic Auth on the Broker
+  redis.broker.backend_port:
+    default: 10001
+    description: The port for the broker unicorn process to run on
+  redis.broker.ssl.cert:
+    description: SSL Certificate for broker (PEM encoded)
+  redis.broker.ssl.key:
+    description: SSL private key for broker (PEM encoded)
+
+  redis.broker.dedicated_nodes:
+    description: List of node IPs for the dedicated plan
+    default: []
+  redis.broker.dedicated_port:
+    description: The port used by the redis instances
+    default: 6379
+
+
+  redis.broker.name:
+    default: redis
+    description: Name of the broker, to be used in cf commandline operations and by the broker-registrar
+
+  redis.broker.backups.access_key_id:
+    default: ""
+    description: "Access Key ID for the S3-compatible blob store that backups will be uploaded to"
+  redis.broker.backups.secret_access_key:
+    default: ""
+    description: "Secret Access Key for the S3-compatible blob store that backups will be uploaded to"
+  redis.broker.backups.endpoint_url:
+    default: ""
+    description: "HTTP(S) endpoint of the S3-compatible blob store that backups will be uploaded to"
+  redis.broker.backups.bucket_name:
+    default: ""
+    description: "Name of the bucket into which backups will be uploaded"
+  redis.broker.backups.path:
+    default: ""
+    description: "Path within the above bucket to which backups will be uploaded"
+  redis.broker.backups.s3_region:
+    default: ""
+    description: "S3 region for the S3-compatible blob store that backups will be uploaded to"
+  redis.broker.backups.security_token:
+    default: ""
+    description: "Security Token for the S3-compatible blob store that backups will be uploaded to"
+  redis.broker.backups.bg_save_timeout:
+    default: 3600
+    description: "Timeout in seconds for Redis background save to complete when backing up instance"

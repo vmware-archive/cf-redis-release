@@ -1,0 +1,307 @@
+---
+builds:
+  9ef82406000e5d3c8027624e21a362e587cdf445:
+    version: 1
+  8e9458551f34745a196c6682e40887d7112ac0e9:
+    version: 2
+  961b979a3a85216d478a5680a3dbf770c34c8ccf:
+    version: 3
+  0f3bb75d5226cea419c3310a5fb0c8467ed4395f:
+    version: 4
+  36bcf644cda66f8630b85c55f5432f3acb139b08:
+    version: 5
+  4188343625ac8e50cedd8fed9107fa8a47acb30e:
+    version: 6
+  d194bee7ba586968e6fe5b6e56fe8299b6dfc3e9:
+    version: 7
+  bd463739e500918cfdebf1e81322d14412a95a8e:
+    version: 8
+  dfb987e0af9c697129047dcbba929e38dbc51d05:
+    version: 9
+  a96a4dd46964497c8bfbb8b326561e307b979233:
+    version: 10
+  b2ae18ebaa48d7a5d4dbcf13fd7784e2a68bd22d:
+    version: 11
+  5466ee9a85164b16ec6fce3e090152f15aff64ae:
+    version: 12
+  93d4278c7b3487e579acdc4cde3832249982bffd:
+    version: 13
+  6bc252c6646de4fc445e950c1255c7bd78452997:
+    version: 14
+  50a3a4d19f4c0386dadedc5b9d6e58dfc6b9b17f:
+    version: 15
+  58496ebd15d109e3265d0d5ebcb0ed60c062dcd5:
+    version: 16
+  234c7f0421b9d2e1e93821fbed184c339e4cff9c:
+    version: 17
+  1163d0fbeee00072663f7627c4604a5fa4161eeb:
+    version: 18
+  4c89f409ceff2c98c65219627183ecb43d483b70:
+    version: 19
+  634eda677937d545d8bbdc1a0a1a225ceec7ddb6:
+    version: 20
+  a7606dae771dfcb9fead6cb346a6f7c6fb4e1f8e:
+    version: 21
+  1ee094275281dc3c3c183c67c6f8d9292576b392:
+    version: 22
+  41cb98eae45d4e12669e08f3d4fd824abc882512:
+    version: 23
+  867c45b42c3abb8400af7261d8e464793d855266:
+    version: 24
+  8bbf696e7386bf1ea660778ac20d849c396ae2b7:
+    version: 25
+  137ee488d79e4e00458966a67a3818e889f4a0dd:
+    version: 26
+  380c1799846c509ae9ffcef38c5060643f3578c1:
+    version: 27
+  dff3c875642b166d05d371e27df0e4f90d37cd4d:
+    version: 28
+  c560370b0d9c54aa1b83788e315c3434b9c04c3e:
+    version: 29
+  80cb61a2bdb11d2c350fbc4e10d5d73b456684ad:
+    version: 30
+  cf386b0202a7a83cf99e3259b47583604f555e11:
+    version: 31
+  35751bd06f838d8fda3462b715a0cedb0e24e25f:
+    version: 32
+  004d0b77af3f98c80e8fa7616876b4a21d392cff:
+    version: 33
+  ac33f5a35f8c2ccc87970f4a82e96cf18819d6df:
+    version: 34
+  8a2cf0e005817e2b7f08fc732ac8fdf8b09faf71:
+    version: 35
+  b444f3d966445c45661335e0b7c833877ffffdd9:
+    version: 36
+  b62a5c4a7163b8bfa79cdf43b70f86ddf6ed4633:
+    version: 37
+  3309c2b9f5a1a8249e1a7a8a24ab4c34d12cdd64:
+    version: 38
+  75ddc89f7eea9e441159076c9059655c45f6b452:
+    version: 39
+  fccabbc6591ae6c109b3cd4b364996a4980792ae:
+    version: 40
+  41f1fbcf6ccdc20bdda6c96ab7ea9f355710d041:
+    version: 41
+  2f0b09b0300890dcdf61bdc76b208fe68615aaf4:
+    version: 42
+  08b70f6d829bd6e53630678d943ca8795f1c2cad:
+    version: 43
+  7c22f00cc42544d268a6166686828c8159e81814:
+    version: 44
+  5e6ca2d1894f72deb8d18902aa13378c26b1d0bf:
+    version: 45
+  177984359ad25e120927f1612c62d2ba8f23bde4:
+    version: 46
+  6eab983a748f19f3f2cc590db8df4ce5823db122:
+    version: 47
+  de2bd6a217f22f1dc138cb350411947b99663e7f:
+    version: 48
+  a2dbc1b42c917387d5720aae5134968a9aab1454:
+    version: 49
+  f37e1dd2e1723f0075be945062fc744430ed0e41:
+    version: 50
+  da855204f3573756821f1d8432e1ff755d753e02:
+    version: 51
+  75cd9a8764657bed355d480b76ee85a5d8b6c2de:
+    version: 52
+  531ba5d28d24448a3038e5b2ff624f4439d56322:
+    version: 53
+  437ac49863b385b0a520db6fdcf7467cad507be9:
+    version: 54
+  9dabc12aa2472bba4efadbbf6e0c13fccbfcc408:
+    version: 55
+  d73a7bed291b461ff74354c6e1d9d47ec6e2c72a:
+    version: 56
+  46e7f13df6db76ea85182701fa2a9c6f17d9af25:
+    version: 57
+  a8a5cab591a680291aafbfaad53f36d96a6a45dc:
+    version: 58
+  4b7e650c2527266d624882bec25242adf7225c5b:
+    version: 59
+  97f78e8b0e4bac932d0597d0623443311b372d9d:
+    version: 60
+  60ea1ea3064f249b95a0f0c1463806140e667b2b:
+    version: 61
+  aec6d5c85c3af258dd0703561b3e79d1fdf0ee9d:
+    version: 62
+  e1a8cf098ca76443b92e8bab81e8258624a41b36:
+    version: 63
+  b05387030ebd14d2957eb94e01adf144b8f2af6f:
+    version: 64
+  ae935da38460f21abe1a26c95bda2b6927507a38:
+    version: 65
+  1a8f9b7be74d78973e6f8017dc11c354bfeccb5a:
+    version: 66
+  5dae69da1f0f5769fbbff06e6865cc8c6b174073:
+    version: 67
+  5c7f97b2ef34814694be2aeca38545619aceeff8:
+    version: 68
+  d0bd1ff4f40cfe8626956fe11beca33db5906638:
+    version: 69
+  9aa0c46566e1ae39b82d5e214ee9689647809f34:
+    version: 70
+  c3823f93eec416d33e6817e21faa8d6a20cdbf70:
+    version: 71
+  34aae2062eab7b656f89f249320b072329a7950f:
+    version: 72
+  7f8e4a75abeab42a93a0c4fc43245c743b8dd509:
+    version: 73
+  ece8cb58eed389fc1ca099af05cc1dd25c70d4be:
+    version: 74
+  ba26c518a85b3f8270cda7fea6a1a9f2eccbf742:
+    version: 75
+  043efbd7943995e4fd4e9743f6670fe6e1345b80:
+    version: 76
+  3c597d72f34c6d266172485f0959df1e713f16b0:
+    version: 77
+  91b8cc6e1cfc3ca5172aa0957dc20758a6291fde:
+    version: 78
+  88d21db1e12eb5b9f0d7b2652c7a937bafe6c280:
+    version: 79
+  dd9b7805d9b2d9d70b7f944f1d343a9382e6c85d:
+    version: 80
+  7f906dd397732f3e256973c395bf372760451e81:
+    version: 81
+  c8df956da8c69cc6650b15ad781bc0ff66662045:
+    version: 82
+  aaba323e406e08e1d65ad3a8e954efd22268e267:
+    version: 83
+  e2ca9d8ae9dc98307319b174c2f9ce9b42223bd4:
+    version: 84
+  33ad39299338dda3e0322660a16a963b73773934:
+    version: 85
+  5fbbb44e0f9e52735c70c8b5fc20d44014e404cf:
+    version: 86
+  10b65fb14150b4c45a87fd4878d68db834e27a29:
+    version: 87
+  f70df3701870c3d011485c37f9660722368b0009:
+    version: 88
+  81cd2d810c80e70b7411d37ce826d03d7f1f3c28:
+    version: 89
+  b1ce60754ff7ff9d4ecc0c734521c3899cf13b71:
+    version: 90
+  65c6224f16636d8de7980ba5d9fa905a47011d97:
+    version: 91
+  ca4c39f7de511f23be93e3979ddfcb9039371e4c:
+    version: 92
+  2baab346432ed3be368c6f184bf7162275688010:
+    version: 93
+  831f47feaccab45b0ff0cd3d258084f4cc0c3fd2:
+    version: 94
+  ffe87096fb9bb6f4b36aac9a391151bd67219769:
+    version: 95
+  07e48c2c3f13b8e5cf1efae0d052b3655614faad:
+    version: 96
+  ca4807f9b6b59f166579373fbdecbc88088448ea:
+    version: 97
+  bc30b9a7cb26a736339a174b7d369af5d6cee12c:
+    version: 98
+  89815774bf3010a1b6abe03d81cc3e654ad3a14f:
+    version: 99
+  fbe9ccdc37ff95fa53c2ed804a278ced894f2a32:
+    version: 100
+  3ce49a8633af2d19e522bdf29dcd9a33b32a27df:
+    version: 101
+  800e305f2dd0cfc36b0c65ec040692c5aa8d0bf8:
+    version: 102
+  b3c22c309c4f5e08139d61c649ad4583a87b76ed:
+    version: 103
+  dfc5ec07f6ae26ef727ef8158e1621f0eedc97b7:
+    version: 104
+  3259303bd67f77cfe21c0c61fe87da534c92ad83:
+    version: 105
+  bc71bfe87af3844aaafbebfa766c8c2eb9bb41ea:
+    version: 106
+  442d7c04e838abc22612d72ce0924e486f203773:
+    version: 107
+  00d3a82da7a20ffa082652976f8ba858e737c840:
+    version: 108
+  434781f2a65d5f4e452c1d558dd54d91dd23b5a2:
+    version: 109
+  1e4c2a3e39410908cba2a8974fab5edbe9acfb32:
+    version: 110
+  8a586e8d4795da72410dd70571ea9ee1604aa8cb:
+    version: 111
+  41f1bc656bbbcb687e7d989a39ee638fb58c83ae:
+    version: 112
+  0f3199139ce701d73d5ca62e14f398ead83fa3b4:
+    version: 113
+  054eeafafe9e70becada0cd4cdbfdff0c53fa521:
+    version: 114
+  4c5a340043ddaf485b729b10d5e3c0e2f18d6a33:
+    version: 115
+  24842e556e1fd27cab7a2a921b93adfbc321abb9:
+    version: 116
+  496a6ed7d20716285d461722cc515644295e1742:
+    version: 117
+  c6f1b752a29fee0fb0bbc594b65d20075fc578c4:
+    version: 118
+  1134fcdea4b86d0a6c99e6c6172adbe1e14d67c7:
+    version: 119
+  3a5cc3a4d3ddae3166c5f4323e0ab5bd40478fc9:
+    version: 120
+  ca06d40729435d12cbc367ffcca384d3c3530d0b:
+    version: 121
+  4695f7f4635c69d10813740606a78c6d6e233586:
+    version: 122
+  18e9a537cbba39e8f9d111106c2a1c510c65f2ca:
+    version: 123
+  dc6f4564bcca47ee00f5289064a35b01c88546cf:
+    version: 124
+  4cf3d5713a634c052eaaa4132197da89f9c7f53f:
+    version: 125
+  ca058f04d7b2bcc56e8bd1889a2512252d90b344:
+    version: 126
+  dc2f952df146a3beffdd12f1fbc4a980957c88a9:
+    version: 127
+  0ccb3a99c3607a6461c7ee3e6493e630bfb6a5f9:
+    version: 128
+  fc13188fcad02075c18e181115111c8b1ab5a58b:
+    version: 129
+  005b0068f7ac1ede5f5c2d9eeaf495ab3ba26ecf:
+    version: 130
+  3e4a3bfab4eb8b28496d98161696b41d7110b509:
+    version: 131
+  0b1e5b264399d9ff951f9f2577e252c7d8139338:
+    version: 132
+  c3e29bcff1dc7ee004bae3f068f19bcaaefc0aef:
+    version: 133
+  24f759df6e885716fe10d046f178061df6f312ed:
+    version: 134
+  ae7a2919869f659781b45339b4c0e4288c672dd8:
+    version: 135
+  eb2e474b5d3189a1dd00f78b97d0c5fb7ddf3afa:
+    version: 136
+  0c7a9b2f8f3dd1472cab766b3166a4002696b174:
+    version: 137
+  6d1b57b3a99757ad59751c5c6c3c8d83088bcdf1:
+    version: 138
+  468a544314e4e64ab3d1f7bde1e5ec0bc8c054eb:
+    version: 139
+  99d8082f93924d276d29b6f3ab63926009c23a40:
+    version: 140
+  5a7568d904ff5dda2486256871c242c140099714:
+    version: 141
+  2d8306153786b0f8dc31b0d5f9fccd2721b10cdc:
+    version: 142
+  03fa9c6eefdbff3b4fc83733f1a405a80d2a0799:
+    version: 143
+  a785c044b23abb6c1beb7e4e32b3dc9035c60f2d:
+    version: 144
+  5002d60ded975f9e9c0ffe4e6a9dec3bb1a22f86:
+    version: 145
+  54fe99a8f6d39480a003dc3a3bf4bd1ea650bbc5:
+    version: 146
+  acb682109ea5bc1d97418ad95269035127ed2b3a:
+    version: '147'
+  40aedc1cb678a9b7be9ec3380b1ccc20f395196b:
+    version: '148'
+  b9ec687e091949fe8386f92763dadf253d6eb9b7:
+    version: '149'
+  e787fe5100c7ca4ee5079a8af70899215a6ce32b:
+    version: '150'
+  c4ab03b92fcc14b302af1eb951ddaa8245480da6:
+    version: '151'
+  567f8382-7b2b-4187-a068-e3cda21baac9:
+    version: '152'
+format-version: '2'

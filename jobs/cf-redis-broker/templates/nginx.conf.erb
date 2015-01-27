@@ -1,0 +1,43 @@
+user vcap;
+worker_processes 1;
+daemon off;
+
+error_log  /var/vcap/sys/log/cf-redis-broker/nginx/error.log;
+
+<% if_p("syslog_aggregator.address", "syslog_aggregator.port") do %>
+error_log syslog:server=localhost,facility=local0,tag=CfRedisBrokerNginxError error;
+<% end %>
+
+pid        /var/vcap/sys/run/cf-redis-broker/nginx.pid;
+
+events {
+  worker_connections  1024;
+}
+
+http {
+  server_tokens off;
+
+  server {
+    listen 80;
+    listen 443 ssl;
+
+    location / {
+      proxy_pass         http://127.0.0.1:<%= p('redis.broker.backend_port') %>;
+
+      proxy_set_header   Host             $host;
+      proxy_set_header   X-Real-IP        $remote_addr;
+      proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
+      proxy_set_header   X-Forwarded-Proto $scheme;
+    }
+
+    ssl_protocols          TLSv1 TLSv1.1 TLSv1.2;  # don’t use SSLv3 ref: POODLE
+    ssl_certificate        /var/vcap/store/cf-redis-broker/nginx/cf-redis-broker.pem;
+    ssl_certificate_key    /var/vcap/store/cf-redis-broker/nginx/cf-redis-broker.key;
+  }
+
+  <% if_p("syslog_aggregator.address", "syslog_aggregator.port") do %>
+  access_log syslog:server=localhost,facility=local0,severity=debug,tag=CfRedisBrokerNginxAccess combined;
+  <% end %>
+
+  access_log           /var/vcap/sys/log/cf-redis-broker/nginx/access.log;
+}

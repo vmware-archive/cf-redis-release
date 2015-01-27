@@ -1,0 +1,33 @@
+---
+ruby/ruby-2.0.0-p481.tar.gz:
+  object_id: d7ed90b9-0e26-4579-bc6f-5333222578a4
+  sha: dded7b7349d59feb83d4f774b2ddec23eeab7978
+  size: 13586757
+ruby/rubygems-2.1.11.tgz:
+  object_id: a043d80c-896d-4165-b81f-a922a7817a33
+  sha: ca3033432cae28deb7ced79cda271cb292b70e59
+  size: 367166
+ruby/yaml-0.1.5.tar.gz:
+  object_id: b31f889b-5ae8-42ac-b6f1-f66b7126c784
+  sha: 8b78cb9f759c7d80db8a7328c0ebecfe34fde737
+  size: 504897
+ruby/bundler-1.3.5.gem:
+  object_id: 67d8e9d8-a79a-4ebe-8061-9ac59d0224b5
+  sha: 2cad3052a59b83f1f616e8202f5c714e46bd8523
+  size: 268800
+nginx/pcre-8.34.tar.gz:
+  object_id: 2616f05d-ca34-4db5-a6d4-e1e7aba6799c
+  sha: d46e537337ee70df19084001a4b6815b3d69fe6c
+  size: 1933734
+go/go1.2.linux-amd64.tar.gz:
+  object_id: e83775b7-20c1-4040-bb69-d084332a8a2e
+  sha: 664e5025eae91412a96a10f4ed1a8af6f0f32b7d
+  size: 55966325
+nginx/nginx-1.7.9.tar.gz:
+  object_id: 67a972e2-f601-42f2-aff1-19e631d5fbb9
+  sha: 44ef4770db281cea26a1b2e66c0e34193e1d1f1f
+  size: 827263
+redis/redis-2.8.19.tar.gz:
+  object_id: dac31a97-6f58-4325-95f8-c9617f85d53b
+  sha: 3e362f4770ac2fdbdce58a5aa951c1967e0facc8
+  size: 1254857

@@ -1,0 +1,5 @@
+check process syslog-configurator
+  with pidfile /var/vcap/sys/run/syslog-configurator.pid
+  start program "/var/vcap/jobs/syslog-configurator/bin/syslog-configurator_ctl start"
+  stop program "/var/vcap/jobs/syslog-configurator/bin/syslog-configurator_ctl stop"
+  group vcap

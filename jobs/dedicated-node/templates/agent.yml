@@ -1,0 +1,3 @@
+default_conf_path: /var/vcap/jobs/dedicated-node/config/redis.conf
+conf_path: /var/vcap/store/redis/redis.conf
+monit_executable_path: /var/vcap/bosh/bin/monit

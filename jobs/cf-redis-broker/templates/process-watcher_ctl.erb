@@ -1,0 +1,41 @@
+#!/bin/bash -e
+
+JOB_DIR=/var/vcap/jobs/cf-redis-broker
+RUN_DIR=/var/vcap/sys/run/cf-redis-broker
+LOG_DIR=/var/vcap/sys/log/cf-redis-broker
+INSTANCE_LOG_DIR=<%= p('redis.log_directory') %>
+DATA_DIR=<%= p('redis.data_directory') %>
+PIDFILE=$RUN_DIR/process-watcher.pid
+
+source /var/vcap/packages/common/utils.sh
+
+export PATH=/var/vcap/packages/redis/bin:$PATH
+
+case $1 in
+
+  start)
+    pid_guard $PIDFILE "Redis Process Watcher"
+
+    mkdir -p $RUN_DIR $LOG_DIR $DATA_DIR $INSTANCE_LOG_DIR
+    chown vcap:vcap $RUN_DIR $LOG_DIR $DATA_DIR $INSTANCE_LOG_DIR
+
+    export BROKER_CONFIG_PATH=$JOB_DIR/config/broker.yml
+    export HOST=127.0.0.1
+    export PORT=<%= p('redis.broker.backend_port') %>
+
+    echo $$ > $PIDFILE
+
+    exec chpst -u vcap:vcap /var/vcap/packages/cf-redis-broker/bin/processmonitor \
+      >> $LOG_DIR/process-watcher.stdout.log \
+      2>> $LOG_DIR/process-watcher.stderr.log
+    ;;
+
+  stop)
+    kill_and_wait $PIDFILE 55
+    ;;
+
+  *)
+    echo "Usage: process-watcher_ctl {start|stop}"
+    ;;
+
+esac

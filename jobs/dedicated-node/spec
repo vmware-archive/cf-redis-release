@@ -1,0 +1,21 @@
+---
+name: dedicated-node
+
+templates:
+  agent.yml: config/agent.yml
+  redis.conf.erb: config/redis.conf
+  redis_ctl.erb: bin/redis_ctl
+  redis-agent_ctl.erb: bin/redis-agent_ctl
+
+packages:
+- redis
+- common
+- cf-redis-broker
+
+properties:
+  redis.broker.dedicated_port:
+    description: The port used by the redis instances
+    default: 6379
+  redis.config_command:
+    default: ""
+    description: The name of the obfuscated redis CONFIG command.

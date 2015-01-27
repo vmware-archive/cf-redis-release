@@ -1,0 +1,4 @@
+---
+name: redis
+files:
+  - redis/redis-2.8.19.tar.gz

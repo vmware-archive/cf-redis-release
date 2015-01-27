@@ -1,0 +1,33 @@
+#!/bin/bash -e
+
+LOG_DIR=/var/vcap/sys/log/redis-agent
+DATA_DIR=/var/vcap/store/redis
+PIDFILE=/var/vcap/sys/run/redis-agent.pid
+
+source /var/vcap/packages/common/utils.sh
+
+case $1 in
+
+  start)
+
+    mkdir -p $LOG_DIR $DATA_DIR
+    chown vcap:vcap $LOG_DIR $DATA_DIR
+
+    cd $DATA_DIR
+
+    echo $$ > $PIDFILE
+    exec chpst -u root:root /var/vcap/packages/cf-redis-broker/bin/agent \
+      -agentConfig=/var/vcap/jobs/dedicated-node/config/agent.yml
+      >> $LOG_DIR/redis-agent.stdout.log \
+      2>> $LOG_DIR/redis-agent.stderr.log
+    ;;
+
+  stop)
+    kill_and_wait $PIDFILE 55
+    ;;
+
+  *)
+    echo "Usage: redis-agent_ctl {start|stop}"
+    ;;
+
+esac

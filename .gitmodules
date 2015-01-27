@@ -1,3 +1,9 @@
 [submodule "src/cf-redis-broker"]
 	path = src/cf-redis-broker
 	url = git@github.com:pivotal-cf/cf-redis-broker.git
+[submodule "packages/ruby"]
+	path = packages/ruby
+	url = https://github.com/cloudfoundry/ruby-package
+[submodule "src/broker-registrar"]
+	path = src/broker-registrar
+	url = https://github.com/pivotal-cf/broker-registrar

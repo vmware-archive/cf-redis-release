@@ -1,0 +1,43 @@
+#!/bin/bash -e
+
+job_dir=/var/vcap/jobs/cf-redis-broker
+run_dir=/var/vcap/sys/run/cf-redis-broker
+log_dir=/var/vcap/sys/log/cf-redis-broker/nginx
+store_dir=/var/vcap/store/cf-redis-broker/nginx
+ssl_dir=/var/vcap/jobs/cf-redis-broker/config/ssl
+pidfile=$run_dir/nginx.pid
+
+source /var/vcap/packages/common/utils.sh
+
+case $1 in
+
+  start)
+    mkdir -p $run_dir $log_dir $store_dir
+
+    # if the properties contain cf-redis-broker.ssl.key & cf-redis-broker.ssl.cert then
+    # the two files below will contain key & cert - copy them to the persistent disk
+    if [ -s $ssl_dir/cf-redis-broker.key -a -s $ssl_dir/cf-redis-broker.pem ]; then
+      cp $ssl_dir/* $store_dir
+    # otherwise, if the key or cert doesn't exist in the persistent disk, create new ones
+    elif [ ! -f $store_dir/cf-redis-broker.key -o ! -f $store_dir/cf-redis-broker.pem ]; then
+      openssl req -nodes -new -newkey rsa:1024 -out $store_dir/cf-redis-broker.csr \
+        -keyout $store_dir/cf-redis-broker.key -subj '/O=Bosh/CN=*'
+      openssl x509 -req -days 3650 -in $store_dir/cf-redis-broker.csr \
+        -signkey $store_dir/cf-redis-broker.key -out $store_dir/cf-redis-broker.pem
+    fi
+
+    echo $$ > $pidfile
+
+    exec /var/vcap/packages/nginx/sbin/nginx -c $job_dir/config/nginx.conf \
+      >>$log_dir/nginx.stdout.log 2>>$log_dir/nginx.stderr.log
+    ;;
+
+  stop)
+    kill_and_wait $pidfile 55
+    ;;
+
+  *)
+    echo "Usage: nginx_ctl {start|stop}"
+    ;;
+
+esac

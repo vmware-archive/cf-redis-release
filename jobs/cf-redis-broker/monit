@@ -1,0 +1,17 @@
+check process process-watcher
+  with pidfile /var/vcap/sys/run/cf-redis-broker/process-watcher.pid
+  start program "/var/vcap/jobs/cf-redis-broker/bin/process-watcher_ctl start" with timeout 60 seconds
+  stop program "/var/vcap/jobs/cf-redis-broker/bin/process-watcher_ctl stop" with timeout 60 seconds
+  group vcap
+
+check process cf-redis-broker
+  with pidfile /var/vcap/sys/run/cf-redis-broker/unicorn.pid
+  start program "/var/vcap/jobs/cf-redis-broker/bin/cf-redis-broker_ctl start" with timeout 60 seconds
+  stop program "/var/vcap/jobs/cf-redis-broker/bin/cf-redis-broker_ctl stop" with timeout 60 seconds
+  group vcap
+
+check process broker-nginx
+  with pidfile /var/vcap/sys/run/cf-redis-broker/nginx.pid
+  start program "/var/vcap/jobs/cf-redis-broker/bin/nginx_ctl start"
+  stop program "/var/vcap/jobs/cf-redis-broker/bin/nginx_ctl stop"
+  group vcap

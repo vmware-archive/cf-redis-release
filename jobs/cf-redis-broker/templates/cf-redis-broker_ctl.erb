@@ -1,0 +1,60 @@
+#!/bin/bash -e
+
+JOB_DIR=/var/vcap/jobs/cf-redis-broker
+RUN_DIR=/var/vcap/sys/run/cf-redis-broker
+LOG_DIR=/var/vcap/sys/log/cf-redis-broker
+BIN_DIR=/var/vcap/packages/cf-redis-broker/bin
+INSTANCE_LOG_DIR=<%= p('redis.log_directory') %>
+DATA_DIR=<%= p('redis.data_directory') %>
+STATEFILE_DIR=`dirname <%= p('redis.statefile_path') %>`
+PIDFILE=$RUN_DIR/unicorn.pid
+
+source /var/vcap/packages/common/utils.sh
+
+export PATH=/var/vcap/packages/redis/bin:$PATH
+
+case $1 in
+
+  start)
+    <%
+      endpoint_url_set = p("redis.broker.backups.endpoint_url") && p("redis.broker.backups.endpoint_url") != ''
+      bucket_name_set = p("redis.broker.backups.bucket_name") && p("redis.broker.backups.bucket_name") != ''
+      if bucket_name_set != endpoint_url_set
+        raise "you must supply both the bucket name and endpoint url to enable backups"
+      end
+    %>
+    pid_guard $PIDFILE "Redis Broker"
+
+    mkdir -p $RUN_DIR $LOG_DIR $DATA_DIR $INSTANCE_LOG_DIR $STATEFILE_DIR
+    chown vcap:vcap $RUN_DIR $LOG_DIR $DATA_DIR $INSTANCE_LOG_DIR $STATEFILE_DIR
+
+    # Run backups at midnight, every night
+    # Apparently the dash on the end of this line will cause an issue on Solaris.
+    (crontab -l; echo "0 0 * * * BROKER_CONFIG_PATH=${JOB_DIR}/config/broker.yml ${BIN_DIR}/backup") | uniq | crontab -
+
+    # Recommended for running redis on a VM in production (https://www.pivotaltracker.com/story/show/74949514)
+    sysctl vm.overcommit_memory=1
+
+    # Redis complains if you set maxclients to over the number of open file descriptors.
+    # This value is (maxclients + 32).
+    ulimit -n 10032
+
+    export BROKER_CONFIG_PATH=$JOB_DIR/config/broker.yml
+    export HOST=127.0.0.1
+    export PORT=<%= p('redis.broker.backend_port') %>
+
+    echo $$ > $PIDFILE
+    exec chpst -u vcap:vcap $BIN_DIR/broker \
+      >> $LOG_DIR/cf-redis-broker.stdout.log \
+      2>> $LOG_DIR/cf-redis-broker.stderr.log
+    ;;
+
+  stop)
+    kill_and_wait $PIDFILE 55
+    ;;
+
+  *)
+    echo "Usage: cf-redis-broker_ctl {start|stop}"
+    ;;
+
+esac

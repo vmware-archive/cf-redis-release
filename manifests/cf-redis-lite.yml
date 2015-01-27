@@ -1,0 +1,189 @@
+---
+name: cf-redis
+director_uuid: 111111111111111111111111111111111111
+releases:
+- name: cf-redis
+  version: latest
+compilation:
+  cloud_properties:
+    name: random
+  network: services1
+  reuse_compilation_vms: true
+  workers: 2
+update:
+  canaries: 1
+  canary_watch_time: 30000-180000
+  update_watch_time: 30000-180000
+  max_in_flight: 4
+networks:
+- name: services1
+  subnets:
+  - cloud_properties:
+      name: random
+    range: 10.244.3.32/30
+    reserved:
+    - 10.244.3.33
+  - cloud_properties:
+      name: random
+    range: 10.244.3.36/30
+    reserved:
+    - 10.244.3.37
+  - cloud_properties:
+      name: random
+    range: 10.244.3.40/30
+    reserved:
+    - 10.244.3.41
+  - cloud_properties:
+      name: random
+    range: 10.244.3.44/30
+    reserved:
+    - 10.244.3.45
+    static:
+    - 10.244.3.46
+  - cloud_properties:
+      name: random
+    range: 10.244.3.48/30
+    reserved:
+    - 10.244.3.49
+  - cloud_properties:
+      name: random
+    range: 10.244.3.52/30
+    reserved:
+    - 10.244.3.53
+    static:
+    - 10.244.3.54
+  - cloud_properties:
+      name: random
+    range: 10.244.3.56/30
+    reserved:
+    - 10.244.3.57
+    static:
+    - 10.244.3.58
+  - cloud_properties:
+      name: random
+    range: 10.244.3.60/30
+    reserved:
+    - 10.244.3.61
+    static:
+    - 10.244.3.62
+  - cloud_properties:
+      name: random
+    range: 10.244.3.64/30
+    reserved:
+    - 10.244.3.65
+    static:
+    - 10.244.3.66
+  - cloud_properties:
+      name: random
+    range: 10.244.3.68/30
+    reserved:
+    - 10.244.3.69
+    static:
+    - 10.244.3.70
+resource_pools:
+- cloud_properties:
+    ram: 1024
+    name: random
+  name: services-small
+  network: services1
+  stemcell:
+    name: bosh-warden-boshlite-ubuntu-trusty-go_agent
+    version: latest
+jobs:
+- name: dedicated-node
+  templates:
+  - name: dedicated-node
+    release: cf-redis
+  - name: syslog-configurator
+    release: cf-redis
+  instances: 5
+  resource_pool: services-small
+  persistent_disk: 4096
+  networks:
+  - name: services1
+    static_ips:
+    - 10.244.3.54
+    - 10.244.3.58
+    - 10.244.3.62
+    - 10.244.3.66
+    - 10.244.3.70
+- name: cf-redis-broker
+  templates:
+  - name: cf-redis-broker
+    release: cf-redis
+  - name: syslog-configurator
+    release: cf-redis
+  instances: 1
+  resource_pool: services-small
+  persistent_disk: 4096
+  networks:
+  - name: services1
+    static_ips:
+    - 10.244.3.46
+- name: broker-registrar
+  instances: 1
+  lifecycle: errand
+  networks:
+  - name: services1
+  resource_pool: services-small
+  templates:
+  - name: broker-registrar
+    release: cf-redis
+  properties:
+    broker:
+      name: redis
+      host: 10.244.3.46
+      username: admin
+      password: admin
+- name: broker-deregistrar
+  instances: 1
+  lifecycle: errand
+  networks:
+  - name: services1
+  resource_pool: services-small
+  templates:
+  - name: broker-deregistrar
+    release: cf-redis
+  properties:
+    broker:
+      name: redis
+      host: 10.244.3.46
+      username: admin
+      password: admin
+properties:
+  broker:
+    golang: true
+  syslog_aggregator:
+    address: 127.0.0.1
+    port: 1234
+  cf:
+    api_url: http://api.10.244.0.34.xip.io
+    admin_username: admin
+    admin_password: admin
+  redis:
+    host: 10.244.3.46
+    maxmemory: 262144000
+    config_command: config
+    save_command: save
+    bg_save_command: bgsave
+    broker:
+      dedicated_nodes:
+      - 10.244.3.54
+      - 10.244.3.58
+      - 10.244.3.62
+      - 10.244.3.66
+      - 10.244.3.70
+      service_instance_limit: 3
+      auth:
+        username: admin
+        password: admin
+      backups:
+        path: "/backups"
+        s3_region: ''
+        access_key_id: ZZZZZZZZZZZZZZZ
+        secret_access_key: ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+        security_token: ''
+        endpoint_url: https://s3.amazonaws.com
+        bucket_name: my-backup-bucket
+  networks:
+    broker: services1

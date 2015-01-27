@@ -1,0 +1,32 @@
+---
+packages:
+- name: common
+  version: 2
+  sha1: 7be9b4656d3e3a825359bd016cfa386b530eefaf
+  fingerprint: 47eac3c416f87eb0a648b3dfe45632c654d6e67f
+  dependencies: []
+- name: cf-redis-broker
+  version: 20
+  sha1: 306fd7b1a3df333483ce92752037cbc04ddaaea0
+  fingerprint: 663f1bef26c5a922bce2743646548a54a06a729c
+  dependencies:
+  - ruby
+- name: ruby
+  version: 2
+  sha1: 881b3b09b4168e984e91de1813b8e1749b448519
+  fingerprint: 91190a1bec7ad4fd2ca936574276ea88e21e2644
+  dependencies: []
+- name: redis
+  version: 4
+  sha1: 84f0c65edb7a2f5371662e7ed477a1a2e8cbeb67
+  fingerprint: 047d56a42e3c734a913dd33d4cf12d8ce4000c9e
+  dependencies: []
+jobs:
+- name: cf-redis-broker
+  version: 5
+  fingerprint: e9fd711743c9a8f409a76d786a78e249392fe5ae
+  sha1: 072b7c47ff6bfc7619671ce0b928141afdc1119e
+commit_hash: eede432f
+uncommitted_changes: true
+name: cf-redis
+version: 28

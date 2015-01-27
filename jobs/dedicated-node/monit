@@ -1,0 +1,12 @@
+check process redis-agent
+  with pidfile /var/vcap/sys/run/redis-agent.pid
+  start program "/var/vcap/jobs/dedicated-node/bin/redis-agent_ctl start"
+  stop program "/var/vcap/jobs/dedicated-node/bin/redis-agent_ctl stop"
+  group vcap
+
+check process redis
+  with pidfile /var/vcap/sys/run/redis.pid
+  start program "/var/vcap/jobs/dedicated-node/bin/redis_ctl start"
+  stop program "/var/vcap/jobs/dedicated-node/bin/redis_ctl stop"
+  group vcap
+  depends on redis-agent

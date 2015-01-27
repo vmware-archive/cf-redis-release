@@ -1,0 +1,73 @@
+---
+packages:
+- name: broker-registrar
+  version: 4
+  sha1: b356ee7fa8f7f94d6b12b117b22c191df4ff03e7
+  fingerprint: 2862b9417c88983ebfb395758101a2661b2c34aa
+  dependencies:
+  - ruby
+- name: go
+  version: 1
+  sha1: a92ce28e1394e444ff3de4437fd938d683cac1e9
+  fingerprint: 919f0a2a667698431277af86c2094bbb04814b68
+  dependencies: []
+- name: redis
+  version: 7
+  sha1: b51fff2b96470e2bbf85e44a01e286f3b46683cd
+  fingerprint: c11493d2763860450609cf657adec0faa07fe66e
+  dependencies: []
+- name: cf-redis-broker-ruby
+  version: 3
+  sha1: 6a88017bdcd4c8aa4b2cb0f63b441f4d71254bb3
+  fingerprint: c564c5d4086c2a6ef6501c14d445ac3af119773c
+  dependencies:
+  - ruby
+- name: cf-redis-broker
+  version: 64
+  sha1: 8e75f1d92ef7743ce990cbc1aaba5f9a7a3d5c41
+  fingerprint: 15742c5945b1e2f709ef4a2c1a21552cb21ad444
+  dependencies:
+  - go
+- name: nginx
+  version: 2
+  sha1: 5804a98f7d88cd07f60b355aef84a0a4d356a074
+  fingerprint: ca0be677873e26f36ff661edbf0161a755d4cccb
+  dependencies: []
+- name: syslog_aggregator
+  version: 1
+  sha1: f4e6066374700a8eef790a30408aa9ad22b329d1
+  fingerprint: 32c0bc68e0610c4a8f3c52f62ab15cbf3b2290bb
+  dependencies: []
+- name: libyaml
+  version: 1
+  sha1: 79cc0f47ba7b0afc750cdff9135fef1d277b8529
+  fingerprint: 1af9681f0517c18e3c20dcd5dd97be7a262c322a
+  dependencies: []
+- name: common
+  version: 2
+  sha1: 7be9b4656d3e3a825359bd016cfa386b530eefaf
+  fingerprint: 47eac3c416f87eb0a648b3dfe45632c654d6e67f
+  dependencies: []
+- name: ruby
+  version: 3
+  sha1: e88189f1a4851b7a274c15ec66fb5d982068b43c
+  fingerprint: a1867ef5ab826fd7f2a36f858f365ecc362e3ae9
+  dependencies:
+  - libyaml
+jobs:
+- name: broker-registrar
+  version: 1
+  fingerprint: c151dce6b3486a22a7bdd442f98ce5afd75f3bf6
+  sha1: 62b6986e8ead7e7584acf26530eff7573468982d
+- name: broker-deregistrar
+  version: 1
+  fingerprint: 8fe9edc76a04b0e59989011e8cdfece50f17f40d
+  sha1: d54b75150571ea07debe994037ba66202e21a53f
+- name: cf-redis-broker
+  version: 30
+  fingerprint: 77ade532a65828ff66474e64ed9f91dcff867d23
+  sha1: 746364b1c1ed4428785c259ca08c7aabdb340094
+commit_hash: a59c7557
+uncommitted_changes: false
+name: cf-redis
+version: 124

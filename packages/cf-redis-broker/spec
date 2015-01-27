@@ -1,0 +1,8 @@
+---
+name: cf-redis-broker
+
+dependencies:
+- go
+
+files:
+- cf-redis-broker/**/*.go
