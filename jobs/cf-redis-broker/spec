@@ -63,7 +63,10 @@ properties:
     default: admin
     description: The password for HTTP Basic Auth on the Broker
   redis.broker.backend_port:
-    default: 10001
+    default: 10005
+    description: The port for the broker unicorn process to run on
+  redis.broker.backend_host:
+    default: localhost
     description: The port for the broker unicorn process to run on
   redis.broker.ssl.cert:
     description: SSL Certificate for broker (PEM encoded)
