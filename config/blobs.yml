@@ -31,3 +31,7 @@ redis/redis-2.8.19.tar.gz:
   object_id: dac31a97-6f58-4325-95f8-c9617f85d53b
   sha: 3e362f4770ac2fdbdce58a5aa951c1967e0facc8
   size: 1254857
+go/go1.4.1.linux-amd64.tar.gz:
+  object_id: f91bb10b-956b-4918-a26e-a87db551c0db
+  sha: 3e871200e13c0b059b14866d428910de0a4c51ed
+  size: 62402109
