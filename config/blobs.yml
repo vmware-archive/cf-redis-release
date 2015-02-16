@@ -19,10 +19,6 @@ nginx/pcre-8.34.tar.gz:
   object_id: 2616f05d-ca34-4db5-a6d4-e1e7aba6799c
   sha: d46e537337ee70df19084001a4b6815b3d69fe6c
   size: 1933734
-go/go1.2.linux-amd64.tar.gz:
-  object_id: e83775b7-20c1-4040-bb69-d084332a8a2e
-  sha: 664e5025eae91412a96a10f4ed1a8af6f0f32b7d
-  size: 55966325
 nginx/nginx-1.7.9.tar.gz:
   object_id: 67a972e2-f601-42f2-aff1-19e631d5fbb9
   sha: 44ef4770db281cea26a1b2e66c0e34193e1d1f1f
