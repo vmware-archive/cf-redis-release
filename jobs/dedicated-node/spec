@@ -2,20 +2,43 @@
 name: dedicated-node
 
 templates:
-  agent.yml: config/agent.yml
+  agent.yml.erb: config/agent.yml
   redis.conf.erb: config/redis.conf
+  nginx.conf.erb: config/nginx.conf
+
   redis_ctl.erb: bin/redis_ctl
   redis-agent_ctl.erb: bin/redis-agent_ctl
+  nginx_ctl.erb: bin/nginx_ctl
+
+  redis-agent.pem.erb: config/ssl/redis-agent.pem
+  redis-agent.key.erb: config/ssl/redis-agent.key
 
 packages:
 - redis
 - common
+- nginx
 - cf-redis-broker
 
 properties:
+  redis.broker.auth.username:
+    default: admin
+    description: The username for HTTP Basic Auth on the agent, also used for the broker
+  redis.broker.auth.password:
+    default: admin
+    description: The password for HTTP Basic Auth on the agent, also used for the broker
+
   redis.broker.dedicated_port:
     description: The port used by the redis instances
     default: 6379
   redis.config_command:
     default: ""
     description: The name of the obfuscated redis CONFIG command.
+
+  redis.broker.ssl.cert:
+    description: SSL Certificate for broker (PEM encoded)
+  redis.broker.ssl.key:
+    description: SSL private key for broker (PEM encoded)
+
+  redis.agent.backend_port:
+    description: The backend port for the redis-agent process to listen on
+    default: 9876

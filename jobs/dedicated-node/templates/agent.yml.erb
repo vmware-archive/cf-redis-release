@@ -1,3 +1,7 @@
 default_conf_path: /var/vcap/jobs/dedicated-node/config/redis.conf
 conf_path: /var/vcap/store/redis/redis.conf
 monit_executable_path: /var/vcap/bosh/bin/monit
+backend_port: <%= p('redis.agent.backend_port') %>
+auth:
+  username: <%= p('redis.broker.auth.username') %>
+  password: <%= p('redis.broker.auth.password') %>

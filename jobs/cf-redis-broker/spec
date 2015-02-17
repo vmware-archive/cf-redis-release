@@ -58,10 +58,10 @@ properties:
     description: The maximum number of instances allowed
   redis.broker.auth.username:
     default: admin
-    description: The username for HTTP Basic Auth on the Broker
+    description: The username for HTTP Basic Auth on the Broker, also used for the agent
   redis.broker.auth.password:
     default: admin
-    description: The password for HTTP Basic Auth on the Broker
+    description: The password for HTTP Basic Auth on the Broker, also used for the agent
   redis.broker.backend_port:
     default: 10005
     description: The port for the broker unicorn process to run on

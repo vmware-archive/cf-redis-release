@@ -27,6 +27,7 @@ auth:
 
 backend_host: <%= p('redis.broker.backend_host') %>
 backend_port: <%= p('redis.broker.backend_port') %>
+agent_port: 443
 
 monit_executable_path: /var/vcap/bosh/bin/monit
 redis_server_executable_path: /var/vcap/packages/redis/bin/redis-server

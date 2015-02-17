@@ -1,13 +1,13 @@
 #!/bin/bash -e
 
-JOB_DIR=/var/vcap/jobs/cf-redis-broker
-RUN_DIR=/var/vcap/sys/run/cf-redis-broker
-LOG_DIR=/var/vcap/sys/log/cf-redis-broker/nginx
-STORE_DIR=/var/vcap/store/cf-redis-broker/nginx
-TEMPLATE_DIR=/var/vcap/jobs/cf-redis-broker/config/ssl
+JOB_DIR=/var/vcap/jobs/dedicated-node
+RUN_DIR=/var/vcap/sys/run/dedicated-node
+LOG_DIR=/var/vcap/sys/log/nginx
+STORE_DIR=/var/vcap/store/dedicated-node/nginx
+TEMPLATE_DIR=/var/vcap/jobs/dedicated-node/config/ssl
 PID_FILE=$RUN_DIR/nginx.pid
-KEY_FILE=cf-redis-broker.key
-CERT_FILE=cf-redis-broker.pem
+KEY_FILE=redis-agent.key
+CERT_FILE=redis-agent.pem
 
 source /var/vcap/packages/common/utils.sh
 
