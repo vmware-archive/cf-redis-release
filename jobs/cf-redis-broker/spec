@@ -80,7 +80,6 @@ properties:
     description: The port used by the redis instances
     default: 6379
 
-
   redis.broker.name:
     default: redis
     description: Name of the broker, to be used in cf commandline operations and by the broker-registrar

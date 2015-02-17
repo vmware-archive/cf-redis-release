@@ -151,8 +151,6 @@ jobs:
       username: admin
       password: admin
 properties:
-  broker:
-    golang: true
   syslog_aggregator:
     address: 127.0.0.1
     port: 1234
