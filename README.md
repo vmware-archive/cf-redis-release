@@ -9,14 +9,13 @@ Clone the repository using `git clone --recursive`.
 
 ## Properties
 
-Example manifests for BOSH Lite and AWS are provided in `/manifests`.
-Descriptions for all required and optional properties can be found in the
+Example manifests for BOSH Lite and AWS are provided in `/manifests`. All
+required properties are shown in these examples. There are a number of other
+optional properties. Descriptions for all properties can be found in the
 relevant `spec` files for each job.
 
 ## Related Documentation
 
- * [BOSH Installation](docs/bosh_install.md)
- * [Anatomy of RabbitMQ BOSH release](docs/bosh_rabbitmq.md)
- * [Service Broker](docs/service_broker.md)
- * [Managing RabbitMQ via OpsManager](docs/tempest.md)
- * [Creating a Release](docs/release.md)
+ * [BOSH](https://bosh.io/docs)
+ * [Service Broker API](http://docs.cloudfoundry.org/services/api.html)
+ * [Redis](http://redis.io/documentation)
