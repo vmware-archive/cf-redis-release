@@ -1,6 +1,6 @@
 ---
 name: cf-redis
-director_uuid: 111111111111111111111111111111111111
+director_uuid: REPLACE_WITH_DIRECTOR_ID
 releases:
 - name: cf-redis
   version: latest
@@ -183,5 +183,3 @@ properties:
         security_token: ''
         endpoint_url: https://s3.amazonaws.com
         bucket_name: my-backup-bucket
-  networks:
-    broker: services1
