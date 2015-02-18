@@ -126,16 +126,8 @@ properties:
     admin_username: REPLACE_WITH_CLOUD_FOUNDRY_ADMIN_USERNAME
     admin_password: REPLACE_WITH_CLOUD_FOUNDRY_ADMIN_PASSWORD
   redis:
-    maxmemory: 262144000
     host: 10.10.32.12
-    config_command: configalias
-    save_command: anotherrandomstring
-    bg_save_command: yetanotherrandomstring
-    agent:
-      backend_port: 54321
     broker:
-      backend_port: 12345
-      name: redis
       service_instance_limit: 5
       dedicated_nodes:
       - 10.10.32.6
@@ -144,4 +136,5 @@ properties:
       - 10.10.32.9
       - 10.10.32.10
       auth:
-        password: coolpassword
+        username: admin
+        password: REPLACE_WITH_BROKER_PASSWORD
