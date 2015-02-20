@@ -610,4 +610,6 @@ builds:
     version: '304'
   28c7a856-11fe-4bbf-93d2-0f172fe60165:
     version: '305'
+  4984aaa1-14e4-40e8-b0ff-4edb05fc1b92:
+    version: '306'
 format-version: '2'
