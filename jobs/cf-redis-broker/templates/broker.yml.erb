@@ -12,7 +12,6 @@ redis:
     bucket_name: "<%= p('redis.broker.backups.bucket_name') %>"
     access_key_id: "<%= p('redis.broker.backups.access_key_id') %>"
     secret_access_key: "<%= p('redis.broker.backups.secret_access_key') %>"
-    security_token: "<%= p('redis.broker.backups.security_token') %>"
     path: "<%= p('redis.broker.backups.path') %>"
     s3_region: "<%= p('redis.broker.backups.s3_region') %>"
     bg_save_timeout: <%= p('redis.broker.backups.bg_save_timeout') %>

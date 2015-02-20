@@ -180,6 +180,5 @@ properties:
         s3_region: ''
         access_key_id: ZZZZZZZZZZZZZZZ
         secret_access_key: ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-        security_token: ''
         endpoint_url: https://s3.amazonaws.com
         bucket_name: my-backup-bucket
