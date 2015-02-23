@@ -1,15 +1,16 @@
 <%
-  unless spec.resource_pool.cloud_properties.ram
-    raise "RAM must be set in resource_pool.cloud_properties"
+  max_memory = nil
+  if spec.resource_pool.cloud_properties.ram
+    # This property only exists on vSphere
+    ram_mb = spec.resource_pool.cloud_properties.ram
+    ram = ram_mb * 1024 * 1024
+
+    # It is recommended to use 45% of memory
+    # when enabling snapshots
+    max_memory = (ram * 0.45).floor
   end
-
-  ram_mb = spec.resource_pool.cloud_properties.ram
-  ram = ram_mb * 1024 * 1024
-
-  # It is recommended to use 45% of memory
-  # when enabling snapshots
-  max_memory = (ram * 0.45).floor
-%> # Redis configuration file example
+%>
+# Redis configuration file example
 
 # Note on units: when memory size is needed, it is possible to specify
 # it in the usual form of 1k 5GB 4M and so forth:
@@ -327,11 +328,10 @@ requirepass password
 # limit for maxmemory so that there is some free RAM on the system for slave
 # output buffers (but this is not needed if the policy is 'noeviction').
 #
-
-# calculated ram for this machine: <%= ram %> bytes
-# calculated 45% ram (recommanded maxmemory): <%= max_memory %> bytes
-
+# max_memory will be nil if we are on e.g. AWS
+<% if max_memory %>
 maxmemory <%= max_memory %>
+<% end %>
 
 # MAXMEMORY POLICY: how Redis will select what to remove when maxmemory
 # is reached. You can select among five behaviors:
