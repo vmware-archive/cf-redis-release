@@ -48,6 +48,18 @@ properties:
     default: ""
     description: The name of the obfuscated redis BGSAVE command.
 
+  redis.broker.service_name:
+    description: Service name displayed in the catalog metadata
+    default: p-redis
+  redis.broker.service_id:
+    description: Service id displayed in the catalog metadata
+    default: EEA47C3A-569C-4C24-869D-0ADB5B337A4C
+  redis.broker.shared_vm_plan_id:
+    description: Shared-VM plan id displayed in the catalog metadata
+    default: C210CA06-E7E5-4F5D-A5AA-7A2C51CC290E
+  redis.broker.dedicated_vm_plan_id:
+    description: Dedicated-VM plan id displayed in the catalog metadata
+    default: 74E8984C-5F8C-11E4-86BE-07807B3B2589
   redis.broker.process_check_interval:
     description: Interval in seconds between checks for dead processes
     default: 10
