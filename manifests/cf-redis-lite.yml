@@ -150,12 +150,22 @@ jobs:
       host: 10.244.3.46
       username: admin
       password: admin
+- name: smoke-tests
+  instances: 1
+  lifecycle: errand
+  networks:
+  - name: services1
+  resource_pool: services-small
+  templates:
+  - name: smoke-tests
+    release: cf-redis
 properties:
   syslog_aggregator:
     address: 127.0.0.1
     port: 1234
   cf:
     api_url: http://api.10.244.0.34.xip.io
+    apps_domain: 10.244.0.34.xip.io
     admin_username: admin
     admin_password: admin
   redis:
