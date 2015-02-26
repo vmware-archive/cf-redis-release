@@ -1,0 +1,13 @@
+{
+  "api":            "<%= p('cf.api_url') %>",
+  "apps_domain":    "<%= p('cf.apps_domain') %>",
+  "admin_user":     "<%= p('cf.admin_username') %>",
+  "admin_password": "<%= p('cf.admin_username') %>",
+  "service_name":   "<%= p('redis.broker.service_name') %>",
+  "plan_names": [
+    "shared-vm",
+    "dedicated-vm"
+  ],
+  "skip_ssl_validation": true,
+  "create_permissive_security_group": true
+}

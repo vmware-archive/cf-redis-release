@@ -1,0 +1,4 @@
+---
+name: cf-redis-smoke-tests
+files:
+- cf-redis-smoke-tests/**/*
