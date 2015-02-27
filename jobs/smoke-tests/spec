@@ -16,8 +16,6 @@ properties:
     description: 'Username of the admin user'
   cf.admin_password:
     description: 'Password of the admin user'
-  broker.name:
-    description: 'Name of the service broker'
   redis.broker.service_name:
     description: Service name displayed in the catalog metadata
     default: p-redis
