@@ -80,7 +80,7 @@ properties:
   redis.broker.backend_host:
     default: localhost
     description: The port for the broker unicorn process to run on
-  redis.broker.ssl.cert:
+  redis.broker.ssl.pem:
     description: SSL Certificate for broker (PEM encoded)
   redis.broker.ssl.key:
     description: SSL private key for broker (PEM encoded)

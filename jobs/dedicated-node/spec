@@ -34,7 +34,7 @@ properties:
     default: ""
     description: The name of the obfuscated redis CONFIG command.
 
-  redis.broker.ssl.cert:
+  redis.broker.ssl.pem:
     description: SSL Certificate for broker (PEM encoded)
   redis.broker.ssl.key:
     description: SSL private key for broker (PEM encoded)
