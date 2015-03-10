@@ -1,0 +1,42 @@
+#!/bin/bash
+set -e # exit immediately if a simple command exits with a non-zero status
+set -u # report the usage of uninitialized variables
+
+JOB_NAME=route-registrar
+
+RUN_DIR=/var/vcap/sys/run/cf-redis-broker
+LOG_DIR=/var/vcap/sys/log/route-registrar
+PIDFILE=$RUN_DIR/route-registrar.pid
+source /var/vcap/packages/common/utils.sh
+
+export HOME=/var/vcap
+
+case $1 in
+
+start)
+  mkdir -p $RUN_DIR $LOG_DIR
+  chown vcap:vcap $RUN_DIR $LOG_DIR
+
+  pid_guard $PIDFILE $JOB_NAME
+  echo $$ > $PIDFILE
+
+  # Copy the config file to right folder
+  cp /var/vcap/jobs/cf-redis-broker/config/registrar_settings.yml /var/vcap/packages/route-registrar/registrar_settings.yml
+
+  # registrar_settings.yml must be in pwd
+  cd /var/vcap/packages/route-registrar
+
+  exec chpst -u vcap:vcap /var/vcap/packages/route-registrar/bin/route-registrar \
+    >>$LOG_DIR/route-registrar.stdout.log \
+    2>>$LOG_DIR/route-registrar.stderr.log
+;;
+
+stop)
+  kill_and_wait $PIDFILE
+;;
+
+*)
+echo "Usage: route_registrar_ctl {start|stop}" ;;
+
+esac
+exit 0

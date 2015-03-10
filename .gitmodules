@@ -10,3 +10,6 @@
 [submodule "src/cf-redis-smoke-tests"]
 	path = src/cf-redis-smoke-tests
 	url = git@github.com:pivotal-cf/cf-redis-smoke-tests
+[submodule "src/route-registrar"]
+	path = src/route-registrar
+	url = git@github.com:cloudfoundry-incubator/route-registrar.git

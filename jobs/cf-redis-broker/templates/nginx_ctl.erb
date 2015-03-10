@@ -3,41 +3,14 @@
 JOB_DIR=/var/vcap/jobs/cf-redis-broker
 RUN_DIR=/var/vcap/sys/run/cf-redis-broker
 LOG_DIR=/var/vcap/sys/log/cf-redis-broker/nginx
-STORE_DIR=/var/vcap/store/cf-redis-broker/nginx
-TEMPLATE_DIR=/var/vcap/jobs/cf-redis-broker/config/ssl
 PID_FILE=$RUN_DIR/nginx.pid
-KEY_FILE=cf-redis-broker.key
-CERT_FILE=cf-redis-broker.pem
 
 source /var/vcap/packages/common/utils.sh
-
-file_has_content() {
-  local _file=$1
-  [[ $(du -b $_file | awk '{ print $1 }') > 1 ]]
-}
-
-file_missing() {
-  local _file=$1
-  [[ ! -f $1 ]]
-}
-
-generate_self_signed_key_and_cert() {
-  openssl req -nodes -x509 -days 3650 -newkey rsa:1024 -subj '/O=Pivotal/CN=*' \
-  -keyout ${STORE_DIR}/${KEY_FILE} -out ${STORE_DIR}/${CERT_FILE}
-}
 
 case $1 in
 
   start)
     mkdir -p $RUN_DIR $LOG_DIR $STORE_DIR
-
-    if file_has_content ${TEMPLATE_DIR}/${KEY_FILE} && file_has_content ${TEMPLATE_DIR}/${CERT_FILE}
-    then
-      cp ${TEMPLATE_DIR}/* $STORE_DIR
-    elif file_missing ${STORE_DIR}/${KEY_FILE} || file_missing ${STORE_DIR}/${CERT_FILE}
-    then
-      generate_self_signed_key_and_cert
-    fi
 
     echo $$ > $PID_FILE
 

@@ -5,21 +5,21 @@ templates:
   cf-redis-broker_ctl.erb: bin/cf-redis-broker_ctl
   process-watcher_ctl.erb: bin/process-watcher_ctl
   nginx_ctl.erb: bin/nginx_ctl
+  route-registrar_ctl: bin/route-registrar_ctl
 
-  nginx.conf.erb: config/nginx.conf
   broker.yml.erb: config/broker.yml
+  nginx.conf.erb: config/nginx.conf
   redis.conf.erb: config/redis.conf
-
-  cf-redis-broker.pem.erb: config/ssl/cf-redis-broker.pem
-  cf-redis-broker.key.erb: config/ssl/cf-redis-broker.key
+  registrar_settings.yml.erb: config/registrar_settings.yml
 
   drain.sh: bin/drain
 
 packages:
+- cf-redis-broker
 - common
 - nginx
 - redis
-- cf-redis-broker
+- route-registrar
 
 properties:
   redis.statefile_path:
@@ -80,10 +80,6 @@ properties:
   redis.broker.backend_host:
     default: localhost
     description: The port for the broker unicorn process to run on
-  redis.broker.ssl.pem:
-    description: SSL Certificate for broker (PEM encoded)
-  redis.broker.ssl.key:
-    description: SSL private key for broker (PEM encoded)
 
   redis.broker.dedicated_nodes:
     description: List of node IPs for the dedicated plan
@@ -117,3 +113,16 @@ properties:
   redis.broker.backups.bg_save_timeout:
     default: 3600
     description: "Timeout in seconds for Redis background save to complete when backing up instance"
+  redis.broker.network:
+    description: The name of the network that the redis broker runs on.
+
+  cf.apps_domain:
+    description: Domain shared by the UAA and CF API eg '10.244.0.34.xip.io'
+  cf.nats.host:
+    description: Hostname/IP of NATS
+  cf.nats.port:
+    description: Port that NATS listens on
+  cf.nats.username:
+    description: The user to use when authenticating with NATS
+  cf.nats.password:
+    description: The password to use when authenticating with NATS

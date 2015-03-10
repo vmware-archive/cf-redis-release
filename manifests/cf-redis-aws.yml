@@ -115,7 +115,7 @@ jobs:
 properties:
   broker:
     name: redis
-    host: 10.10.32.12
+    host: REPLACE_WITH redis-broker.<CF_APP_DOMAIN>
     username: admin
     password: REPLACE_WITH_BROKER_PASSWORD
   syslog_aggregator:
@@ -125,6 +125,11 @@ properties:
     api_url: REPLACE_WITH_CLOUD_FOUNDRY_TARGET
     admin_username: REPLACE_WITH_CLOUD_FOUNDRY_ADMIN_USERNAME
     admin_password: REPLACE_WITH_CLOUD_FOUNDRY_ADMIN_PASSWORD
+    nats:
+      host: REPLACE_WITH_NATS_HOST
+      port: REPLACE_WITH_NATS_PORT
+      username: REPLACE_WITH_NATS_USERNAME
+      password: REPLACE_WITH_NATS_PASSWORD
   redis:
     host: 10.10.32.12
     broker:
