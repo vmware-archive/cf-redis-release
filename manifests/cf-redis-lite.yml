@@ -7,7 +7,7 @@ releases:
 compilation:
   cloud_properties:
     name: random
-  network: services1
+  network: services
   reuse_compilation_vms: true
   workers: 2
 update:
@@ -16,7 +16,7 @@ update:
   update_watch_time: 30000-180000
   max_in_flight: 4
 networks:
-- name: services1
+- name: services
   subnets:
   - cloud_properties:
       name: random
@@ -85,7 +85,7 @@ resource_pools:
     ram: 1024
     name: random
   name: services-small
-  network: services1
+  network: services
   stemcell:
     name: bosh-warden-boshlite-ubuntu-trusty-go_agent
     version: latest
@@ -100,7 +100,7 @@ jobs:
   resource_pool: services-small
   persistent_disk: 4096
   networks:
-  - name: services1
+  - name: services
     static_ips:
     - 10.244.3.54
     - 10.244.3.58
@@ -117,14 +117,14 @@ jobs:
   resource_pool: services-small
   persistent_disk: 4096
   networks:
-  - name: services1
+  - name: services
     static_ips:
     - 10.244.3.46
 - name: broker-registrar
   instances: 1
   lifecycle: errand
   networks:
-  - name: services1
+  - name: services
   resource_pool: services-small
   templates:
   - name: broker-registrar
@@ -139,7 +139,7 @@ jobs:
   instances: 1
   lifecycle: errand
   networks:
-  - name: services1
+  - name: services
   resource_pool: services-small
   templates:
   - name: broker-deregistrar
@@ -154,7 +154,7 @@ jobs:
   instances: 1
   lifecycle: errand
   networks:
-  - name: services1
+  - name: services
   resource_pool: services-small
   templates:
   - name: smoke-tests
@@ -180,6 +180,7 @@ properties:
     save_command: save
     bg_save_command: bgsave
     broker:
+      network: services
       dedicated_nodes:
       - 10.244.3.54
       - 10.244.3.58

@@ -52,7 +52,7 @@ networks:
 
 resource_pools:
 - name: services-small
-  network: services1
+  network: services
   stemcell:
     name: bosh-aws-xen-ubuntu-trusty-go_agent
     version: latest
@@ -70,7 +70,7 @@ jobs:
     resource_pool: services-small
     persistent_disk: 4096
     networks:
-    - name: services1
+    - name: services
       static_ips:
       - 10.10.32.12
 
@@ -84,7 +84,7 @@ jobs:
     resource_pool: services-small
     persistent_disk: 4096
     networks:
-    - name: services1
+    - name: services
       static_ips:
       - 10.10.32.6
       - 10.10.32.7
@@ -96,7 +96,7 @@ jobs:
     instances: 1
     lifecycle: errand
     networks:
-    - name: services1
+    - name: services
     resource_pool: services-small
     templates:
     - name: broker-registrar
@@ -106,7 +106,7 @@ jobs:
     instances: 1
     lifecycle: errand
     networks:
-    - name: services1
+    - name: services
     resource_pool: services-small
     templates:
     - name: broker-deregistrar
@@ -133,6 +133,7 @@ properties:
   redis:
     host: 10.10.32.12
     broker:
+      network: services
       service_instance_limit: 5
       dedicated_nodes:
       - 10.10.32.6
