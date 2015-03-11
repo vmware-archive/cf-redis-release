@@ -7,6 +7,14 @@ broker.
 
 Clone the repository using `git clone --recursive`.
 
+### git-hooks
+
+The `githooks` directory includes hooks that will only run if
+[git-hooks](http://git-hooks.github.io/git-hooks) has been initialized for this
+repository on this machine. Sprout-wrap does this by default on CF London
+machines. If you are on a different machine, please run `git hooks install` in
+the root dir of this repository.
+
 ## Properties
 
 Example manifests for BOSH Lite and AWS are provided in `/manifests`. All

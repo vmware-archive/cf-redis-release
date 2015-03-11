@@ -1,0 +1,12 @@
+#!/bin/bash -e
+
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+if [[ $CURRENT_BRANCH == "develop" ]]
+then
+  echo "Merging origin/master into develop to update release yaml files"
+  git fetch
+  git merge origin/master
+else
+  echo "Not on 'develop' - skipping merge of origin/master"
+fi
