@@ -17,7 +17,7 @@ case $1 in
 
     echo $$ > $PIDFILE
     exec chpst -u root:root /var/vcap/packages/cf-redis-broker/bin/agent \
-      -agentConfig=/var/vcap/jobs/dedicated-node/config/agent.yml
+      -agentConfig=/var/vcap/jobs/dedicated-node/config/agent.yml \
       >> $LOG_DIR/redis-agent.stdout.log \
       2>> $LOG_DIR/redis-agent.stderr.log
     ;;
