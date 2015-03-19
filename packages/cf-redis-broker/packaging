@@ -12,7 +12,7 @@ export GOROOT=$(readlink -nf /var/vcap/packages/go)
 export GOPATH=$BOSH_INSTALL_TARGET:${PACKAGE_DIR}/Godeps/_workspace
 export PATH=$GOROOT/bin:$PATH
 
-BINARIES=( broker processmonitor agent backup restore )
+BINARIES=( broker processmonitor agent backup restore configmigrator )
 for BINARY in "${BINARIES[@]}"
 do
   go install ${PACKAGE_NAME}/cmd/${BINARY}
