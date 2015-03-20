@@ -8,6 +8,7 @@ templates:
   route-registrar_ctl: bin/route-registrar_ctl
 
   broker.yml.erb: config/broker.yml
+  backup.yml.erb: config/backup.yml
   nginx.conf.erb: config/nginx.conf
   redis.conf.erb: config/redis.conf
   registrar_settings.yml.erb: config/registrar_settings.yml

@@ -1,0 +1,9 @@
+s3:
+  endpoint_url: <%= p('redis.broker.backups.endpoint_url') %>
+  bucket_name: <%= p('redis.broker.backups.bucket_name') %>
+  access_key_id: <%= p('redis.broker.backups.access_key_id') %>
+  secret_access_key: <%= p('redis.broker.backups.secret_access_key') %>
+  path: <%= p('redis.broker.backups.path') %>
+  region: <%= p('redis.broker.backups.s3_region') %>
+bg_save_timeout: <%= p('redis.broker.backups.bg_save_timeout') %>
+redis_data_directory: <%= p('redis.data_directory') %>
