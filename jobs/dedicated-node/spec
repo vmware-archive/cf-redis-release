@@ -5,6 +5,7 @@ templates:
   agent.yml.erb: config/agent.yml
   redis.conf.erb: config/redis.conf
   nginx.conf.erb: config/nginx.conf
+  backup.yml.erb: config/backup.yml
 
   redis_ctl.erb: bin/redis_ctl
   redis-agent_ctl.erb: bin/redis-agent_ctl
@@ -42,3 +43,25 @@ properties:
   redis.agent.backend_port:
     description: The backend port for the redis-agent process to listen on
     default: 9876
+
+  redis.broker.backups.access_key_id:
+    default: ""
+    description: "Access Key ID for the S3-compatible blob store that backups will be uploaded to"
+  redis.broker.backups.secret_access_key:
+    default: ""
+    description: "Secret Access Key for the S3-compatible blob store that backups will be uploaded to"
+  redis.broker.backups.endpoint_url:
+    default: ""
+    description: "HTTP(S) endpoint of the S3-compatible blob store that backups will be uploaded to"
+  redis.broker.backups.bucket_name:
+    default: ""
+    description: "Name of the bucket into which backups will be uploaded"
+  redis.broker.backups.path:
+    default: ""
+    description: "Path within the above bucket to which backups will be uploaded"
+  redis.broker.backups.s3_region:
+    default: ""
+    description: "S3 region for the S3-compatible blob store that backups will be uploaded to"
+  redis.broker.backups.bg_save_timeout:
+    default: 3600
+    description: "Timeout in seconds for Redis background save to complete when backing up instance"

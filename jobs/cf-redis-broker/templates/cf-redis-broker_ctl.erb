@@ -30,7 +30,7 @@ case $1 in
 
     # Run backups at midnight, every night
     # Apparently the dash on the end of this line will cause an issue on Solaris.
-    (crontab -l; echo "0 0 * * * BROKER_CONFIG_PATH=${JOB_DIR}/config/broker.yml ${BIN_DIR}/backup") | uniq | crontab -
+    (crontab -l; echo "0 0 * * * BACKUP_CONFIG_PATH=${JOB_DIR}/config/backup.yml ${BIN_DIR}/backup") | uniq | crontab -
 
     # Recommended for running redis on a VM in production (https://www.pivotaltracker.com/story/show/74949514)
     sysctl vm.overcommit_memory=1
