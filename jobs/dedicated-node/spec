@@ -65,3 +65,9 @@ properties:
   redis.broker.backups.bg_save_timeout:
     default: 3600
     description: "Timeout in seconds for Redis background save to complete when backing up instance"
+  redis.save_command:
+    default: ""
+    description: The name of the obfuscated redis SAVE command.
+  redis.bg_save_command:
+    default: ""
+    description: The name of the obfuscated redis BGSAVE command.
