@@ -1,0 +1,88 @@
+---
+packages:
+- name: ruby
+  version: cd4d8494a137e228e6358eb18eee7528e371a0a0
+  fingerprint: cd4d8494a137e228e6358eb18eee7528e371a0a0
+  sha1: 9ba1074b87ff070c2fc96e77406d4879647b7ebb
+  dependencies: []
+- name: route-registrar
+  version: e9192a1c30c44edc5af6a2b8512e0c1e9498cdf9
+  fingerprint: e9192a1c30c44edc5af6a2b8512e0c1e9498cdf9
+  sha1: 31cb8bc62dbfb4157155bdcf62db237a4d9ce228
+  dependencies:
+  - go
+- name: cf-redis-smoke-tests
+  version: b2027d439e30e9663da794cc107cdfac1170ebee
+  fingerprint: b2027d439e30e9663da794cc107cdfac1170ebee
+  sha1: a0da69681b7c0a8d87ba06f7ee15743741f7cca2
+  dependencies: []
+- name: cf-cli
+  version: b4bceb6414d9dc3ca44eb9d675b9791ed246ca88
+  fingerprint: b4bceb6414d9dc3ca44eb9d675b9791ed246ca88
+  sha1: ff710b2a2c0734b6b20721bb1193ca4394d711d7
+  dependencies: []
+- name: go
+  version: 1c91feb55b72e9340a52db974f6d2927b2be225c
+  fingerprint: 1c91feb55b72e9340a52db974f6d2927b2be225c
+  sha1: 89c6cc4d28de32baed246da9e5eaf66c2739aa43
+  dependencies: []
+- name: broker-registrar
+  version: 54f0522fb6a104875346f14d504d5ee61bdc1651
+  fingerprint: 54f0522fb6a104875346f14d504d5ee61bdc1651
+  sha1: 2652ca6093008bec78d236fdeb8abaf5fe5f5492
+  dependencies:
+  - ruby
+- name: cf-redis-broker
+  version: 4028ff3bc57b9e414e3bd6c5577fa92e2985d953
+  fingerprint: 4028ff3bc57b9e414e3bd6c5577fa92e2985d953
+  sha1: 6eb87f317707c29a4e62384e0c0030414fd0a1a2
+  dependencies:
+  - go
+- name: nginx
+  version: 01113ed71da2b1753a0adb3f15cffa85b9dc49e2
+  fingerprint: 01113ed71da2b1753a0adb3f15cffa85b9dc49e2
+  sha1: 09d77659894c231796be2902aab7ba0ee929675f
+  dependencies: []
+- name: redis
+  version: ff033563fccf0a84f521041e7a58d38cb289dc4c
+  fingerprint: ff033563fccf0a84f521041e7a58d38cb289dc4c
+  sha1: 3ab09ff71aae41dd4771d06ca3c20ccd49d9df74
+  dependencies: []
+- name: common
+  version: dbfb71d071c927c2b93e2554c0a0a95d6fb77d6d
+  fingerprint: dbfb71d071c927c2b93e2554c0a0a95d6fb77d6d
+  sha1: 1e0c7ecda98e8adbdfb05cc5117a0e97bb459122
+  dependencies: []
+jobs:
+- name: broker-deregistrar
+  version: 30015fee8a0532ac7e5b72080dca95e85b810eda
+  fingerprint: 30015fee8a0532ac7e5b72080dca95e85b810eda
+  sha1: e20a5a3f879f3a21ed5e37e3444eb5b20580528b
+- name: syslog-configurator
+  version: dca9ca8de02acf40b58eaeb9a57c98cc75638898
+  fingerprint: dca9ca8de02acf40b58eaeb9a57c98cc75638898
+  sha1: 0623b8cda5f874f8c54c2abd41c881bac0621e48
+- name: smoke-tests
+  version: f196a4d7aeb5d4ff5378380323faface8060042c
+  fingerprint: f196a4d7aeb5d4ff5378380323faface8060042c
+  sha1: 6000c194fd27cad1ab8429522e9feae94bc2b687
+- name: dedicated-node
+  version: 194d47cf0e21f4fbe164fbe7ced18c3d3ccd8e30
+  fingerprint: 194d47cf0e21f4fbe164fbe7ced18c3d3ccd8e30
+  sha1: f7d46e4b57aedb3d964e780cce45e91549e2bad4
+- name: broker-registrar
+  version: 9f566e65b9c68b62521b77ea3105afe9f654396b
+  fingerprint: 9f566e65b9c68b62521b77ea3105afe9f654396b
+  sha1: 2af8a41098d0946d6fcfd725f64f80d5dc966509
+- name: cf-redis-broker
+  version: 7250749061f901201a66da1bffcaf177b3da55f0
+  fingerprint: 7250749061f901201a66da1bffcaf177b3da55f0
+  sha1: 2d19208157ad272f0bb3925813bda25fc1d06b40
+license:
+  version: 443041add743bce9c52077d8f3d2e130c08340c5
+  fingerprint: 443041add743bce9c52077d8f3d2e130c08340c5
+  sha1: a65ac1e9d55dc8ce3fc4ac601c13d704ecd163ab
+commit_hash: c0ca4f13
+uncommitted_changes: false
+name: cf-redis
+version: '322'
