@@ -5,6 +5,6 @@ s3:
   secret_access_key: <%= p('redis.broker.backups.secret_access_key') %>
   path: <%= p('redis.broker.backups.path') %>
   region: <%= p('redis.broker.backups.s3_region') %>
-node_id: <%= spec.job.name %>_<%= spec.index %>
+dedicated_instance: false
 bg_save_timeout: <%= p('redis.broker.backups.bg_save_timeout') %>
 redis_data_directory: <%= p('redis.data_directory') %>
