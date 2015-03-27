@@ -6,6 +6,7 @@ templates:
   redis.conf.erb: config/redis.conf
   nginx.conf.erb: config/nginx.conf
   backup.yml.erb: config/backup.yml
+  restore.yml.erb: config/restore.yml
 
   redis_ctl.erb: bin/redis_ctl
   redis-agent_ctl.erb: bin/redis-agent_ctl
@@ -39,6 +40,9 @@ properties:
     description: SSL Certificate for broker (PEM encoded)
   redis.broker.ssl.key:
     description: SSL private key for broker (PEM encoded)
+  redis.broker.start_redis_timeout:
+    description: Maximum wait time in seconds for Redis to start up
+    default: 10
 
   redis.agent.backend_port:
     description: The backend port for the redis-agent process to listen on

@@ -1,0 +1,5 @@
+monit_executable_path: /var/vcap/bosh/bin/monit
+redis_data_directory: <%= p('redis.data_directory') %>
+redis_server_executable_path: /var/vcap/packages/redis/bin/redis-server
+start_redis_timeout_seconds: <%= p('redis.broker.start_redis_timeout') %>
+dedicated_instance: false
