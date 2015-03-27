@@ -59,9 +59,6 @@ properties:
   redis.broker.backups.path:
     default: ""
     description: "Path within the above bucket to which backups will be uploaded"
-  redis.broker.backups.s3_region:
-    default: ""
-    description: "S3 region for the S3-compatible blob store that backups will be uploaded to"
   redis.broker.backups.bg_save_timeout:
     default: 3600
     description: "Timeout in seconds for Redis background save to complete when backing up instance"
