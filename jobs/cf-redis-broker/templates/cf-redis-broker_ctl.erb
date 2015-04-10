@@ -8,6 +8,7 @@ INSTANCE_LOG_DIR=<%= p('redis.log_directory') %>
 DATA_DIR=<%= p('redis.data_directory') %>
 STATEFILE_DIR=`dirname <%= p('redis.statefile_path') %>`
 PIDFILE=$RUN_DIR/unicorn.pid
+BACKUP_LOG_DIR=/var/vcap/sys/log/backup
 
 source /var/vcap/packages/common/utils.sh
 
@@ -25,12 +26,22 @@ case $1 in
     %>
     pid_guard $PIDFILE "Redis Broker"
 
-    mkdir -p $RUN_DIR $LOG_DIR $DATA_DIR $INSTANCE_LOG_DIR $STATEFILE_DIR
-    chown vcap:vcap $RUN_DIR $LOG_DIR $DATA_DIR $INSTANCE_LOG_DIR $STATEFILE_DIR
+    mkdir -p $RUN_DIR $LOG_DIR $DATA_DIR $INSTANCE_LOG_DIR $STATEFILE_DIR $BACKUP_LOG_DIR
+    chown vcap:vcap $RUN_DIR $LOG_DIR $DATA_DIR $INSTANCE_LOG_DIR $STATEFILE_DIR $BACKUP_LOG_DIR
 
     # Run backups at midnight, every night
-    # Apparently the dash on the end of this line will cause an issue on Solaris.
-    (crontab -l; echo "0 0 * * * BACKUP_CONFIG_PATH=${JOB_DIR}/config/backup.yml ${BIN_DIR}/backup") | uniq | crontab -
+    # Remove any backup entry from root's crontab, we used to add it to root's in older versions
+    if crontab -l | grep --quiet $BIN_DIR
+    then
+      crontab -l | grep -v $BIN_DIR | crontab -
+    fi
+    # Add new entry to vcap crontab if not already present
+    if ! crontab -u vcap -l | grep --quiet $BIN_DIR
+    then
+      # WARNING: If you change this, you'll need to reconsider the check above,
+      # as the current implementation won't update existing crontab entries.
+      (crontab -u vcap -l; echo "0 0 * * * BACKUP_CONFIG_PATH=${JOB_DIR}/config/backup.yml ${BIN_DIR}/backup") | crontab -u vcap -
+    fi
 
     # Recommended for running redis on a VM in production (https://www.pivotaltracker.com/story/show/74949514)
     sysctl vm.overcommit_memory=1

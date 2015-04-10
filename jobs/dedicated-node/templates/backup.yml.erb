@@ -4,7 +4,12 @@ s3:
   access_key_id: <%= p('redis.broker.backups.access_key_id') %>
   secret_access_key: <%= p('redis.broker.backups.secret_access_key') %>
   path: <%= p('redis.broker.backups.path') %>
-node_id: <%= spec.job.name %>_<%= spec.index %>
+node_ip: <%= spec.networks.send(spec.networks.methods(false).first).ip %>
 dedicated_instance: true
+broker_credentials:
+  username: <%= p('redis.broker.auth.username') %>
+  password: <%= p('redis.broker.auth.password') %> 
 bg_save_timeout: <%= p('redis.broker.backups.bg_save_timeout') %>
 redis_data_directory: /var/vcap/store/redis
+broker_host: <%= p('redis.broker.backend_host') %>
+log_file_path: /var/vcap/sys/log/backup/backup.log
