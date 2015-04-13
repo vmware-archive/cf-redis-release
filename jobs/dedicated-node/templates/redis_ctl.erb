@@ -21,17 +21,17 @@ case $1 in
     ulimit -n 10032
 
     # Run backups at midnight, every night
-    # Remove any backup entry from root's crontab, we used to add it to root's in older versions
-    if crontab -l | grep --quiet $BIN_DIR
-    then
-      crontab -l | grep -v $BIN_DIR | crontab -
-    fi
     # Add new entry to vcap crontab if not already present
     if ! crontab -u vcap -l | grep --quiet $BIN_DIR
     then
       # WARNING: If you change this, you'll need to reconsider the check above,
       # as the current implementation won't update existing crontab entries.
-      (crontab -u vcap -l; echo "0 0 * * * BACKUP_CONFIG_PATH=${JOB_DIR}/config/backup.yml ${BIN_DIR}/backup") | crontab -u vcap -
+      if crontab -u vcap -l
+      then
+             (crontab -u vcap -l; echo "0 0 * * * BACKUP_CONFIG_PATH=${JOB_DIR}/config/backup.yml ${BIN_DIR}/backup") | crontab -u vcap -
+      else
+             echo "0 0 * * * BACKUP_CONFIG_PATH=${JOB_DIR}/config/backup.yml ${BIN_DIR}/backup" | crontab -u vcap -
+      fi
     fi
 
     exec chpst -u vcap:vcap /var/vcap/packages/redis/bin/redis-server $CONFIG_PATH \
