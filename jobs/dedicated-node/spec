@@ -20,6 +20,8 @@ packages:
 - common
 - nginx
 - cf-redis-broker
+- python
+- aws-cli
 
 properties:
   redis.broker.backend_host:
