@@ -17,6 +17,10 @@ case $1 in
 
     mkdir -p $LOG_DIR $RUN_DIR $DATA_DIR $BACKUP_LOG_DIR
     chown vcap:vcap $LOG_DIR $RUN_DIR $DATA_DIR $BACKUP_LOG_DIR
+    
+    # Remove temp backup files that might be left over because of a previously
+    # aborted BGSAVE, just to save space
+    rm -f $DATA_DIR/temp-*.rdb
 
     ulimit -n 10032
 
