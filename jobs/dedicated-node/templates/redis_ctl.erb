@@ -40,7 +40,7 @@ case $1 in
     ;;
 
   stop)
-    kill_and_wait $PIDFILE 55
+    kill_and_wait $PIDFILE 55 0
     ;;
 
   *)
