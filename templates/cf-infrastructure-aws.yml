@@ -1,0 +1,17 @@
+meta: ~
+
+compilation:
+  cloud_properties:
+    instance_type: m3.medium
+
+networks: ((merge))
+
+resource_pools:
+- name: services-small
+  stemcell:
+    name: bosh-aws-xen-ubuntu-trusty-go_agent
+    version: (( merge || "latest" ))
+  cloud_properties:
+    instance_type: m3.medium
+    ram: 3840 # Bosh AWS CPI ignores this setting, but it is simulating a vsphere manifest for tests
+

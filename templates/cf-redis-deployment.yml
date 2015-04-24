@@ -1,0 +1,126 @@
+---
+meta: 
+  environment: ~
+  external_domain: (( merge ))
+  syslog_aggregator: ~
+  apps_domain: (( merge ))
+  nats: (( merge ))
+
+name: (( meta.environment "-redis" ))
+director_uuid: (( merge ))
+
+releases:
+  - name: cf-redis
+    version: latest
+
+compilation:
+  workers: 2
+  network: services1
+  reuse_compilation_vms: true
+  cloud_properties: (( merge ))
+
+update:
+  canaries: 1
+  canary_watch_time: 30000-180000
+  update_watch_time: 30000-180000
+  max_in_flight: 4
+
+networks: ((merge))
+
+resource_pools:
+- name: services-small
+  network: services1
+  stemcell: (( merge ))
+  cloud_properties: (( merge ))
+
+jobs:
+- name: cf-redis-broker
+  templates:
+  - name: cf-redis-broker
+    release: cf-redis
+  - name: syslog-configurator
+    release: cf-redis
+  instances: 1
+  resource_pool: services-small
+  persistent_disk: (( merge || 4096 ))
+  networks:
+  - name: services1
+    static_ips: (( merge || static_ips(0) ))
+  properties:
+    host: (( "redis-broker." meta.external_domain ))
+    broker:
+      username: (( merge ))
+      password: (( merge ))
+
+- name: dedicated-node
+  templates:
+  - name: dedicated-node
+    release: cf-redis
+  - name: syslog-configurator
+    release: cf-redis
+  instances: (( merge || 5 ))
+  resource_pool: services-small
+  persistent_disk: (( merge || 4096 ))
+  networks:
+  - name: services1
+    static_ips: (( merge || static_ips(1,2,3,4,5) ))
+
+- name: broker-registrar
+  instances: 1
+  lifecycle: errand
+  networks:
+  - name: services1
+  resource_pool: services-small
+  templates:
+  - name: broker-registrar
+    release: cf-redis
+  properties: 
+    broker:
+      name: redis
+      host: (( jobs.cf-redis-broker.properties.host ))
+      username: (( jobs.cf-redis-broker.properties.broker.username ))
+      password: (( jobs.cf-redis-broker.properties.broker.password ))
+
+- name: broker-deregistrar
+  instances: 1
+  lifecycle: errand
+  networks:
+  - name: services1
+  resource_pool: services-small
+  templates:
+  - name: broker-deregistrar
+    release: cf-redis
+  properties:
+    broker:
+      name: redis
+      host: (( jobs.cf-redis-broker.properties.host ))
+      username: (( jobs.cf-redis-broker.properties.broker.username ))
+      password: (( jobs.cf-redis-broker.properties.broker.password ))
+
+properties:
+  syslog_aggregator: (( meta.syslog_aggregator ))
+  cf:
+    api_url: (( merge )) 
+    apps_domain: (( meta.apps_domain ))
+    admin_username: (( merge ))
+    admin_password: (( merge ))
+    nats: (( meta.nats )) 
+  redis:
+    maxmemory: (( merge || 262144000 ))
+    host: (( jobs.cf-redis-broker.networks.services1.static_ips.[0] ))
+    config_command: (( merge || "configalias" ))
+    save_command: (( merge || "anotherrandomstring" ))
+    bg_save_command: (( merge || "yetanotherrandomstring" ))
+    agent:
+      backend_port: 54321
+    broker:
+      network: services1
+      backend_host: (( jobs.cf-redis-broker.networks.services1.static_ips.[0] ))
+      backend_port: 12345
+      name: redis
+      service_instance_limit: (( merge || 5 ))
+      dedicated_nodes: (( jobs.dedicated-node.networks.services1.static_ips ))
+      auth:
+        username: (( jobs.cf-redis-broker.properties.broker.username ))
+        password: (( jobs.cf-redis-broker.properties.broker.password ))
+      backups: (( merge ))

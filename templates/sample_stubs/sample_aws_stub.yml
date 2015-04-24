@@ -1,0 +1,60 @@
+meta:
+  environment: YOUR_ENVIRONMENT_NAME
+  external_domain: YOUR_CF_SYSTEM_DOMAIN
+  apps_domain: YOUR_CF_APPS_DOMAIN
+  nats:
+    host: 10.10.80.11
+    port: 4222
+    username: NATS_USERNAME_FROM_CF_RELEASE
+    password: NATS_PASSWORD_FROM_CF_RELEASE
+
+director_uuid: YOUR_DIRECTOR_UUID
+
+networks:
+- name: services1
+  type: manual
+  subnets:
+  - range: 10.10.32.0/24
+    gateway: 10.10.32.1
+    reserved:
+    - 10.10.32.2 - 10.10.32.4
+    - 10.10.32.11
+    - 10.10.32.5
+    - 10.10.32.254
+    static:
+    - 10.10.32.6 - 10.10.32.10
+    - 10.10.32.12
+    dns:
+    - 10.10.0.6
+    cloud_properties:
+      subnet: (( properties.template_only.aws.subnet_ids.services1 ))
+
+properties:
+  template_only:
+    aws:
+      subnet_ids:
+        services1: YOUR_SUBNET_ID
+  redis:
+    broker:
+      backups:
+        access_key_id: YOUR_S3_ACCESS_KEY_ID
+        secret_access_key: YOUR_S3_SECRET_ACCESS_KEY 
+        s3_region: YOUR_S3_REGION
+        endpoint_url: S3_ENDPOINT_FOR_YOUR_REGION
+        bucket_name: YOUR_S3_BUCKET
+        path: YOUR_S3_BACKUP_PATH
+  cf:
+    admin_username: YOUR_CF_ADMIN_USERNAME
+    api_url: https://api.YOUR_CF_SYSTEM_DOMAIN
+    admin_password: YOUR_CF_ADMIN_PASSWORD
+
+
+jobs:
+- name: cf-redis-broker
+  properties:
+    broker:
+      username: A_USERNAME_YOU_MAKE_UP
+      password: A_PASSWORD_YOU_MAKE_UP
+  
+
+
