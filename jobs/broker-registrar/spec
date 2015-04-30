@@ -15,12 +15,12 @@ properties:
     description: 'Name of the service broker'
   broker.protocol:
     description: 'Protocol (http/https) provided to the Cloud Controller when registering/deregistering the broker'
-    default: https
+    default: http
   broker.host:
     description: 'Host address of the service broker'
   broker.port:
     description: 'Port for the service broker'
-    default: 443
+    default: 80
   broker.username:
     description: 'Basic Auth username for the service broker'
   broker.password:
