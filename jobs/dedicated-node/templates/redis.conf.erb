@@ -51,7 +51,7 @@ port <%= p('redis.broker.dedicated_port') %>
 # unixsocketperm 755
 
 # Close the connection after a client is idle for N seconds (0 to disable)
-timeout 0
+timeout <%= p('redis.client_timeout') %>
 
 # TCP keepalive.
 #
@@ -67,7 +67,7 @@ timeout 0
 # On other kernels the period depends on the kernel configuration.
 #
 # A reasonable value for this option is 60 seconds.
-tcp-keepalive 0
+tcp-keepalive <%= p('redis.tcp_keep_alive') %>
 
 # Specify the server verbosity level.
 # This can be one of:
@@ -75,7 +75,7 @@ tcp-keepalive 0
 # verbose (many rarely useful info, but not a mess like the debug level)
 # notice (moderately verbose, what you want in production probably)
 # warning (only very important / critical messages are logged)
-loglevel notice
+loglevel <%= p('redis.log_level') %>
 
 # Specify the log file name. Also 'stdout' can be used to force
 # Redis to log on the standard output. Note that if you use standard
@@ -85,18 +85,18 @@ loglevel notice
 
 # To enable logging to the system logger, just set 'syslog-enabled' to yes,
 # and optionally update the other syslog parameters to suit your needs.
-syslog-enabled yes
+syslog-enabled <%= p('redis.syslog_enabled') %>
 
 # Specify the syslog identity.
-syslog-ident redis-server
+syslog-ident <%= p('redis.syslog_ident') %>
 
 # Specify the syslog facility. Must be USER or between LOCAL0-LOCAL7.
-syslog-facility local0
+syslog-facility <%= p('redis.syslog_facility') %>
 
 # Set the number of databases. The default database is DB 0, you can select
 # a different one on a per-connection basis using SELECT <dbid> where
 # dbid is a number between 0 and 'databases'-1
-databases 16
+databases <%= p('redis.databases') %>
 
 ################################ SNAPSHOTTING  #################################
 #
@@ -119,10 +119,14 @@ databases 16
 #   like in the following example:
 #
 #   save ""
-
-save 900 1
-save 300 10
-save 60 10000
+<%
+  if_p('redis.snapshotting.save') do
+    p('redis.snapshotting.save').each do | command |
+%>save <%= command %>
+<%
+    end
+  end
+%>
 
 # By default Redis will stop accepting writes if RDB snapshots are enabled
 # (at least one save point) and the latest background save failed.
@@ -137,13 +141,13 @@ save 60 10000
 # and persistence, you may want to disable this feature so that Redis will
 # continue to work as usually even if there are problems with disk,
 # permissions, and so forth.
-stop-writes-on-bgsave-error yes
+stop-writes-on-bgsave-error <%= p('redis.snapshotting.stop_writes_on_bgsave_error') %>
 
 # Compress string objects using LZF when dump .rdb databases?
 # For default that's set to 'yes' as it's almost always a win.
 # If you want to save some CPU in the saving child set it to 'no' but
 # the dataset will likely be bigger if you have compressible values or keys.
-rdbcompression yes
+rdbcompression <%= p('redis.snapshotting.rdb_compression') %>
 
 # Since version 5 of RDB a CRC64 checksum is placed at the end of the file.
 # This makes the format more resistant to corruption but there is a performance
@@ -152,7 +156,7 @@ rdbcompression yes
 #
 # RDB files created with checksum disabled have a checksum of zero that will
 # tell the loading code to skip the check.
-rdbchecksum yes
+rdbchecksum <%= p('redis.snapshotting.rdb_checksum') %>
 
 # The filename where to dump the DB
 dbfilename dump.rdb
@@ -195,7 +199,7 @@ dir /var/vcap/store/redis
 #    an error "SYNC with master in progress" to all the kind of commands
 #    but to INFO and SLAVEOF.
 #
-slave-serve-stale-data yes
+slave-serve-stale-data <%= p('redis.replication.slave_serve_stale_data') %>
 
 # You can configure a slave instance to accept writes or not. Writing against
 # a slave instance may be useful to store some ephemeral data (because data
@@ -211,13 +215,13 @@ slave-serve-stale-data yes
 # such as CONFIG, DEBUG, and so forth. To a limited extend you can improve
 # security of read only slaves using 'rename-command' to shadow all the
 # administrative / dangerous commands.
-slave-read-only yes
+slave-read-only <%= p('redis.replication.slave_read_only') %>
 
 # Slaves send PINGs to server in a predefined interval. It's possible to change
 # this interval with the repl_ping_slave_period option. The default value is 10
 # seconds.
 #
-# repl-ping-slave-period 10
+repl-ping-slave-period <%= p('redis.replication.repl_ping_slave_period') %>
 
 # The following option sets a timeout for both Bulk transfer I/O timeout and
 # master data or ping response timeout. The default value is 60 seconds.
@@ -226,7 +230,7 @@ slave-read-only yes
 # specified for repl-ping-slave-period otherwise a timeout will be detected
 # every time there is low traffic between the master and the slave.
 #
-# repl-timeout 60
+repl-timeout <%= p('redis.replication.repl_timeout') %>
 
 # Disable TCP_NODELAY on the slave socket after SYNC?
 #
@@ -241,7 +245,7 @@ slave-read-only yes
 # By default we optimize for low latency, but in very high traffic conditions
 # or when the master and slaves are many hops away, turning this to "yes" may
 # be a good idea.
-repl-disable-tcp-nodelay no
+repl-disable-tcp-nodelay <%= p('redis.replication.repl_disable_tcp_nodelay') %>
 
 # The slave priority is an integer number published by Redis in the INFO output.
 # It is used by Redis Sentinel in order to select a slave to promote into a
@@ -256,7 +260,7 @@ repl-disable-tcp-nodelay no
 # Redis Sentinel for promotion.
 #
 # By default the priority is 100.
-slave-priority 100
+slave-priority <%= p('redis.replication.slave_priority') %>
 
 ################################## SECURITY ###################################
 
@@ -271,7 +275,9 @@ slave-priority 100
 # 150k passwords per second against a good box. This means that you should
 # use a very strong password otherwise it will be very easy to break.
 #
-requirepass password
+<% if_p('redis.security.require_pass') do %>
+requirepass <%= p('redis.security.require_pass') %>
+<% end %>
 
 # Command renaming.
 #
@@ -470,7 +476,7 @@ auto-aof-rewrite-min-size 64mb
 # termination of the script.
 #
 # Set it to 0 or a negative value for unlimited execution without warnings.
-lua-time-limit 5000
+lua-time-limit <%=  p('redis.lua_time_limit') %>
 
 ################################## SLOW LOG ###################################
 
@@ -490,11 +496,11 @@ lua-time-limit 5000
 # The following time is expressed in microseconds, so 1000000 is equivalent
 # to one second. Note that a negative number disables the slow log, while
 # a value of zero forces the logging of every command.
-slowlog-log-slower-than 10000
+slowlog-log-slower-than <%=  p('redis.slow_log.log_slower_than') %>
 
 # There is no limit to this length. Just be aware that it will consume memory.
 # You can reclaim memory used by the slow log with SLOWLOG RESET.
-slowlog-max-len 128
+slowlog-max-len <%=  p('redis.slow_log.max_len') %>
 
 ############################### ADVANCED CONFIG ###############################
 

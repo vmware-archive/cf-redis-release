@@ -25,6 +25,102 @@ packages:
 - aws-cli
 
 properties:
+
+  redis.client_timeout:
+    default: 0
+    description: Close the connection after a client is idle for N seconds (0 to disable)
+  redis.tcp_keep_alive:
+    default: 0
+    description: TCP keepalive
+  redis.log_level:
+    default: notice
+    description: Specify the server log verbosity level (debug, verbose, notice, warning)
+  redis.syslog_enabled:
+    default: 'yes'
+    description: Enable/Disable logging to the system logger
+  redis.syslog_ident:
+    default: redis-server
+    description: Specify the syslog identity.
+  redis.syslog_facility:
+    default: local0
+    description: Specify the syslog facility. Must be USER or between LOCAL0-LOCAL7.
+  redis.databases:
+    default: 16
+    description: Set the number of databases. The default database is DB 0.
+
+################################ SNAPSHOTTING  #################################
+  redis.snapshotting.save:
+    default:
+      - 900 1
+      - 300 10
+      - 60 1000
+    description: save <seconds> <changes>; Will save the DB if both the given number of seconds and the given number of write operations against the DB occurred.
+  redis.snapshotting.stop_writes_on_bgsave_error:
+    default: 'yes'
+    description: This will make the user aware (in an hard way) that data is not persisting on disk properly
+  redis.snapshotting.rdb_compression:
+    default: 'yes'
+    description: Compress string objects using LZF when dump .rdb databases
+  redis.snapshotting.rdb_checksum:
+    default: 'yes'
+    description: RDB files created with checksum disabled have a checksum of zero that will tell the loading code to skip the check.
+
+################################# REPLICATION #################################
+#
+# Master-Slave replication. Use slaveof to make a Redis instance a copy of
+# another Redis server. Note that the configuration is local to the slave
+# so for example it is possible to configure the slave to save the DB with a
+# different interval, or to listen to another port, and so on.
+#
+
+  redis.replication.slave_serve_stale_data:
+    default: 'yes'
+    description:  Master-Slave replication. Use slaveof to make a Redis instance a copy of another Redis server.
+  redis.replication.slave_read_only:
+    default: 'yes'
+    description: Configure a slave instance to accept writes or not.
+  redis.replication.repl_ping_slave_period:
+    default: 10
+    description: Configure interval time in seconds that slaves send PINGs to server.
+  redis.replication.repl_timeout:
+    default: 60
+    description: Sets a timeout for both Bulk transfer I/O timeout and master data or ping response timeout.
+  redis.replication.repl_disable_tcp_nodelay:
+    default: 'no'
+    description: Set TCP_NODELAY on the slave socket after SYNC.
+  redis.replication.slave_priority:
+    default: 100
+    description: The slave priority is an integer number published by Redis in the INFO output. It is used by Redis Sentinel in order to select a slave to promote into a master if the master is no longer working correctly.
+
+  redis.security.require_pass:
+    description: Require clients to issue AUTH PASSWORD before processing any other commands.
+
+  redis.lua_time_limit:
+    description: Max execution time of a Lua script in milliseconds.
+    default: 5000
+
+
+################################## SLOW LOG ###################################
+
+# The Redis Slow Log is a system to log queries that exceeded a specified
+# execution time. The execution time does not include the I/O operations
+# like talking with the client, sending the reply and so forth,
+# but just the time needed to actually execute the command (this is the only
+# stage of command execution where the thread is blocked and can not serve
+# other requests in the meantime).
+
+  redis.slow_log.log_slower_than:
+    description: the execution time, in microseconds, to exceed in order for the command to get logged
+    default: 10000
+
+  redis.slow_log.max_len:
+    description: The length of the slow log. There is no limit to this length. Just be aware that it will consume memory. You can reclaim memory used by the slow log with SLOWLOG RESET.
+    default: 128
+
+  redis.limits.maxclients:
+    default: 10000
+    description: Set the max number of connected clients at the same time
+
   redis.broker.backend_host:
     description: The port for the broker unicorn process to run on
   redis.broker.auth.username:
