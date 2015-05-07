@@ -174,7 +174,7 @@ properties:
     default: ""
     description: "Secret Access Key for the S3-compatible blob store that backups will be uploaded to"
   redis.broker.backups.endpoint_url:
-    default: ""
+    default: "https://s3.amazonaws.com"
     description: "HTTP(S) endpoint of the S3-compatible blob store that backups will be uploaded to"
   redis.broker.backups.bucket_name:
     default: ""
