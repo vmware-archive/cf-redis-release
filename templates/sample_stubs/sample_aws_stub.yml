@@ -3,10 +3,13 @@ meta:
   external_domain: YOUR_CF_SYSTEM_DOMAIN
   apps_domain: YOUR_CF_APPS_DOMAIN
   nats:
-    host: 10.10.80.11
+    host: 10.10.16.11
     port: 4222
     username: NATS_USERNAME_FROM_CF_RELEASE
     password: NATS_PASSWORD_FROM_CF_RELEASE
+  syslog_aggregator:
+    address: 127.0.0.1
+    port: 1234
 
 director_uuid: YOUR_DIRECTOR_UUID
 
