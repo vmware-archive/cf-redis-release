@@ -140,7 +140,7 @@ properties:
     default: 10
   redis.broker.start_redis_timeout:
     description: Maximum wait time in seconds for Redis to start up
-    default: 10
+    default: 600
   redis.broker.service_instance_limit:
     description: The maximum number of instances allowed
   redis.broker.auth.username:

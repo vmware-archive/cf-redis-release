@@ -143,7 +143,7 @@ properties:
     description: SSL private key for broker (PEM encoded)
   redis.broker.start_redis_timeout:
     description: Maximum wait time in seconds for Redis to start up
-    default: 10
+    default: 600
 
   redis.agent.backend_port:
     description: The backend port for the redis-agent process to listen on
