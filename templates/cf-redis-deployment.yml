@@ -42,7 +42,7 @@ jobs:
     release: cf-redis
   instances: 1
   resource_pool: redis_z1
-  persistent_disk: (( merge || 4096 ))
+  persistent_disk: (( merge || 8192 ))
   networks:
   - name: redis_z1
     static_ips: (( merge || static_ips(0) ))
@@ -60,7 +60,7 @@ jobs:
     release: cf-redis
   instances: (( merge || 5 ))
   resource_pool: redis_z1
-  persistent_disk: (( merge || 4096 ))
+  persistent_disk: (( merge || 8192 ))
   networks:
   - name: redis_z1
     static_ips: (( merge || static_ips(1,2,3,4,5) ))

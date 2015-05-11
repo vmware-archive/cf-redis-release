@@ -1,0 +1,19 @@
+meta: ~
+
+compilation:
+  cloud_properties:
+    ram: 4096
+    disk: 4096
+    cpu: 1
+
+networks: (( merge ))
+
+resource_pools:
+- name: redis_z1
+  stemcell:
+    name: bosh-vsphere-esxi-ubuntu-trusty-go_agent
+    version: (( merge || "latest" ))
+  cloud_properties:
+    ram: 4096
+    disk: 4096
+    cpu: 1
