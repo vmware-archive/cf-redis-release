@@ -13,5 +13,4 @@ resource_pools:
     version: (( merge || "latest" ))
   cloud_properties:
     instance_type: m3.medium
-    ram: 3840 # Bosh AWS CPI ignores this setting, but it is simulating a vsphere manifest for tests
 
