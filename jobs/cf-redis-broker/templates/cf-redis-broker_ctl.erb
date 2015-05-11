@@ -17,13 +17,6 @@ export PATH=/var/vcap/packages/redis/bin:$PATH
 case $1 in
 
   start)
-    <%
-      endpoint_url_set = p("redis.broker.backups.endpoint_url") && p("redis.broker.backups.endpoint_url") != ''
-      bucket_name_set = p("redis.broker.backups.bucket_name") && p("redis.broker.backups.bucket_name") != ''
-      if bucket_name_set != endpoint_url_set
-        raise "you must supply both the bucket name and endpoint url to enable backups"
-      end
-    %>
     pid_guard $PIDFILE "Redis Broker"
 
     mkdir -p $RUN_DIR $LOG_DIR $DATA_DIR $INSTANCE_LOG_DIR $STATEFILE_DIR $BACKUP_LOG_DIR
