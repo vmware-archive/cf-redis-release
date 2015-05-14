@@ -39,6 +39,7 @@ properties:
         redis_z1: YOUR_SUBNET_ID
   redis:
     broker:
+      service_name: redis
       backups: #Leave this section empty if you don't require backups.
         access_key_id: YOUR_S3_ACCESS_KEY_ID
         secret_access_key: YOUR_S3_SECRET_ACCESS_KEY 

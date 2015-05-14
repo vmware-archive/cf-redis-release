@@ -9,9 +9,10 @@ CF_API_URL='<%= p("cf.api_url") %>'
 CF_ADMIN_USERNAME='<%= p("cf.admin_username") %>'
 CF_ADMIN_PASSWORD='<%= p("cf.admin_password") %>'
 BROKER_NAME='<%= p("broker.name") %>'
+BROKER_SERVICE_NAME='<%= p("redis.broker.service_name") %>'
 
 cf --version
 cf api --skip-ssl-validation $CF_API_URL
 cf auth $CF_ADMIN_USERNAME $CF_ADMIN_PASSWORD
-cf purge-service-offering -f $BROKER_NAME
+cf purge-service-offering -f $BROKER_SERVICE_NAME
 cf delete-service-broker -f $BROKER_NAME
