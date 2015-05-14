@@ -18,4 +18,6 @@ cf --version
 cf api --skip-ssl-validation $CF_API_URL
 cf auth $CF_ADMIN_USERNAME $CF_ADMIN_PASSWORD
 cf create-service-broker $BROKER_NAME $BROKER_USERNAME $BROKER_PASSWORD $BROKER_URL || cf update-service-broker $BROKER_NAME $BROKER_USERNAME $BROKER_PASSWORD $BROKER_URL
-cf enable-service-access $BROKER_NAME
+<% if p("redis.broker.enable_service_access") %>
+cf enable-service-access $BROKER_SERVICE_NAME
+<% end %>

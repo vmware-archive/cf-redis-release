@@ -25,6 +25,9 @@ properties:
     description: 'Basic Auth username for the service broker'
   broker.password:
     description: 'Basic Auth password for the service broker'
+  redis.broker.enable_service_access:
+    description: 'Enable service access to all'
+    default: true
   redis.broker.service_name:
     description: 'Service name'
     default: p-redis

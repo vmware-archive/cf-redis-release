@@ -120,6 +120,7 @@ properties:
       name: redis
       service_name: (( merge || "redis" ))
       service_instance_limit: (( merge || 5 ))
+      enable_service_access: (( merge || true ))
       dedicated_nodes: (( jobs.dedicated-node.networks.redis_z1.static_ips ))
       auth:
         username: (( jobs.cf-redis-broker.properties.broker.username ))
