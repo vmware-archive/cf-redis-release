@@ -97,6 +97,16 @@ jobs:
       username: (( jobs.cf-redis-broker.properties.broker.username ))
       password: (( jobs.cf-redis-broker.properties.broker.password ))
 
+- name: smoke-tests
+  instances: 1
+  lifecycle: errand
+  networks:
+  - name: redis_z1
+  resource_pool: redis_z1
+  templates:
+  - name: smoke-tests
+    release: cf-redis
+
 properties:
   syslog_aggregator: (( meta.syslog_aggregator ))
   cf:
