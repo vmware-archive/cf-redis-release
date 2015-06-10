@@ -1,7 +1,7 @@
 set -e
 
-PCRE_VERSION=8.34
-NGINX_VERSION=1.7.9
+PCRE_VERSION=8.37-patch-CVE2015-3210
+NGINX_VERSION=1.8.0
 
 echo "Extracting pcre..."
 tar xzvf nginx/pcre-$PCRE_VERSION.tar.gz
@@ -25,6 +25,5 @@ cd nginx-$NGINX_VERSION
   --prefix=${BOSH_INSTALL_TARGET} \
   --with-http_ssl_module \
   --with-pcre=../pcre-$PCRE_VERSION
-
 make
 make install

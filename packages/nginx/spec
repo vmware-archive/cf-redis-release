@@ -2,5 +2,5 @@
 name: nginx
 
 files:
-  - nginx/nginx-1.7.9.tar.gz
-  - nginx/pcre-8.34.tar.gz
+  - nginx/nginx-1.8.0.tar.gz
+  - nginx/pcre-8.37-patch-CVE2015-3210.tar.gz
