@@ -184,8 +184,8 @@ properties:
         username: admin
         password: admin
       backups:
-        path: "/backups"
-        access_key_id: ZZZZZZZZZZZZZZZ
-        secret_access_key: ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-        endpoint_url: https://s3.amazonaws.com
-        bucket_name: my-backup-bucket
+        path: 
+        access_key_id: 
+        secret_access_key: 
+        endpoint_url: 
+        bucket_name: 
