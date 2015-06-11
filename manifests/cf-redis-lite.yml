@@ -1,6 +1,6 @@
 ---
 name: cf-redis
-director_uuid: REPLACE_WITH_DIRECTOR_ID
+director_uuid: <%= `bundle exec bosh status --uuid` %>
 releases:
 - name: cf-redis
   version: latest
