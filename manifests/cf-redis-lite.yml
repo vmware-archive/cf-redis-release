@@ -96,17 +96,13 @@ jobs:
     release: cf-redis
   - name: syslog-configurator
     release: cf-redis
-  instances: 5
+  instances: 1
   resource_pool: services-small
   persistent_disk: 4096
   networks:
   - name: services
     static_ips:
     - 10.244.3.54
-    - 10.244.3.58
-    - 10.244.3.62
-    - 10.244.3.66
-    - 10.244.3.70
 - name: cf-redis-broker
   templates:
   - name: cf-redis-broker
@@ -183,10 +179,6 @@ properties:
       network: services
       dedicated_nodes:
       - 10.244.3.54
-      - 10.244.3.58
-      - 10.244.3.62
-      - 10.244.3.66
-      - 10.244.3.70
       service_instance_limit: 3
       auth:
         username: admin
