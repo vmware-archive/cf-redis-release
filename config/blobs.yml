@@ -43,3 +43,15 @@ python/Python-2.7.8.tgz:
   object_id: 449aacb5-8758-4fcc-8b0a-9ce7af700d64
   sha: 511960dd78451a06c9df76509635aeec05b2051a
   size: 14846119
+nginx/nginx-1.8.0.tar.gz:
+  object_id: 03be3964-ee92-4d83-9411-4b82df8fc535
+  sha: 12bad312764feae50246685ab2e74512d1aa9b2f
+  size: 832104
+nginx/pcre-8.37-patch-CVE2015-3210.tar.gz:
+  object_id: 085fdfbd-1794-4870-a9ae-20bb2900037a
+  sha: 46e2839ab51af83e73c246e62d9abc3095ff5dd6
+  size: 4524683
+redis/redis-2.8.21.tar.gz:
+  object_id: 6175c70d-c11e-4e70-ab80-69ee23d59881
+  sha: 52f619d3d301fc7ae498a1d4cb4d44ecebc5b0f9
+  size: 1260030
