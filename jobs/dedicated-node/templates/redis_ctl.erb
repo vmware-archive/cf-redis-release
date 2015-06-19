@@ -32,9 +32,9 @@ case $1 in
       # as the current implementation won't update existing crontab entries.
       if crontab -u vcap -l
       then
-             (crontab -u vcap -l; echo "0 0 * * * BACKUP_CONFIG_PATH=${JOB_DIR}/config/backup.yml ${BIN_DIR}/backup") | crontab -u vcap -
+             (crontab -u vcap -l; echo "0 0 * * * "'PATH=$PATH:/var/vcap/packages/aws-cli/bin'" ${BIN_DIR}/backup --config ${JOB_DIR}/config/backup.yml") | crontab -u vcap -
       else
-             echo "0 0 * * * BACKUP_CONFIG_PATH=${JOB_DIR}/config/backup.yml ${BIN_DIR}/backup" | crontab -u vcap -
+             echo "0 0 * * * PATH="'$PATH:/var/vcap/packages/aws-cli/bin'" ${BIN_DIR}/backup --config ${JOB_DIR}/config/backup.yml" | crontab -u vcap -
       fi
     fi
 
