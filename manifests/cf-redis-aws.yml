@@ -54,8 +54,8 @@ resource_pools:
 - name: services-small
   network: services
   stemcell:
-    name: bosh-aws-xen-ubuntu-trusty-go_agent
-    version: latest
+    name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+    version: 2989
   cloud_properties:
     instance_type: m3.medium
 

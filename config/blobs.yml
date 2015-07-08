@@ -43,3 +43,15 @@ redis/redis-2.8.21.tar.gz:
   object_id: 611cbde4-6516-4ddc-93bf-f02788888ff5
   sha: 6798200d007451a960a0a72041699e12adf14ee3
   size: 1272195
+nginx/nginx-1.8.0.tar.gz:
+  object_id: 77904c0d-6bb2-4e3e-b981-16828770f7a2
+  sha: 12bad312764feae50246685ab2e74512d1aa9b2f
+  size: 832104
+nginx/pcre-8.37-patch-CVE2015-3210.tar.gz:
+  object_id: feb600ac-a4c4-4f84-b87f-bc4268605a40
+  sha: 46e2839ab51af83e73c246e62d9abc3095ff5dd6
+  size: 4524683
+ruby/ruby-2.1.5.tar.gz:
+  object_id: 698d02c7-61f9-4d14-893a-f4a8f085fc92
+  sha: 9c0a238bd7839a4b51871641945a3da90997b8c2
+  size: 15127433
