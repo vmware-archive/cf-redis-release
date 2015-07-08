@@ -96,17 +96,13 @@ jobs:
     release: cf-redis
   - name: syslog-configurator
     release: cf-redis
-  instances: 5
+  instances: 1
   resource_pool: services-small
   persistent_disk: 4096
   networks:
   - name: services
     static_ips:
     - 10.244.3.54
-    - 10.244.3.58
-    - 10.244.3.62
-    - 10.244.3.66
-    - 10.244.3.70
 - name: cf-redis-broker
   templates:
   - name: cf-redis-broker
@@ -180,20 +176,17 @@ properties:
     save_command: save
     bg_save_command: bgsave
     broker:
+      backend_host: 10.244.3.46
       network: services
       dedicated_nodes:
       - 10.244.3.54
-      - 10.244.3.58
-      - 10.244.3.62
-      - 10.244.3.66
-      - 10.244.3.70
       service_instance_limit: 3
       auth:
         username: admin
         password: admin
       backups:
-        path: "/backups"
-        access_key_id: ZZZZZZZZZZZZZZZ
-        secret_access_key: ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-        endpoint_url: https://s3.amazonaws.com
-        bucket_name: my-backup-bucket
+        path: 
+        access_key_id: 
+        secret_access_key: 
+        endpoint_url: 
+        bucket_name: 
