@@ -176,6 +176,7 @@ properties:
     save_command: save
     bg_save_command: bgsave
     broker:
+      backend_host: 10.244.3.46
       network: services
       dedicated_nodes:
       - 10.244.3.54
