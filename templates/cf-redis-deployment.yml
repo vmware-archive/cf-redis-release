@@ -58,12 +58,12 @@ jobs:
     release: cf-redis
   - name: syslog-configurator
     release: cf-redis
-  instances: (( merge || 5 ))
+  instances: (( properties.template_only.dedicated_plan.instance_count || 5 ))
   resource_pool: redis_z1
   persistent_disk: (( merge || 8192 ))
   networks:
   - name: redis_z1
-    static_ips: (( merge || static_ips(1,2,3,4,5) ))
+    static_ips: (( merge || static_ips(1,2,3,4,5,6,7,8,9,10) ))
 
 - name: broker-registrar
   instances: 1
@@ -108,6 +108,7 @@ jobs:
     release: cf-redis
 
 properties:
+  template_only: (( merge ))
   syslog_aggregator: (( meta.syslog_aggregator ))
   cf:
     api_url: (( merge )) 
@@ -116,7 +117,7 @@ properties:
     admin_password: (( merge ))
     nats: (( meta.nats )) 
   redis:
-    maxmemory: (( merge || 262144000 ))
+    maxmemory: (( properties.template_only.shared_plan.max_memory || 262144000 ))
     host: (( jobs.cf-redis-broker.networks.redis_z1.static_ips.[0] ))
     config_command: (( merge || "configalias" ))
     save_command: (( merge || "anotherrandomstring" ))
@@ -129,7 +130,7 @@ properties:
       backend_port: 12345
       name: redis
       service_name: (( merge || "redis" ))
-      service_instance_limit: (( merge || 5 ))
+      service_instance_limit: (( properties.template_only.shared_plan.instance_limit || 5 ))
       enable_service_access: (( merge || true ))
       dedicated_nodes: (( jobs.dedicated-node.networks.redis_z1.static_ips ))
       auth:

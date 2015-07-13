@@ -3,7 +3,7 @@ meta:
   external_domain: YOUR_CF_SYSTEM_DOMAIN
   apps_domain: YOUR_CF_APPS_DOMAIN
   nats:
-    host: 10.10.16.11
+    host: 10.0.16.11
     port: 4222
     username: NATS_USERNAME_FROM_CF_RELEASE
     password: NATS_PASSWORD_FROM_CF_RELEASE
@@ -17,26 +17,24 @@ networks:
 - name: redis_z1
   type: manual
   subnets:
-  - range: 10.10.32.0/24
-    gateway: 10.10.32.1
+  - range: 10.0.16.0/20
+    gateway: 10.0.16.1
     reserved:
-    - 10.10.32.2 - 10.10.32.4
-    - 10.10.32.11
-    - 10.10.32.5
-    - 10.10.32.254
+    - 10.0.16.2 - 10.0.16.254
     static:
-    - 10.10.32.6 - 10.10.32.10
-    - 10.10.32.12
+    - 10.0.17.1 - 10.0.17.100
     dns:
-    - 10.10.0.6
+    - 10.0.0.2
     cloud_properties:
-      subnet: (( properties.template_only.aws.subnet_ids.redis_z1 ))
+      subnet: YOUR_SUBNET_ID
 
 properties:
   template_only:
-    aws:
-      subnet_ids:
-        redis_z1: YOUR_SUBNET_ID
+    dedicated_plan:
+      instance_count: 5 # NB, IF YOU INCREASE THIS TO MORE THAN 10 YOU MUST ALSO ADD IPS TO THE JOB
+    shared_plan:
+      instance_limit: 5 
+      max_memory: 262144000
   redis:
     broker:
       enable_service_access: true
