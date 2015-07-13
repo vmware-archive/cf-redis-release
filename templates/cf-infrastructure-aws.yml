@@ -14,3 +14,5 @@ resource_pools:
   cloud_properties:
     instance_type: m3.medium
 
+properties:
+  template_only: (( merge ))
