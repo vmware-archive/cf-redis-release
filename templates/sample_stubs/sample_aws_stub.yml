@@ -27,6 +27,7 @@ networks:
     - 10.0.0.2
     cloud_properties:
       subnet: YOUR_SUBNET_ID
+      security_group: YOUR_SECURITY_GROUP_NAME
 
 properties:
   template_only:
