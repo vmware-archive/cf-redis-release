@@ -99,6 +99,15 @@ Allow the following:
  1. register service broker by runing `bosh run errand broker-registrar`
  1. optionally, run smoke tests to verify your deployment, i.e. `bosh run errand smoke-tests`
 
+### CF Application ACL
+
+As an administrator of the Cloud Foundry instance, perform the following:   
+ * `cf create-security-group cf-redis <(echo '[{ "protocol": "tcp", "destination": "10.0.16.0/20", "ports": "6379"  }]')`
+
+As a space administrator, perform the following:  
+ * `cf bind-security-group cf-redis ORG SPACE`
+
+
 ## Related Documentation
 
  * [BOSH](https://bosh.io/docs)
