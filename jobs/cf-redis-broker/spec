@@ -18,7 +18,7 @@ templates:
 
 packages:
 - cf-redis-broker
-- common
+- redis-common
 - nginx
 - redis
 - route-registrar

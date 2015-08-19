@@ -10,7 +10,7 @@ STATEFILE_DIR=`dirname <%= p('redis.statefile_path') %>`
 PIDFILE=$RUN_DIR/unicorn.pid
 BACKUP_LOG_DIR=/var/vcap/sys/log/backup
 
-source /var/vcap/packages/common/utils.sh
+source /var/vcap/packages/redis-common/utils.sh
 
 export PATH=/var/vcap/packages/redis/bin:$PATH
 

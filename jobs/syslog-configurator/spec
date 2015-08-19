@@ -6,7 +6,7 @@ templates:
   syslog_forwarder.conf.erb: config/syslog_forwarder.conf
 
 packages:
-- common
+- redis-common
 
 properties:
   syslog_aggregator.address:

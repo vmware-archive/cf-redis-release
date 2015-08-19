@@ -7,7 +7,7 @@ INSTANCE_LOG_DIR=<%= p('redis.log_directory') %>
 DATA_DIR=<%= p('redis.data_directory') %>
 PIDFILE=$RUN_DIR/process-watcher.pid
 
-source /var/vcap/packages/common/utils.sh
+source /var/vcap/packages/redis-common/utils.sh
 
 export PATH=/var/vcap/packages/redis/bin:$PATH
 

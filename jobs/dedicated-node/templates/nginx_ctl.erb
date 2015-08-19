@@ -9,7 +9,7 @@ PID_FILE=$RUN_DIR/nginx.pid
 KEY_FILE=redis-agent.key
 CERT_FILE=redis-agent.pem
 
-source /var/vcap/packages/common/utils.sh
+source /var/vcap/packages/redis-common/utils.sh
 
 file_has_content() {
   local _file=$1

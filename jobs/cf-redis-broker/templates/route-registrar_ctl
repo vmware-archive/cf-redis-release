@@ -7,7 +7,7 @@ JOB_NAME=route-registrar
 RUN_DIR=/var/vcap/sys/run/cf-redis-broker
 LOG_DIR=/var/vcap/sys/log/route-registrar
 PIDFILE=$RUN_DIR/route-registrar.pid
-source /var/vcap/packages/common/utils.sh
+source /var/vcap/packages/redis-common/utils.sh
 
 export HOME=/var/vcap
 

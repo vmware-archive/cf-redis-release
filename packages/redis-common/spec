@@ -1,0 +1,4 @@
+---
+name: redis-common
+files:
+- redis-common/utils.sh
