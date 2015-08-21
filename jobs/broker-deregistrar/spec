@@ -15,4 +15,3 @@ properties:
     description: 'Name of the service broker'
   redis.broker.service_name:
     description: 'Service name'
-    default: p-redis
