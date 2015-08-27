@@ -8,6 +8,7 @@
   "admin_user":     "<%= p('cf.admin_username') %>",
   "admin_password": "<%= p('cf.admin_password') %>",
   "service_name":   "<%= p('redis.broker.service_name') %>",
+  "test_password":  "<%= p('smoke_test_password') %>",
   "plan_names": [
     <% if shared_vm_plan_enabled %>"shared-vm"<% end %><% if shared_vm_plan_enabled && dedicated_vm_plan_enabled %>,<% end %>
     <% if dedicated_vm_plan_enabled %>"dedicated-vm"<% end %>

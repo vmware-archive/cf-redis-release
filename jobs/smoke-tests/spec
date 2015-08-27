@@ -24,3 +24,6 @@ properties:
   redis.broker.dedicated_nodes:
     description: List of node IPs for the dedicated plan
     default: []
+  smoke_test_password:
+    description: 'Password for smoke-tests only to comply with CF password policy, if exists.'
+    default: "meow"
