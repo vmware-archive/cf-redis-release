@@ -170,7 +170,6 @@ properties:
       username: nats
       password: nats
   redis:
-    host: 10.244.3.46
     maxmemory: 262144000
     config_command: config
     save_command: save
@@ -185,8 +184,8 @@ properties:
         username: admin
         password: admin
       backups:
-        path: 
-        access_key_id: 
-        secret_access_key: 
-        endpoint_url: 
-        bucket_name: 
+        path:
+        access_key_id:
+        secret_access_key:
+        endpoint_url:
+        bucket_name:
