@@ -131,7 +131,6 @@ properties:
       username: REPLACE_WITH_NATS_USERNAME
       password: REPLACE_WITH_NATS_PASSWORD
   redis:
-    host: 10.10.32.12
     broker:
       network: services
       service_instance_limit: 5

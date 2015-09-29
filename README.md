@@ -22,7 +22,7 @@ director_uuid: REPLACE_WITH_DIRECTOR_ID
 
 2. You can increase the count of the `dedicated-vm` plan nodes from the example of `1`
 
-**Note:** If your bosh-lite does not have enough capacity to handle the increased nodes resource requirements, your deployment will likely fail. 
+**Note:** If your bosh-lite does not have enough capacity to handle the increased nodes resource requirements, your deployment will likely fail.
 
 ```
 jobs:
@@ -47,7 +47,6 @@ You must also add these additional IPs in the properties block at the end of the
 
 ```
   redis:
-    host: 10.244.3.46
     maxmemory: 262144000
     config_command: config
     save_command: save
@@ -62,14 +61,14 @@ You must also add these additional IPs in the properties block at the end of the
 
 ```
       backups:
-        path: 
-        access_key_id: 
-        secret_access_key: 
-        endpoint_url: 
-        bucket_name: 
+        path:
+        access_key_id:
+        secret_access_key:
+        endpoint_url:
+        bucket_name:
 ```
 
-If these values are not populated, the scheduled backups will not run. 
+If these values are not populated, the scheduled backups will not run.
 
 
 ### Properties

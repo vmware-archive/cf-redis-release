@@ -35,8 +35,6 @@ properties:
   redis.log_directory:
     default: /var/vcap/sys/log/redis
     description: The directory which stores the redis server logs
-  redis.host:
-    description: This host which the Redis server runs on
   redis.conf_path:
     default: /var/vcap/jobs/cf-redis-broker/config/redis.conf
     description: The shared conf file for all Redis instances
