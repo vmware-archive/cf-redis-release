@@ -23,10 +23,6 @@ nginx/nginx-1.7.9.tar.gz:
   object_id: 67a972e2-f601-42f2-aff1-19e631d5fbb9
   sha: 44ef4770db281cea26a1b2e66c0e34193e1d1f1f
   size: 827263
-go/go1.4.1.linux-amd64.tar.gz:
-  object_id: f91bb10b-956b-4918-a26e-a87db551c0db
-  sha: 3e871200e13c0b059b14866d428910de0a4c51ed
-  size: 62402109
 cf-cli/cf-linux-amd64.tgz:
   object_id: 66de7a9f-6166-45a1-b988-09005429f4ca
   sha: f845800310e4b702a39a2f1191e3d71862630103
@@ -55,3 +51,7 @@ ruby/ruby-2.1.5.tar.gz:
   object_id: 698d02c7-61f9-4d14-893a-f4a8f085fc92
   sha: 9c0a238bd7839a4b51871641945a3da90997b8c2
   size: 15127433
+go/go1.4.3.linux-amd64.tar.gz:
+  object_id: 064333e0-3863-4cf7-8d57-1dd1ac9560f3
+  sha: 332b64236d30a8805fc8dd8b3a269915b4c507fe
+  size: 61210288
