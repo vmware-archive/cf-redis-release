@@ -23,10 +23,6 @@ nginx/nginx-1.7.9.tar.gz:
   object_id: 67a972e2-f601-42f2-aff1-19e631d5fbb9
   sha: 44ef4770db281cea26a1b2e66c0e34193e1d1f1f
   size: 827263
-redis/redis-2.8.19.tar.gz:
-  object_id: dac31a97-6f58-4325-95f8-c9617f85d53b
-  sha: 3e362f4770ac2fdbdce58a5aa951c1967e0facc8
-  size: 1254857
 go/go1.4.1.linux-amd64.tar.gz:
   object_id: f91bb10b-956b-4918-a26e-a87db551c0db
   sha: 3e871200e13c0b059b14866d428910de0a4c51ed
@@ -51,7 +47,11 @@ nginx/pcre-8.37-patch-CVE2015-3210.tar.gz:
   object_id: 085fdfbd-1794-4870-a9ae-20bb2900037a
   sha: 46e2839ab51af83e73c246e62d9abc3095ff5dd6
   size: 4524683
-redis/redis-2.8.21.tar.gz:
-  object_id: 6175c70d-c11e-4e70-ab80-69ee23d59881
-  sha: 52f619d3d301fc7ae498a1d4cb4d44ecebc5b0f9
-  size: 1260030
+ruby/ruby-2.1.5.tar.gz:
+  object_id: 698d02c7-61f9-4d14-893a-f4a8f085fc92
+  sha: 9c0a238bd7839a4b51871641945a3da90997b8c2
+  size: 15127433
+redis/redis-3.0.4.tar.gz:
+  object_id: b3974e4d-7a58-4cc9-ae0d-b7a04e5ff088
+  sha: cccc58b2b8643930840870f17280fcae57ed7675
+  size: 1364993
