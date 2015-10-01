@@ -1,7 +1,7 @@
 # abort script on any command that exits with a non zero value
 set -e
 
-REDIS_VERSION=2.8.21
+REDIS_VERSION=3.0.4
 
 tar xvf redis/redis-${REDIS_VERSION}.tar.gz
 
