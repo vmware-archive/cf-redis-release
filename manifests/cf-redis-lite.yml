@@ -160,7 +160,7 @@ properties:
     address: 127.0.0.1
     port: 1234
   cf:
-    api_url: http://api.10.244.0.34.xip.io
+    api_url: http://api.bosh-lite.com
     apps_domain: 10.244.0.34.xip.io
     admin_username: admin
     admin_password: admin
