@@ -123,7 +123,7 @@ properties:
 
   redis.broker.service_name:
     description: Service name displayed in the catalog metadata
-    default: Redis
+    default: p-redis
   redis.broker.service_id:
     description: Service id displayed in the catalog metadata
     default: EEA47C3A-569C-4C24-869D-0ADB5B337A4C
