@@ -167,3 +167,6 @@ properties:
   redis.broker.backups.bg_save_timeout:
     default: 3600
     description: "Timeout in seconds for Redis background save to complete when backing up instance"
+  redis.broker.backups.backup_tmp_dir:
+    default: /var/vcap/store/tmp_backup
+    description: "Temporary directory to use for backups. MUST be on same device (persistent disk) as redis data"

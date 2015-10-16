@@ -10,3 +10,4 @@ redis_config_root: /var/vcap/store/cf-redis-broker/redis-data/
 redis_config_filename: redis.conf
 log_file_path: /var/vcap/sys/log/backup/backup.log
 aws_cli_path: /var/vcap/packages/aws-cli/bin/aws
+backup_tmp_dir: <%= p('redis.broker.backups.backup_tmp_dir') %>

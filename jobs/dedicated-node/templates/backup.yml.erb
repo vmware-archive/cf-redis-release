@@ -8,10 +8,11 @@ node_ip: <%= spec.networks.send(spec.networks.methods(false).first).ip %>
 plan_name: dedicated-vm
 broker_credentials:
   username: <%= p('redis.broker.auth.username') %>
-  password: <%= p('redis.broker.auth.password') %> 
+  password: <%= p('redis.broker.auth.password') %>
 snapshot_timeout_seconds: <%= p('redis.broker.backups.bg_save_timeout') %>
 redis_config_root: /var/vcap/store/redis/
 redis_config_filename: redis.conf
 broker_address: http://<%= p('redis.broker.backend_host') %>/instance
 log_file_path: /var/vcap/sys/log/backup/backup.log
 aws_cli_path: /var/vcap/packages/aws-cli/bin/aws
+backup_tmp_dir: <%= p('redis.broker.backups.backup_tmp_dir') %>
