@@ -168,6 +168,9 @@ properties:
     default: redis
     description: Name of the broker, to be used in cf commandline operations and by the broker-registrar
 
+  redis.broker.backups.restore_available:
+    default: true
+    description: "Makes the backup restore binary available"
   redis.broker.backups.access_key_id:
     default: ""
     description: "Access Key ID for the S3-compatible blob store that backups will be uploaded to"

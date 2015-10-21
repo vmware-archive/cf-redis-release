@@ -19,6 +19,11 @@ case $1 in
     mkdir -p $LOG_DIR $RUN_DIR $DATA_DIR $BACKUP_LOG_DIR $BACKUP_TMP_DIR
     chown vcap:vcap $LOG_DIR $RUN_DIR $DATA_DIR $BACKUP_LOG_DIR $BACKUP_TMP_DIR
 
+    <% unless p('redis.broker.backups.restore_available') %>
+      echo "restore binary feature flag is off" | tee --append $LOG_DIR/cf-redis-broker.stdout.log | logger -s -t redis-ctl
+      rm -f $BIN_DIR/restore
+    <% end %>
+
     # Remove temp backup files that might be left over because of a previously
     # aborted BGSAVE, just to save space
     rm -f $DATA_DIR/temp-*.rdb

@@ -20,6 +20,11 @@ case $1 in
   start)
     pid_guard $PIDFILE "Redis Broker"
 
+    <% unless p('redis.broker.backups.restore_available') %>
+      echo "restore binary feature flag is off" | tee --append $LOG_DIR/cf-redis-broker.stdout.log | logger -s -t cf-redis-broker
+      rm -f $BIN_DIR/restore
+    <% end %>
+
     mkdir -p $RUN_DIR $LOG_DIR $DATA_DIR $INSTANCE_LOG_DIR $STATEFILE_DIR $BACKUP_LOG_DIR $BACKUP_TMP_DIR
     chown vcap:vcap $RUN_DIR $LOG_DIR $DATA_DIR $INSTANCE_LOG_DIR $STATEFILE_DIR $BACKUP_LOG_DIR $BACKUP_TMP_DIR
 

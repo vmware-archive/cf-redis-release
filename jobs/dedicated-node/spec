@@ -149,6 +149,9 @@ properties:
     description: The backend port for the redis-agent process to listen on
     default: 9876
 
+  redis.broker.backups.restore_available:
+    default: true
+    description: "Makes the backup restore binary available"
   redis.broker.backups.access_key_id:
     default: ""
     description: "Access Key ID for the S3-compatible blob store that backups will be uploaded to"
