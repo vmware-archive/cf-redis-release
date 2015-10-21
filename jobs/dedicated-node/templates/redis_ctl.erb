@@ -40,7 +40,7 @@ case $1 in
     fi
 
     exec chpst -u vcap:vcap /var/vcap/packages/redis/bin/redis-server $CONFIG_PATH \
-      >>$LOG_DIR/redis.stdout.log 2>>$LOG_DIR/redis.stderr.log
+      2>&1 | tee --append $LOG_DIR/redis.log | logger -s -t redis-ctl
 
     ;;
 
