@@ -3,7 +3,7 @@ message_bus_servers:
   - host: <%= p('cf.nats.host') %>:<%= p('cf.nats.port') %>
     user: <%= p('cf.nats.username') %>
     password: <%= p('cf.nats.password') %>
-external_host: redis-broker.<%= p('cf.apps_domain') %>
+external_host: <%= p('redis.broker.subdomain') %>.<%= p('cf.apps_domain') %>
 external_ip: <%= spec.networks.send(p('redis.broker.network')).ip %>
 port: 80
 health_checker:
