@@ -1,6 +1,6 @@
 ---
 name: cf-redis
-director_uuid: <%= `bundle exec bosh status --uuid` %>
+director_uuid: 9bca5701-66c0-43ee-a4d0-64813b4b5ece
 releases:
 - name: cf-redis
   version: latest
@@ -128,7 +128,7 @@ jobs:
   properties:
     broker:
       name: redis
-      host: redis-broker.10.244.0.34.xip.io
+      host: redis-broker.bosh-lite.com
       username: admin
       password: admin
 - name: broker-deregistrar
@@ -143,7 +143,7 @@ jobs:
   properties:
     broker:
       name: redis
-      host: redis-broker.10.244.0.34.xip.io
+      host: redis-broker.bosh-lite.com
       username: admin
       password: admin
 - name: smoke-tests
@@ -160,8 +160,8 @@ properties:
     address: 127.0.0.1
     port: 1234
   cf:
-    api_url: http://api.10.244.0.34.xip.io
-    apps_domain: 10.244.0.34.xip.io
+    api_url: https://api.bosh-lite.com
+    apps_domain: bosh-lite.com
     admin_username: admin
     admin_password: admin
     nats:
@@ -170,6 +170,7 @@ properties:
       username: nats
       password: nats
   redis:
+    host: redis-broker.bosh-lite.com
     maxmemory: 262144000
     config_command: config
     save_command: save
