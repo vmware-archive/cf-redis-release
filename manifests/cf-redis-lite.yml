@@ -128,7 +128,7 @@ jobs:
   properties:
     broker:
       name: redis
-      host: redis-broker.10.244.0.34.xip.io
+      host: redis-broker.bosh-lite.com
       username: admin
       password: admin
 - name: broker-deregistrar
@@ -143,7 +143,7 @@ jobs:
   properties:
     broker:
       name: redis
-      host: redis-broker.10.244.0.34.xip.io
+      host: redis-broker.bosh-lite.com
       username: admin
       password: admin
 - name: smoke-tests
@@ -160,8 +160,8 @@ properties:
     address: 127.0.0.1
     port: 1234
   cf:
-    api_url: http://api.10.244.0.34.xip.io
-    apps_domain: 10.244.0.34.xip.io
+    api_url: http://api.bosh-lite.com
+    apps_domain: bosh-lite.com
     admin_username: admin
     admin_password: admin
     nats:
