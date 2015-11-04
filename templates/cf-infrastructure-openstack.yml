@@ -1,0 +1,21 @@
+meta: ~
+
+compilation:
+  cloud_properties:
+    instance_type: m1.medium
+    availability_zone: (( merge || nil ))
+  reuse_compilation_vms: true
+
+networks: (( merge ))
+
+resource_pools:
+- name: redis_z1
+  stemcell:
+    name: bosh-openstack-kvm-ubuntu-trusty-go_agent
+    version: (( merge || "latest" ))
+  cloud_properties:
+    instance_type: m1.medium
+    availability_zone: (( merge || nil ))
+
+properties:
+  template_only: (( merge ))
