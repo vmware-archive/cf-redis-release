@@ -78,6 +78,26 @@ required properties are shown in these examples. There are a number of other
 optional properties. Descriptions for all properties can be found in the
 relevant `spec` files for each job.
 
+## Deploying
+
+### Subnet ACL
+
+Allow the following: 
+ * Destination port 80 access to the service broker from the cloud controllers
+ * Destination port 6379 access to all dedicated nodes from the DEA network(s)
+ * Destination ports 32768 to 61000 on the service broker from the DEA network(s). This is only required for the shared service plan.
+
+### Deployment Steps
+
+ 1. depending on your IAAS, pick one of the sample Spiff stubs in `templates/sample_stubs/`
+ 1. adjust the spiff stub based on your environment, i.e. replace all PLACEHOLDERs with actual values (see above details for the Subnet ACL)
+ 1. create a deployment manifest using spiff, e.g. `spiff merge cf-redis-deployment.yml cf-infrastructure-aws.yml sample_stubs/sample_aws_stub.yml > cf-redis.yml`
+ 1. set bosh deployment using the new manifest, i.e. `bosh deployment cf-redis.yml`
+ 1. upload a cf-redis release, e.g. `bosh upload release releases/cf-redis/cf-redis-384.yml`
+ 1. `bosh deploy`
+ 1. register service broker by runing `bosh run errand broker-registrar`
+ 1. optionally, run smoke tests to verify your deployment, i.e. `bosh run errand smoke-tests`
+
 ## Related Documentation
 
  * [BOSH](https://bosh.io/docs)
