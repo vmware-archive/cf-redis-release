@@ -59,3 +59,7 @@ redis/redis-3.0.5.tar.gz:
   object_id: 47795193-538a-4bf1-a229-51c61f74afcc
   sha: ad3ee178c42bfcfd310c72bbddffbbe35db9b4a6
   size: 1366160
+cf-cli/cf-cli_6.13.0_linux_x86-64.tgz:
+  object_id: 1bd6488e-267d-4172-b3e5-16b092a0b59c
+  sha: 82c5774aa44af9d091d3461adfb61bdadd64aad3
+  size: 5486088
