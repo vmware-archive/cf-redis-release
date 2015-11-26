@@ -15,7 +15,27 @@ describe 'dedicated plan' do
 
   let(:redis_config_command) { bosh_manifest.property('redis.config_command') }
 
+  # TODO do not manually run drain once bosh bug fixed
+  let(:manually_drain) { '/var/vcap/jobs/cf-redis-broker/bin/drain' }
+
   it_behaves_like 'a persistent cloud foundry service'
+
+  it 'preserves data when recreating vms' do
+    service_broker.provision_and_bind(service.name, service.plan) do |binding|
+      service_client = service_client_builder(binding)
+      service_client.write('test_key', 'test_value')
+      expect(service_client.read('test_key')).to eq('test_value')
+
+      # TODO do not manually run drain once bosh bug fixed
+      bosh_director.stop(environment.bosh_service_broker_job_name, 0)
+      host = bosh_director.ips_for_job(environment.bosh_service_broker_job_name, bosh_manifest.deployment_name).first
+      ssh_gateway.execute_on(host, manually_drain, root: true)
+
+      bosh_director.recreate_all([environment.bosh_service_broker_job_name])
+
+      expect(service_client.read('test_key')).to eq('test_value')
+    end
+  end
 
   let(:admin_command_availability) do
     {
@@ -88,22 +108,6 @@ describe 'dedicated plan' do
 
       # Ensure data is intact
       expect(client.read('test_key')).to eq('test_value')
-    end
-  end
-
-  it 'retains service instance state after recreating the broker' do
-    service_broker.provision_instance(service.name, service.plan) do |service_instance|
-      service_broker.bind_instance(service_instance) do |binding|
-        client = service_client_builder(binding)
-        client.write('test_key', 'test_value')
-      end
-
-      bosh_director.recreate_instance('cf-redis-broker', 0)
-
-      service_broker.bind_instance(service_instance) do |binding|
-        client = service_client_builder(binding)
-        expect(client.read('test_key')).to eq('test_value')
-      end
     end
   end
 

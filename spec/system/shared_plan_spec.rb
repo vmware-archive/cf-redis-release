@@ -13,6 +13,26 @@ describe 'shared plan' do
     )
   end
 
+  # TODO do not manually run drain once bosh bug fixed
+  let(:manually_drain) { '/var/vcap/jobs/cf-redis-broker/bin/drain' }
+
+  it 'preserves data when recreating vms' do
+    service_broker.provision_and_bind(service.name, service.plan) do |binding|
+      service_client = service_client_builder(binding)
+      service_client.write('test_key', 'test_value')
+      expect(service_client.read('test_key')).to eq('test_value')
+
+      # TODO do not manually run drain once bosh bug fixed
+      bosh_director.stop(environment.bosh_service_broker_job_name, 0)
+      host = binding.credentials.fetch(:host)
+      ssh_gateway.execute_on(host, manually_drain, root: true)
+
+      bosh_director.recreate_all([environment.bosh_service_broker_job_name])
+
+      expect(service_client.read('test_key')).to eq('test_value')
+    end
+  end
+
   it_behaves_like 'a persistent cloud foundry service'
 
   let(:maxmemory) { bosh_manifest.property('redis.maxmemory') }
