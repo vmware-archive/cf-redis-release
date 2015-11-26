@@ -155,6 +155,9 @@ properties:
   redis.broker.backend_host:
     default: localhost
     description: The port for the broker unicorn process to run on
+  redis.broker.subdomain:
+    default: redis-broker
+    description: Subdomain for route registrar
 
   redis.broker.dedicated_nodes:
     description: List of node IPs for the dedicated plan
