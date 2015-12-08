@@ -1,6 +1,6 @@
 meta:
   environment: YOUR_ENVIRONMENT_NAME
-  external_domain: YOUR_CF_SYSTEM_DOMAIN
+  external_domain: YOUR_CF_APPS_DOMAIN
   apps_domain: YOUR_CF_APPS_DOMAIN
   nats:
     host: 10.0.16.11
