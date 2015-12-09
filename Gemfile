@@ -9,6 +9,6 @@ group :test do
   gem 'rspec', '~> 3.1.0'
   gem 'pry'
 
-  gem 'hula', source: "https://gem.fury.io/me"
-  gem 'prof', source: "https://gem.fury.io/me"
-end if ENV['CI']
+  gem 'hula'
+  gem 'prof'
+end
