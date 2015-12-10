@@ -20,7 +20,7 @@ properties:
     description: 'Host address of the service broker'
   broker.port:
     description: 'Port for the service broker'
-    default: 80
+    default: 19283
   broker.username:
     description: 'Basic Auth username for the service broker'
   broker.password:
