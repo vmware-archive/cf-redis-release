@@ -1,12 +1,12 @@
 [submodule "src/cf-redis-broker"]
 	path = src/cf-redis-broker
-	url = git@github.com:pivotal-cf/cf-redis-broker.git
+	url = https://github.com/pivotal-cf/cf-redis-broker.git
 [submodule "packages/ruby"]
 	path = packages/ruby
-	url = https://github.com/cloudfoundry/ruby-package
+	url = https://github.com/cloudfoundry/ruby-package.git
 [submodule "src/cf-redis-smoke-tests"]
 	path = src/cf-redis-smoke-tests
-	url = git@github.com:pivotal-cf/cf-redis-smoke-tests
+	url = https://github.com/pivotal-cf/cf-redis-smoke-tests.git
 [submodule "src/route-registrar"]
 	path = src/route-registrar
-	url = git@github.com:cloudfoundry-incubator/route-registrar.git
+	url = https://github.com/cloudfoundry-incubator/route-registrar.git
