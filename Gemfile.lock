@@ -106,7 +106,7 @@ GEM
       fog-core (>= 1.21.0)
       fog-json
       fog-xml (>= 0.0.1)
-    fog-sakuracloud (1.5.0)
+    fog-sakuracloud (1.7.3)
       fog-core
       fog-json
     fog-serverlove (0.1.2)
@@ -166,7 +166,7 @@ GEM
     net-ssh-gateway (1.2.0)
       net-ssh (>= 2.6.5)
     netaddr (1.5.0)
-    nokogiri (1.6.7)
+    nokogiri (1.6.7.1)
       mini_portile2 (~> 2.0.0.rc2)
     opsmanager_client (0.8.0)
       httmultiparty (~> 0.3)
