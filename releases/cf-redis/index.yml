@@ -852,4 +852,6 @@ builds:
     version: 424.1.0
   b36524b1-441f-4d61-89f4-c051fcb43294:
     version: 424.2.0
+  d78180a9-cfeb-4d8a-b9b8-9bda16350d30:
+    version: 424.3.0
 format-version: '2'
