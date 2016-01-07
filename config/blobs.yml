@@ -15,11 +15,11 @@ ruby/bundler-1.3.5.gem:
   object_id: 67d8e9d8-a79a-4ebe-8061-9ac59d0224b5
   sha: 2cad3052a59b83f1f616e8202f5c714e46bd8523
   size: 268800
-nginx/pcre-8.34.tar.gz:
+nginx_cf_redis/pcre-8.34.tar.gz:
   object_id: 2616f05d-ca34-4db5-a6d4-e1e7aba6799c
   sha: d46e537337ee70df19084001a4b6815b3d69fe6c
   size: 1933734
-nginx/nginx-1.7.9.tar.gz:
+nginx_cf_redis/nginx-1.7.9.tar.gz:
   object_id: 67a972e2-f601-42f2-aff1-19e631d5fbb9
   sha: 44ef4770db281cea26a1b2e66c0e34193e1d1f1f
   size: 827263
@@ -39,11 +39,11 @@ redis/redis-2.8.21.tar.gz:
   object_id: 611cbde4-6516-4ddc-93bf-f02788888ff5
   sha: 6798200d007451a960a0a72041699e12adf14ee3
   size: 1272195
-nginx/nginx-1.8.0.tar.gz:
+nginx_cf_redis/nginx-1.8.0.tar.gz:
   object_id: 77904c0d-6bb2-4e3e-b981-16828770f7a2
   sha: 12bad312764feae50246685ab2e74512d1aa9b2f
   size: 832104
-nginx/pcre-8.37-patch-CVE2015-3210.tar.gz:
+nginx_cf_redis/pcre-8.37-patch-CVE2015-3210.tar.gz:
   object_id: feb600ac-a4c4-4f84-b87f-bc4268605a40
   sha: 46e2839ab51af83e73c246e62d9abc3095ff5dd6
   size: 4524683
