@@ -1,0 +1,6 @@
+---
+name: cf-redis_nginx
+
+files:
+  - cf-redis_nginx/nginx-1.8.0.tar.gz
+  - cf-redis_nginx/pcre-8.37-patch-CVE2015-3210.tar.gz
