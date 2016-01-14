@@ -3,9 +3,9 @@
 This repository contains a BOSH release for a Cloud Foundry Redis service
 broker.
 
-## Getting Started
+## Updating
 
-Clone the repository using `git clone --recursive`.
+Clone the repository and run `./scripts/update-release`.
 
 ### BOSH Lite
 An example manifest for BOSH Lite is provided in `/manifests/cf-redis-lite.yml`
