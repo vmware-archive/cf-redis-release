@@ -7,6 +7,14 @@ broker.
 
 Clone the repository and run `./scripts/update-release`.
 
+## Testing
+
+### Unit Tests
+
+To run the unit tests locally, just run: `bundle exec rake spec:unit`.
+
+You can run it from docker by using `./scripts/from-docker bundle exec rake spec:unit`.
+
 ### BOSH Lite
 An example manifest for BOSH Lite is provided in `/manifests/cf-redis-lite.yml`
 
