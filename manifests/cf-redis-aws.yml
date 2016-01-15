@@ -55,7 +55,7 @@ resource_pools:
   network: services
   stemcell:
     name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
-    version: 2989
+    version: 3146.3
   cloud_properties:
     instance_type: m3.medium
 
