@@ -5,10 +5,12 @@ require 'support/redis_service_client_builder'
 
 module Helpers
   module Environment
+    fail "Must specify BOSH_MANIFEST environment variable" unless ENV.key?('BOSH_MANIFEST')
+
     def environment
       @environment ||= begin
         options = {
-          bosh_manifest_path: ENV.fetch('BOSH_MANIFEST') { File.join(ROOT, 'manifests/cf-redis-lite.yml') },
+          bosh_manifest_path: ENV.fetch('BOSH_MANIFEST'),
           bosh_service_broker_job_name: 'cf-redis-broker'
         }
         options[:bosh_target]          = ENV['BOSH_TARGET']   if ENV.key?('BOSH_TARGET')
