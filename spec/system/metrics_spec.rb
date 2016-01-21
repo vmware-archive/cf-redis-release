@@ -1,7 +1,9 @@
 require 'system_spec_helper'
 
 describe 'metrics' do
+
   before(:all) do
+    @number_of_nodes = bosh_manifest.job('dedicated-node').static_ips.count
     @outFile = Tempfile.new('smetrics')
     @pid = spawn(
       {
@@ -39,8 +41,8 @@ describe 'metrics' do
      "/redis/info/server/uptime_in_seconds",
      "/redis/info/server/uptime_in_days"
     ].each do |metric_name|
-      5.times do |idx|
-        it "contains #{metric_name} metric for dedicated node #{idx}" do
+      it "contains #{metric_name} metric for all dedicated nodes" do
+        @number_of_nodes.times do |idx|
           assert_metric(metric_name, 'dedicated-node', idx)
         end
       end
