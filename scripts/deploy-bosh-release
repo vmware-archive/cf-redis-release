@@ -2,58 +2,90 @@
 
 set -ex
 
-if [ "$#" -ne 2 ]; then
-  echo "Usage: $0 <path to BOSH deployment manifest file> [<bosh target alias>]"
-  echo "E.G. $0 ~/workspace/london-ci-tools/manifests/redis/develop/development/bosh-lite.yml lite"
-  exit 1
-fi
-
 BOSH_MANIFEST_FILE_PATH=$1
-BOSH_TARGET_ALIAS=$2
-WORKSPACE_BASE_DIR="/Users/pivotal/workspace"
+BOSH_TARGET_ALIAS="lite"
+WORKSPACE_BASE_DIR="$HOME/workspace"
 
-bosh target "$BOSH_TARGET_ALIAS"
-bosh deployment "$BOSH_MANIFEST_FILE_PATH"
+log() {
+  local _message=$1
+  echo -e "$_message"
+}
+
+bosh_target_and_set_deployment() {
+  local _bosh_target=$1
+  local _bosh_deployment_manifest_path=$2
+
+  bosh target "$_bosh_target"
+  bosh deployment "$_bosh_deployment_manifest_path"
+}
+
+bosh_deploy() {
+  bosh -n deploy
+}
+
+bosh_run_errand() {
+  local _errand_name=$1
+
+  bosh -n run errand "$_errand_name"
+}
+
+check_args() {
+  if [ "$#" -lt 1 ]
+  then
+    log "Usage: $0 <path to BOSH deployment manifest file> [<bosh target alias>]"
+    log "E.G. $0 ~/workspace/london-ci-tools/manifests/redis/develop/development/bosh-lite.yml lite"
+    exit 1
+  fi
+
+  if [ "$#" -eq 1 ]
+  then
+    log "[WARN] no BOSH target specified - defaulting to lite"
+  else
+    BOSH_TARGET_ALIAS=$2
+  fi
+}
 
 update_release() {
   if [ ! -f scripts/update-release ]
   then
-    echo "[ERROR] Could not find the 'scripts/update-release' script in $(pwd)"
+    log "[ERROR] Could not find the 'scripts/update-release' script in $(pwd)"
     exit 1
   fi
 
   scripts/update-release
 }
 
-bosh_dance() {
+upload_release() {
   local _release_path=$1
 
   pushd "$_release_path"
   update_release
   bosh -n create release --force
-  bosh -n upload release --rebase || echo "[WARNING] Attempted a --rebase, but there were no job or package changes."
-  bosh -n deploy
+  bosh -n upload release --rebase || log "[WARN] Attempted a --rebase, but there were no job or package changes."
   popd
 }
 
-check_release_uploaded() {
-  local _release_name=$1
-  set +e
-  bosh releases | grep "$_release_name" > /dev/null 2>&1
-  local _release_uploaded=$?
-  set -e
+upload_metrics_releases() {
+  local _bosh_deployment_manifest_path=$1
+  grep "redis-metrics" "$_bosh_deployment_manifest_path" > /dev/null 2>&1
 
-  if [ $_release_uploaded -ne 0 ]
+  if [ $? -eq 0 ]
   then
-    echo "[ERROR] $_release_name release must be uploaded to the director"
-    exit 1
+    upload_release "${WORKSPACE_BASE_DIR}/redis-metrics-release"
+    upload_release "${WORKSPACE_BASE_DIR}/service-metrics-release"
   fi
 }
 
 main() {
-  check_release_uploaded "redis-metrics"
-  check_release_uploaded "service-metrics"
-  bosh_dance "${WORKSPACE_BASE_DIR}/cf-redis-release"
+  check_args "$@"
+
+  bosh_target_and_set_deployment "$BOSH_TARGET_ALIAS" "$BOSH_MANIFEST_FILE_PATH"
+
+  upload_metrics_releases "$BOSH_MANIFEST_FILE_PATH"
+  upload_release "${WORKSPACE_BASE_DIR}/cf-redis-release"
+
+  bosh_deploy
+  bosh_run_errand "broker-registrar"
 }
 
-main
+main "$@"
