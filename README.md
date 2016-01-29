@@ -7,6 +7,24 @@ broker.
 
 Clone the repository and run `./scripts/update-release`.
 
+## Deploying
+
+Run the `scripts/deploy-release` script. Examples as follows:
+
+```
+# Deploying locally to BOSH lite
+./scripts/deploy-release manifests/cf-redis-lite.yml lite
+
+# Deploying to a different BOSH director
+./scripts/deploy-release manifests/my-custom-redis.yml my-bosh-alias
+```
+
+Note that the second argument is a BOSH alias, which you must have configured prior to running the script. E.G.
+
+```
+bosh target https://192.168.50.4:25555 lite
+```
+
 ## Testing
 
 ### Unit Tests
