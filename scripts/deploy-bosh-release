@@ -1,0 +1,59 @@
+#!/bin/bash
+
+set -ex
+
+if [ "$#" -ne 2 ]; then
+  echo "Usage: $0 <path to BOSH deployment manifest file> [<bosh target alias>]"
+  echo "E.G. $0 ~/workspace/london-ci-tools/manifests/redis/develop/development/bosh-lite.yml lite"
+  exit 1
+fi
+
+BOSH_MANIFEST_FILE_PATH=$1
+BOSH_TARGET_ALIAS=$2
+WORKSPACE_BASE_DIR="/Users/pivotal/workspace"
+
+bosh target "$BOSH_TARGET_ALIAS"
+bosh deployment "$BOSH_MANIFEST_FILE_PATH"
+
+update_release() {
+  if [ ! -f scripts/update-release ]
+  then
+    echo "[ERROR] Could not find the 'scripts/update-release' script in $(pwd)"
+    exit 1
+  fi
+
+  scripts/update-release
+}
+
+bosh_dance() {
+  local _release_path=$1
+
+  pushd "$_release_path"
+  update_release
+  bosh -n create release --force
+  bosh -n upload release --rebase || echo "[WARNING] Attempted a --rebase, but there were no job or package changes."
+  bosh -n deploy
+  popd
+}
+
+check_release_uploaded() {
+  local _release_name=$1
+  set +e
+  bosh releases | grep "$_release_name" > /dev/null 2>&1
+  local _release_uploaded=$?
+  set -e
+
+  if [ $_release_uploaded -ne 0 ]
+  then
+    echo "[ERROR] $_release_name release must be uploaded to the director"
+    exit 1
+  fi
+}
+
+main() {
+  check_release_uploaded "redis-metrics"
+  check_release_uploaded "service-metrics"
+  bosh_dance "${WORKSPACE_BASE_DIR}/cf-redis-release"
+}
+
+main
