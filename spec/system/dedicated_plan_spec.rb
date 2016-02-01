@@ -77,7 +77,7 @@ describe 'dedicated plan' do
 
     it 'runs correct version of redis' do
       client = service_client_builder(@binding)
-      expect(client.info('redis_version')).to eq('3.0.6')
+      expect(client.info('redis_version')).to eq('3.0.7')
     end
 
     it 'requires a password' do
