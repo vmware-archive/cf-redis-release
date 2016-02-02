@@ -67,3 +67,7 @@ redis/redis-3.0.6.tar.gz:
   object_id: 12fc413f-7eae-409f-93c0-1a6866b8bfdb
   sha: 4b1c7b1201984bca8f7f9c6c58862f6928cf0a25
   size: 1372648
+redis/redis-3.0.7.tar.gz:
+  object_id: 7fb1df75-3a3b-4d9b-a341-8fd360cb4d3c
+  sha: e56b4b7e033ae8dbf311f9191cf6fdf3ae974d1c
+  size: 1375200
