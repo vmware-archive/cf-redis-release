@@ -2,7 +2,6 @@
 
 set -e
 
-BOSH_MANIFEST_FILE_PATH=$1
 BOSH_TARGET_ALIAS="lite"
 WORKSPACE_BASE_DIR="$HOME/workspace"
 
@@ -30,18 +29,18 @@ bosh_run_errand() {
 }
 
 check_args() {
-  if [ "$#" -lt 1 ]
+  if [ -z $BOSH_MANIFEST ]
   then
-    log "Usage: $0 <path to BOSH deployment manifest file> [<bosh target alias>]"
-    log "E.G. $0 ~/workspace/london-ci-tools/manifests/redis/develop/development/bosh-lite.yml lite"
+    log "Please set the BOSH_MANIFEST environment variable to the path to your manifest file"
+    log "E.G. export BOSH_MANIFEST=~/workspace/london-ci-tools/manifests/${RELEASE_NAME}/develop/development/bosh-lite.yml"
     exit 1
   fi
 
-  if [ "$#" -eq 1 ]
+  if [ "$#" -lt 1 ]
   then
     log "[WARN] no BOSH target specified - defaulting to lite"
   else
-    BOSH_TARGET_ALIAS=$2
+    BOSH_TARGET_ALIAS=$1
   fi
 }
 
@@ -84,9 +83,9 @@ upload_metrics_releases() {
 main() {
   check_args "$@"
 
-  bosh_target_and_set_deployment "$BOSH_TARGET_ALIAS" "$BOSH_MANIFEST_FILE_PATH"
+  bosh_target_and_set_deployment "$BOSH_TARGET_ALIAS" "$BOSH_MANIFEST"
 
-  upload_metrics_releases "$BOSH_MANIFEST_FILE_PATH"
+  upload_metrics_releases "$BOSH_MANIFEST"
   upload_release "${WORKSPACE_BASE_DIR}/cf-redis-release"
 
   bosh_deploy
