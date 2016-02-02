@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ex
+set -e
 
 BOSH_MANIFEST_FILE_PATH=$1
 BOSH_TARGET_ALIAS="lite"
@@ -67,9 +67,14 @@ upload_release() {
 
 upload_metrics_releases() {
   local _bosh_deployment_manifest_path=$1
-  grep "redis-metrics" "$_bosh_deployment_manifest_path" > /dev/null 2>&1
+  local _exit_code=0
 
-  if [ $? -eq 0 ]
+  set +e
+  grep "redis-metrics" "$_bosh_deployment_manifest_path" > /dev/null 2>&1
+  _exit_code=$?
+  set -e
+
+  if [ $_exit_code -eq 0 ]
   then
     upload_release "${WORKSPACE_BASE_DIR}/redis-metrics-release"
     upload_release "${WORKSPACE_BASE_DIR}/service-metrics-release"
