@@ -3,8 +3,10 @@
 /.final_builds/jobs/**/*.tgz
 /.final_builds/packages/**/*.tgz
 /blobs
+rspec.xml
 /config/dev.yml
 /config/private.yml
 /dev_releases
 /releases/**/*.tgz
 /releases/*.tgz
+vendor/*

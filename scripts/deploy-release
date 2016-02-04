@@ -1,0 +1,96 @@
+#!/bin/bash
+
+set -e
+
+BOSH_MANIFEST_FILE_PATH=$1
+BOSH_TARGET_ALIAS="lite"
+WORKSPACE_BASE_DIR="$HOME/workspace"
+
+log() {
+  local _message=$1
+  echo -e "$_message"
+}
+
+bosh_target_and_set_deployment() {
+  local _bosh_target=$1
+  local _bosh_deployment_manifest_path=$2
+
+  bosh target "$_bosh_target"
+  bosh deployment "$_bosh_deployment_manifest_path"
+}
+
+bosh_deploy() {
+  bosh -n deploy
+}
+
+bosh_run_errand() {
+  local _errand_name=$1
+
+  bosh -n run errand "$_errand_name"
+}
+
+check_args() {
+  if [ "$#" -lt 1 ]
+  then
+    log "Usage: $0 <path to BOSH deployment manifest file> [<bosh target alias>]"
+    log "E.G. $0 ~/workspace/london-ci-tools/manifests/redis/develop/development/bosh-lite.yml lite"
+    exit 1
+  fi
+
+  if [ "$#" -eq 1 ]
+  then
+    log "[WARN] no BOSH target specified - defaulting to lite"
+  else
+    BOSH_TARGET_ALIAS=$2
+  fi
+}
+
+update_release() {
+  if [ ! -f scripts/update-release ]
+  then
+    log "[ERROR] Could not find the 'scripts/update-release' script in $(pwd)"
+    exit 1
+  fi
+
+  scripts/update-release
+}
+
+upload_release() {
+  local _release_path=$1
+
+  pushd "$_release_path"
+  update_release
+  bosh -n create release --force
+  bosh -n upload release --rebase || log "[WARN] Attempted a --rebase, but there were no job or package changes."
+  popd
+}
+
+upload_metrics_releases() {
+  local _bosh_deployment_manifest_path=$1
+  local _exit_code=0
+
+  set +e
+  grep "redis-metrics" "$_bosh_deployment_manifest_path" > /dev/null 2>&1
+  _exit_code=$?
+  set -e
+
+  if [ $_exit_code -eq 0 ]
+  then
+    upload_release "${WORKSPACE_BASE_DIR}/redis-metrics-release"
+    upload_release "${WORKSPACE_BASE_DIR}/service-metrics-release"
+  fi
+}
+
+main() {
+  check_args "$@"
+
+  bosh_target_and_set_deployment "$BOSH_TARGET_ALIAS" "$BOSH_MANIFEST_FILE_PATH"
+
+  upload_metrics_releases "$BOSH_MANIFEST_FILE_PATH"
+  upload_release "${WORKSPACE_BASE_DIR}/cf-redis-release"
+
+  bosh_deploy
+  bosh_run_errand "broker-registrar"
+}
+
+main "$@"

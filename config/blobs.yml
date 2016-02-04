@@ -63,3 +63,7 @@ cf-cli/cf-cli_6.13.0_linux_x86-64.tgz:
   object_id: 1bd6488e-267d-4172-b3e5-16b092a0b59c
   sha: 82c5774aa44af9d091d3461adfb61bdadd64aad3
   size: 5486088
+redis/redis-3.0.6.tar.gz:
+  object_id: 12fc413f-7eae-409f-93c0-1a6866b8bfdb
+  sha: 4b1c7b1201984bca8f7f9c6c58862f6928cf0a25
+  size: 1372648
