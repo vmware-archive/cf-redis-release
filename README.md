@@ -5,7 +5,8 @@ broker.
 
 ## Updating
 
-Clone the repository and run `./scripts/update-release`.
+Clone the repository and run `scripts/update-release`. This will initialize
+the required submodules and install gems required to run the tests.
 
 ## Deploying
 
@@ -27,20 +28,14 @@ Note that the argument is a BOSH alias, which you must have configured prior to 
 bosh target https://192.168.50.4:25555 lite
 ```
 
-## Testing
-
-### Unit Tests
-
-To run the unit tests locally, just run: `bundle exec rake spec:unit`.
-
-You can run it from docker by using `./scripts/from-docker bundle exec rake spec:unit`.
+## Configuration
 
 ### BOSH Lite
-An example manifest for BOSH Lite is provided in `/manifests/cf-redis-lite.yml`
+An example manifest for BOSH Lite is provided in `manifests/cf-redis-lite.yml`
 
 To use this manifest:
 
-1. Update the director guid
+- Update the director guid
 
 ```
 ---
@@ -48,7 +43,7 @@ name: cf-redis
 director_uuid: REPLACE_WITH_DIRECTOR_ID
 ```
 
-2. You can increase the count of the `dedicated-vm` plan nodes from the example of `1`
+- You can increase the count of the `dedicated-vm` plan nodes from the example of `1`
 
 **Note:** If your bosh-lite does not have enough capacity to handle the increased nodes resource requirements, your deployment will likely fail.
 
@@ -85,7 +80,7 @@ You must also add these additional IPs in the properties block at the end of the
       - 10.244.3.54
 ```
 
-3. If you want to enable the backup functionality, populate these fields in the properties block at the end of the manifest
+- If you want to enable the backup functionality, populate these fields in the properties block at the end of the manifest
 
 ```
       backups:
@@ -101,21 +96,21 @@ If these values are not populated, the scheduled backups will not run.
 
 ### Properties
 
-Example manifests for BOSH Lite and AWS are provided in `/manifests`. All
+Example manifests for BOSH Lite and AWS are provided in `manifests/`. All
 required properties are shown in these examples. There are a number of other
 optional properties. Descriptions for all properties can be found in the
 relevant `spec` files for each job.
 
-## Deploying
+### AWS
 
-### Subnet ACL
+#### Subnet ACL
 
-Allow the following: 
+Allow the following:
  * Destination port 80 access to the service broker from the cloud controllers
  * Destination port 6379 access to all dedicated nodes from the DEA network(s)
  * Destination ports 32768 to 61000 on the service broker from the DEA network(s). This is only required for the shared service plan.
 
-### Deployment Steps
+## Deployment Steps
 
  1. depending on your IAAS, pick one of the sample Spiff stubs in `templates/sample_stubs/`
  1. adjust the spiff stub based on your environment, i.e. replace all PLACEHOLDERs with actual values (see above details for the Subnet ACL)
@@ -125,6 +120,24 @@ Allow the following:
  1. `bosh deploy`
  1. register service broker by runing `bosh run errand broker-registrar`
  1. optionally, run smoke tests to verify your deployment, i.e. `bosh run errand smoke-tests`
+
+## Testing
+
+To test first deploy locally using the Bosh-lite instructions above.
+
+### System Tests
+
+To run the system tests locally, just run: `BOSH_MANIFEST=manifests/cf-redis-lite.yml ./scripts/system-tests`.
+
+To run the system tests in docker, just run: `BOSH_MANIFEST=manifests/cf-redis-lite.yml ./scripts/system-tests-in-docker`.
+
+### Unit Tests
+
+The unit tests are run along with the system tests above, you can run them independetly also:
+
+To run the unit tests locally, just run: `bundle exec rake spec:unit`.
+
+You can run it from docker by using `./scripts/from-docker bundle exec rake spec:unit`.
 
 ## Related Documentation
 
