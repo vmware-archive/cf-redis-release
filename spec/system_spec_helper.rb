@@ -1,3 +1,4 @@
+require 'yaml'
 require 'helpers/environment'
 require 'prof/external_spec/spec_helper'
 require 'prof/matchers/only_support_ssl_with_cipher_set'
@@ -38,6 +39,36 @@ module Helpers
   end
 end
 
+module ExcludeHelper
+  def self.manifest
+    @bosh_manifest ||= YAML.load(File.read(ENV['BOSH_MANIFEST']))
+  end
+
+  def self.metrics_available?
+    0 != manifest.fetch('releases').select{|i| i["name"] == "service-metrics" }.length
+  end
+
+  def self.s3_available?
+    bucket_name = manifest['properties']['redis']['broker']['backups']['bucket_name']
+    !(bucket_name == nil || bucket_name.empty?)
+  end
+
+  def self.warnings
+    message = "\n"
+    if !metrics_available?
+      message += "WARNING: Skipping metrics tests, metrics are not available in this manifest\n"
+    end
+
+    if !s3_available?
+      message += "WARNING: Skipping backup tests, S3 credentials are not available in this manifest\n"
+    end
+
+    message + "\n"
+  end
+end
+
+puts ExcludeHelper::warnings
+
 RSpec.configure do |config|
   config.include Helpers::Environment
   config.include Prof::Matchers
@@ -45,6 +76,8 @@ RSpec.configure do |config|
   config.run_all_when_everything_filtered = true
   config.order = 'random'
   config.full_backtrace = true
+  config.filter_run_excluding :skip_metrics => !ExcludeHelper::metrics_available?
+  config.filter_run_excluding :skip_s3 => !ExcludeHelper::s3_available?
 
   config.before(:all) do
     redis_service_broker.deprovision_service_instances!
