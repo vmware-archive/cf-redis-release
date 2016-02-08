@@ -1,8 +1,13 @@
 #!/bin/sh
 
-templates=$(dirname $0)/templates
+templates=$(dirname "$0")/templates
 
 infrastructure=$1
+
+if [ $# -ge 3 ]; then
+  echo "Usage: $0 <aws|vsphere|warden> <path/to/stub>"
+  exit 1
+fi
 
 shift
 
@@ -14,6 +19,6 @@ if [ "$infrastructure" != "aws" ] && \
 fi
 
 spiff merge \
- $templates/cf-redis-deployment.yml \
- $templates/cf-infrastructure-${infrastructure}.yml \
+ "$templates/cf-redis-deployment.yml" \
+ "$templates/cf-infrastructure-$infrastructure.yml" \
  "$@"
