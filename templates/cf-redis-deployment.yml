@@ -1,5 +1,5 @@
 ---
-meta: 
+meta:
   environment: ~
   external_domain: (( merge ))
   syslog_aggregator: ~
@@ -25,7 +25,7 @@ update:
   update_watch_time: 30000-180000
   max_in_flight: 4
 
-networks: ((merge))
+networks: (( merge ))
 
 resource_pools:
 - name: redis_z1
@@ -74,7 +74,7 @@ jobs:
   templates:
   - name: broker-registrar
     release: cf-redis
-  properties: 
+  properties:
     broker:
       name: redis
       host: (( jobs.cf-redis-broker.properties.host ))
@@ -111,11 +111,11 @@ properties:
   template_only: (( merge ))
   syslog_aggregator: (( meta.syslog_aggregator ))
   cf:
-    api_url: (( merge )) 
+    api_url: (( merge ))
     apps_domain: (( meta.apps_domain ))
     admin_username: (( merge ))
     admin_password: (( merge ))
-    nats: (( meta.nats )) 
+    nats: (( meta.nats ))
   redis:
     maxmemory: (( properties.template_only.shared_plan.max_memory || 262144000 ))
     host: (( jobs.cf-redis-broker.networks.redis_z1.static_ips.[0] ))
