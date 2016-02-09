@@ -1,6 +1,8 @@
 #!/bin/sh
 
-templates=$(dirname "$0")/templates
+BASE_DIR=$(cd "$(dirname \"$0\"/..)"; echo "$PWD")
+
+templates=$BASE_DIR/templates
 
 infrastructure=$1
 
