@@ -23,3 +23,5 @@ resource_pools:
 
 properties:
   template_only: (( merge ))
+  broker:
+    name: (( merge ))

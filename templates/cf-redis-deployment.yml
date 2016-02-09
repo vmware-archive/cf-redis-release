@@ -76,7 +76,7 @@ jobs:
     release: cf-redis
   properties:
     broker:
-      name: redis
+      name: (( .properties.broker.name || "redis" ))
       host: (( jobs.cf-redis-broker.properties.host ))
       username: (( jobs.cf-redis-broker.properties.broker.username ))
       password: (( jobs.cf-redis-broker.properties.broker.password ))
@@ -92,7 +92,7 @@ jobs:
     release: cf-redis
   properties:
     broker:
-      name: redis
+      name: (( .properties.broker.name || "redis" ))
       host: (( jobs.cf-redis-broker.properties.host ))
       username: (( jobs.cf-redis-broker.properties.broker.username ))
       password: (( jobs.cf-redis-broker.properties.broker.password ))

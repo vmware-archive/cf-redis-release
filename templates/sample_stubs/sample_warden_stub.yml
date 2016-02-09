@@ -16,13 +16,18 @@ director_uuid: (( merge ))
 properties:
   template_only:
     dedicated_plan:
-      instance_count: 5 # NB, IF YOU INCREASE THIS TO MORE THAN 10 YOU MUST ALSO ADD IPS TO THE JOB
+      instance_count: 1 # NB, IF YOU INCREASE THIS TO MORE THAN 10 YOU MUST ALSO ADD IPS TO THE JOB
     shared_plan:
       instance_limit: 5
       max_memory: 262144000
   broker:
+    name: redis
     username: admin
     password: admin
+  cf:
+    admin_username: admin
+    admin_password: admin
+    api_url: https://api.bosh-lite.com
   redis:
     broker:
       auth:
@@ -37,10 +42,6 @@ properties:
         s3_region: S3_REGION
         bucket_name: YOUR_S3_BUCKET
         path: YOUR_S3_BACKUP_PATH
-  cf:
-    admin_username: admin
-    api_url: https://api.bosh-lite.com
-    admin_password: admin
 
 jobs:
 - name: cf-redis-broker
