@@ -1,6 +1,6 @@
 require 'system_spec_helper'
 
-fdescribe 'metrics', :skip_metrics => true do
+describe 'metrics', :skip_metrics => true do
 
   before(:all) do
     @number_of_nodes = bosh_manifest.job('dedicated-node').static_ips.count
