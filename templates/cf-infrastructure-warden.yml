@@ -1,5 +1,7 @@
 meta: ~
 
+director_uuid: (( merge ))
+
 compilation:
   cloud_properties:
     name: random

@@ -4,7 +4,13 @@ templates=$(dirname "$0")/templates
 
 infrastructure=$1
 
-if [ $# -ge 3 ]; then
+which bosh > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo "Please install the bosh_cli ruby gem before running this script"
+  exit 1
+fi
+
+if [ $# -lt 2 ]; then
   echo "Usage: $0 <aws|vsphere|warden> <path/to/stub>"
   exit 1
 fi
@@ -18,7 +24,10 @@ if [ "$infrastructure" != "aws" ] && \
  exit 1
 fi
 
+echo "director_uuid: $(bosh status --uuid)" > "$TMPDIR/director_uuid.yml"
+
 spiff merge \
  "$templates/cf-redis-deployment.yml" \
  "$templates/cf-infrastructure-$infrastructure.yml" \
- "$@"
+ "$@" \
+ "$TMPDIR/director_uuid.yml"

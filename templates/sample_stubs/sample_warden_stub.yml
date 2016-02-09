@@ -11,7 +11,7 @@ meta:
     address: 127.0.0.1
     port: 1234
 
-director_uuid: YOUR_DIRECTOR_UUID
+director_uuid: (( merge ))
 
 properties:
   template_only:
