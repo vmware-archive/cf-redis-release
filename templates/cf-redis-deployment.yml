@@ -5,12 +5,13 @@ meta:
   syslog_aggregator: ~
   apps_domain: (( merge ))
   nats: (( merge ))
+  release_name: (( merge ))
 
 name: (( meta.environment "-redis" ))
 director_uuid: (( merge ))
 
 releases:
-  - name: cf-redis
+  - name: (( .meta.release_name ))
     version: latest
 
 compilation:
@@ -37,9 +38,9 @@ jobs:
 - name: cf-redis-broker
   templates:
   - name: cf-redis-broker
-    release: cf-redis
+    release: (( .meta.release_name ))
   - name: syslog-configurator
-    release: cf-redis
+    release: (( .meta.release_name ))
   instances: 1
   resource_pool: redis_z1
   persistent_disk: (( merge || 8192 ))
@@ -55,9 +56,9 @@ jobs:
 - name: dedicated-node
   templates:
   - name: dedicated-node
-    release: cf-redis
+    release: (( .meta.release_name ))
   - name: syslog-configurator
-    release: cf-redis
+    release: (( .meta.release_name ))
   instances: (( properties.template_only.dedicated_plan.instance_count || 5 ))
   resource_pool: redis_z1
   persistent_disk: (( merge || 8192 ))
@@ -73,7 +74,7 @@ jobs:
   resource_pool: redis_z1
   templates:
   - name: broker-registrar
-    release: cf-redis
+    release: (( .meta.release_name ))
   properties:
     broker:
       name: (( .properties.broker.name || "redis" ))
@@ -89,7 +90,7 @@ jobs:
   resource_pool: redis_z1
   templates:
   - name: broker-deregistrar
-    release: cf-redis
+    release: (( .meta.release_name ))
   properties:
     broker:
       name: (( .properties.broker.name || "redis" ))
@@ -105,7 +106,7 @@ jobs:
   resource_pool: redis_z1
   templates:
   - name: smoke-tests
-    release: cf-redis
+    release: (( .meta.release_name ))
 
 properties:
   template_only: (( merge ))
