@@ -12,8 +12,6 @@ meta:
     port: 1234
   release_name: cf-redis
 
-director_uuid: (( merge ))
-
 properties:
   template_only:
     dedicated_plan:

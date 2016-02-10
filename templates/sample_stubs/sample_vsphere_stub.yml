@@ -12,8 +12,6 @@ meta:
     port: 1234
   release_name: cf-redis
 
-director_uuid: YOUR_DIRECTOR_UUID
-
 networks:
 - name: redis_z1
   subnets:
