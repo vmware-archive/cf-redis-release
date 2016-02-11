@@ -47,19 +47,19 @@ check_args() {
 update_release() {
   if [ ! -f scripts/update-release ]
   then
-    log "[ERROR] Could not find the 'scripts/update-release' script in $(pwd)"
-    exit 1
+    log "Could not find scripts folder. Will run a submodule update."
+    git submodule update --init --recursive
+  else
+    scripts/update-release
   fi
-
-  scripts/update-release
 }
 
 upload_release() {
-  local _release_path=$1
-
-  pushd "$_release_path"
+  local _workdir=$1
+  local _name=$2
+  pushd "$_workdir"
   update_release
-  bosh -n create release --force
+  bosh -n create release --force --name $_name
   bosh -n upload release --rebase || log "[WARN] Attempted a --rebase, but there were no job or package changes."
   popd
 }
@@ -75,8 +75,9 @@ upload_metrics_releases() {
 
   if [ $_exit_code -eq 0 ]
   then
-    upload_release "${WORKSPACE_BASE_DIR}/redis-metrics-release"
-    upload_release "${WORKSPACE_BASE_DIR}/service-metrics-release"
+    upload_release "${WORKSPACE_BASE_DIR}/redis-metrics-release" "redis-metrics"
+    upload_release "${WORKSPACE_BASE_DIR}/service-metrics-release" "service-metrics"
+    upload_release "${WORKSPACE_BASE_DIR}/loggregator" "loggregator"
   fi
 }
 
@@ -86,7 +87,7 @@ main() {
   bosh_target_and_set_deployment "$BOSH_TARGET_ALIAS" "$BOSH_MANIFEST"
 
   upload_metrics_releases "$BOSH_MANIFEST"
-  upload_release "${WORKSPACE_BASE_DIR}/cf-redis-release"
+  upload_release "${WORKSPACE_BASE_DIR}/cf-redis-release" "cf-redis"
 
   bosh_deploy
   bosh_run_errand "broker-registrar"
