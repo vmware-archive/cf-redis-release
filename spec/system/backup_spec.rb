@@ -4,7 +4,7 @@ require 'aws-sdk'
 
 require 'prof/marketplace_service'
 
-describe 'backups', :skip_s3 => true do
+describe 'backups' do
 
   let(:redis_config_command) { bosh_manifest.property("redis.config_command") }
   let(:broker_vm_ip) { bosh_director.ips_for_job('cf-redis-broker', bosh_manifest.deployment_name).first }
@@ -20,7 +20,7 @@ describe 'backups', :skip_s3 => true do
   let(:test_key) { "test_key" }
   let(:test_value) { "test_value" }
 
-  context "shared vm plan" do
+  context "shared vm plan", :skip_s3 => true do
     let(:redis_save_command) { bosh_manifest.property("redis.save_command") }
 
     it "sets a crontab entry on the broker" do
@@ -96,7 +96,7 @@ describe 'backups', :skip_s3 => true do
   context "dedicated vm plan" do
     let(:redis_save_command) { "BGSAVE" }
 
-    it "sets a crontab entry on the broker" do
+    it "sets a crontab entry on the broker", :skip_s3 => true do
       first_dedicated_node_vm_ip = bosh_director.ips_for_job('dedicated-node', bosh_manifest.deployment_name).first
 
       expected = [
@@ -113,7 +113,34 @@ describe 'backups', :skip_s3 => true do
       expect(crontab_output).to include(expected)
     end
 
-    describe 'manual backup' do
+    describe 'manual snapshot', :skip_service_backups => true do
+      let(:service) {
+        Prof::MarketplaceService.new(
+          name: bosh_manifest.property('redis.broker.service_name'),
+          plan: 'dedicated-vm'
+        )
+      }
+
+      it 'creates a dump.rdb file' do
+        service_broker.provision_and_bind(service.name, service.plan) do |service_binding, service_instance|
+          vm_ip = service_binding.credentials[:host]
+          result = ssh_gateway.execute_on(
+            vm_ip,
+            '/var/vcap/packages/redis-backups/bin/snapshot -config /var/vcap/jobs/redis-backups/config/backup-config.yml'
+          )
+          expect(result.lines.join).to(match('"event":"done","task":"create-snapshot"'), 'done event not found')
+
+          ls_output = ssh_gateway.execute_on(
+            vm_ip, "ls -l /var/vcap/store/redis/dump.rdb"
+          )
+          expect(ls_output.lines.size).to(eql(1))
+          expect(ls_output.lines.first).to_not(match('No such file or directory'))
+          expect(ls_output.lines.first).to(match('/var/vcap/store/redis/dump.rdb'))
+        end
+      end
+    end
+
+    describe 'manual backup', :skip_s3 => true do
       let(:service) {
         Prof::MarketplaceService.new(
           name: bosh_manifest.property('redis.broker.service_name'),

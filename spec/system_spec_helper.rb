@@ -53,6 +53,10 @@ module ExcludeHelper
     !(bucket_name == nil || bucket_name.empty?)
   end
 
+  def self.service_backups_available?
+    0 != manifest.fetch('releases').select{|i| i["name"] == "service-backups"}.length
+  end
+
   def self.warnings
     message = "\n"
     if !metrics_available?
@@ -61,6 +65,10 @@ module ExcludeHelper
 
     if !s3_available?
       message += "WARNING: Skipping backup tests, S3 credentials are not available in this manifest\n"
+    end
+
+    if !service_backups_available?
+      message += "WARNING: Skipping service backups tests, service backups are not available in this manifest\n"
     end
 
     message + "\n"
@@ -78,6 +86,7 @@ RSpec.configure do |config|
   config.full_backtrace = true
   config.filter_run_excluding :skip_metrics => !ExcludeHelper::metrics_available?
   config.filter_run_excluding :skip_s3 => !ExcludeHelper::s3_available?
+  config.filter_run_excluding :skip_service_backups => !ExcludeHelper::service_backups_available?
 
   config.before(:all) do
     redis_service_broker.deprovision_service_instances!
