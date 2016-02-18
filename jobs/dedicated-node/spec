@@ -22,7 +22,6 @@ packages:
 - nginx
 - cf-redis-broker
 - python
-- aws-cli
 
 properties:
 
