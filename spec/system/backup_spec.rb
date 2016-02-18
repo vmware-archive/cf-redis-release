@@ -120,6 +120,7 @@ describe 'backups' do
           plan: 'dedicated-vm'
         )
       }
+      let(:destination_folder) { bosh_manifest.property("service-backup.source_folder") }
 
       it 'creates a dump.rdb file' do
         service_broker.provision_and_bind(service.name, service.plan) do |service_binding, service_instance|
@@ -131,11 +132,11 @@ describe 'backups' do
           expect(result.lines.join).to(match('"event":"done","task":"create-snapshot"'), 'done event not found')
 
           ls_output = ssh_gateway.execute_on(
-            vm_ip, "ls -l /var/vcap/store/redis/dump.rdb"
+            vm_ip, "ls -l #{destination_folder}dump.rdb"
           )
           expect(ls_output.lines.size).to(eql(1))
           expect(ls_output.lines.first).to_not(match('No such file or directory'))
-          expect(ls_output.lines.first).to(match('/var/vcap/store/redis/dump.rdb'))
+          expect(ls_output.lines.first).to(match("#{destination_folder}dump.rdb"))
         end
       end
     end

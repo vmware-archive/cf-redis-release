@@ -54,7 +54,7 @@ module ExcludeHelper
   end
 
   def self.service_backups_available?
-    0 != manifest.fetch('releases').select{|i| i["name"] == "service-backups"}.length
+    0 != manifest.fetch('releases').select{|i| i["name"] == "service-backup"}.length
   end
 
   def self.warnings
