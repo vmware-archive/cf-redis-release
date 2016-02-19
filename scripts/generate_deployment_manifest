@@ -28,5 +28,6 @@ fi
 
 spiff merge \
  "$templates/cf-redis-deployment.yml" \
+ "$templates/cf-redis-jobs.yml" \
  "$templates/cf-infrastructure-$infrastructure.yml" \
  "$@"

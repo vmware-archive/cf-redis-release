@@ -1,0 +1,5 @@
+meta:
+  release_name: cf-redis
+  releases:
+  - name: (( .meta.release_name ))
+    version: latest

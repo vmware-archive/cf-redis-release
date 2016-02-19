@@ -10,7 +10,6 @@ meta:
   syslog_aggregator:
     address: 127.0.0.1
     port: 1234
-  release_name: cf-redis
 
 director_uuid: DIRECTOR_UUID
 

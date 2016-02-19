@@ -84,6 +84,9 @@ meta:
   syslog_aggregator:
     address: 127.0.0.1
     port: 1234
+  releases:
+  - name: cf-redis
+    version: latest
 name: bosh-lite-redis
 networks:
 - name: redis_z1
