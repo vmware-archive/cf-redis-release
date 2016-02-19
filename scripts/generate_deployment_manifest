@@ -26,10 +26,7 @@ if [ "$infrastructure" != "aws" ] && \
  exit 1
 fi
 
-echo "director_uuid: $(bosh status --uuid)" > "$TMPDIR/director_uuid.yml"
-
 spiff merge \
  "$templates/cf-redis-deployment.yml" \
  "$templates/cf-infrastructure-$infrastructure.yml" \
- "$@" \
- "$TMPDIR/director_uuid.yml"
+ "$@"
