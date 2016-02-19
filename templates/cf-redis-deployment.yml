@@ -5,13 +5,18 @@ meta:
   syslog_aggregator: ~
   apps_domain: (( merge ))
   nats: (( merge ))
-  releases: (( merge ))
-  release_name: (( merge ))
+  release_name: cf-redis
 
 name: (( meta.environment "-redis" ))
 director_uuid: (( merge ))
 
-releases: (( .meta.releases ))
+redis_releases:
+- name: (( .meta.release_name ))
+  version: latest
+
+additional_releases: (( merge || [] ))
+
+releases: (( redis_releases additional_releases ))
 
 compilation:
   workers: 2

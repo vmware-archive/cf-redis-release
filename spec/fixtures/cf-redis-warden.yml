@@ -84,9 +84,6 @@ meta:
   syslog_aggregator:
     address: 127.0.0.1
     port: 1234
-  releases:
-  - name: cf-redis
-    version: latest
 name: bosh-lite-redis
 networks:
 - name: redis_z1
@@ -277,6 +274,10 @@ properties:
     shared_plan:
       instance_limit: 5
       max_memory: 262144000
+additional_releases: []
+redis_releases:
+- name: cf-redis
+  version: latest
 releases:
 - name: cf-redis
   version: latest
