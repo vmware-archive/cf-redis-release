@@ -20,10 +20,38 @@ describe 'backups' do
   let(:test_key) { "test_key" }
   let(:test_value) { "test_value" }
 
-  context "shared vm plan", :skip_s3 => true do
+  context "shared vm plan" do
     let(:redis_save_command) { bosh_manifest.property("redis.save_command") }
 
-    it "sets a crontab entry on the broker" do
+    describe 'manual snapshot', :skip_service_backups => true do
+      let(:service) {
+        Prof::MarketplaceService.new(
+          name: bosh_manifest.property('redis.broker.service_name'),
+          plan: 'shared-vm'
+        )
+      }
+      let(:destination_folder) { bosh_manifest.property("service-backup.source_folder") }
+
+      it 'creates a dump.rdb file' do
+        service_broker.provision_and_bind(service.name, service.plan) do |service_binding, service_instance|
+          vm_ip = service_binding.credentials[:host]
+          result = ssh_gateway.execute_on(
+            vm_ip,
+            '/var/vcap/packages/redis-backups/bin/snapshot -config /var/vcap/jobs/redis-backups/config/backup-config.yml'
+          )
+          expect(result.lines.join).to(match('"event":"done","task":"create-snapshot"'), 'done event not found')
+
+          ls_output = ssh_gateway.execute_on(
+            vm_ip, "ls -l #{destination_folder}dump.rdb"
+          )
+          expect(ls_output.lines.size).to(eql(1))
+          expect(ls_output.lines.first).to_not(match('No such file or directory'))
+          expect(ls_output.lines.first).to(match("#{destination_folder}dump.rdb"))
+        end
+      end
+    end
+
+    it "sets a crontab entry on the broker", :skip_s3 => true do
       expected = [
         "0 0 * * *",
         "PATH=$PATH:/var/vcap/packages/aws-cli/bin",
@@ -38,7 +66,7 @@ describe 'backups' do
       expect(crontab_output).to include(expected)
     end
 
-    describe 'manual backup on the shared-vm plan' do
+    describe 'manual backup on the shared-vm plan', :skip_s3 => true do
       let(:service) {
         Prof::MarketplaceService.new(
           name: bosh_manifest.property('redis.broker.service_name'),

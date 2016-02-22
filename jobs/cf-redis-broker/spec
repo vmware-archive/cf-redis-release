@@ -23,7 +23,6 @@ packages:
 - redis
 - route-registrar
 - python
-- aws-cli
 
 properties:
   redis.statefile_path:
