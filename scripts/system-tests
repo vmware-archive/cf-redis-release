@@ -1,6 +1,11 @@
 #!/bin/bash
 
-set -ex
+set -e
+
+log() {
+  local _message=$1
+  echo -e "$_message"
+}
 
 check_args() {
   if [ -z "$BOSH_MANIFEST" ]
