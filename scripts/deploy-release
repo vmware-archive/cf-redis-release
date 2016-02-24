@@ -93,7 +93,7 @@ upload_backups_releases() {
   if [ $_exit_code -eq 0 ]
   then
     upload_release "${WORKSPACE_BASE_DIR}/redis-backups-release" "redis-backups"
-    bosh -n upload release "${WORKSPACE_BASE_DIR}/service-backup-release/releases/service-backup/service-backup-5.yml"
+    upload_release "${WORKSPACE_BASE_DIR}/service-backup-release" "service-backup"
   fi
 }
 

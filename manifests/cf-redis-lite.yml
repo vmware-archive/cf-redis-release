@@ -104,13 +104,6 @@ properties:
       auth:
         username: admin
         password: admin
-      backups:
-        path:
-        s3_region:
-        access_key_id:
-        secret_access_key:
-        endpoint_url:
-        bucket_name:
 compilation:
   cloud_properties:
     name: random

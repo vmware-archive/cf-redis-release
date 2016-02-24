@@ -48,11 +48,6 @@ module ExcludeHelper
     0 != manifest.fetch('releases').select{|i| i["name"] == "service-metrics" }.length
   end
 
-  def self.s3_available?
-    bucket_name = manifest['properties']['redis']['broker']['backups']['bucket_name']
-    !(bucket_name == nil || bucket_name.empty?)
-  end
-
   def self.service_backups_available?
     0 != manifest.fetch('releases').select{|i| i["name"] == "service-backup"}.length
   end
@@ -61,10 +56,6 @@ module ExcludeHelper
     message = "\n"
     if !metrics_available?
       message += "WARNING: Skipping metrics tests, metrics are not available in this manifest\n"
-    end
-
-    if !s3_available?
-      message += "WARNING: Skipping backup tests, S3 credentials are not available in this manifest\n"
     end
 
     if !service_backups_available?
@@ -85,7 +76,6 @@ RSpec.configure do |config|
   config.order = 'random'
   config.full_backtrace = true
   config.filter_run_excluding :skip_metrics => !ExcludeHelper::metrics_available?
-  config.filter_run_excluding :skip_s3 => !ExcludeHelper::s3_available?
   config.filter_run_excluding :skip_service_backups => !ExcludeHelper::service_backups_available?
 
   config.before(:all) do

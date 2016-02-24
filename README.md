@@ -51,25 +51,6 @@ properties:
 ```
 Increase the `instance_count: 1` to the value you want.
 
-- If you want to enable the backup functionality, populate these fields in the properties block at the end of the manifest
-
-```
-# templates/sample_stubs/sample_warden_stub.yml
-
-properties:
-  redis:
-    broker:
-      backups:
-        access_key_id: YOUR_S3_ACCESS_KEY_ID
-        secret_access_key: YOUR_S3_SECRET_ACCESS_KEY
-        endpoint_url: S3_ENDPOINT_FOR_YOUR_REGION
-        s3_region: S3_REGION
-        bucket_name: YOUR_S3_BUCKET
-        path: YOUR_S3_BACKUP_PATH
-```
-
-If these values are not populated, the scheduled backups will not run.
-
 ### Properties
 
 All required properties are listed in the `templates/sample_stubs/sample_*_stub.yml` files. There are a number of other optional properties. Descriptions for all properties can be found in the relevant `spec` files for each job.

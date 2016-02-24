@@ -3,8 +3,6 @@
 BIN_DIR=/var/vcap/packages/cf-redis-broker/bin
 JOB_DIR=/var/vcap/jobs/dedicated-node
 LOG_DIR=/var/vcap/sys/log/redis
-BACKUP_LOG_DIR=/var/vcap/sys/log/backup
-BACKUP_TMP_DIR=<%= p('redis.broker.backups.backup_tmp_dir') %>
 RUN_DIR=/var/vcap/sys/run
 PIDFILE=$RUN_DIR/redis.pid
 DATA_DIR=/var/vcap/store/redis
@@ -16,13 +14,8 @@ case $1 in
 
   start)
 
-    mkdir -p $LOG_DIR $RUN_DIR $DATA_DIR $BACKUP_LOG_DIR $BACKUP_TMP_DIR
-    chown vcap:vcap $LOG_DIR $RUN_DIR $DATA_DIR $BACKUP_LOG_DIR $BACKUP_TMP_DIR
-
-    <% unless p('redis.broker.backups.restore_available') %>
-      echo "restore binary feature flag is off" | tee --append $LOG_DIR/cf-redis-broker.stdout.log | logger -s -t redis-ctl
-      rm -f $BIN_DIR/restore
-    <% end %>
+    mkdir -p $LOG_DIR $RUN_DIR $DATA_DIR
+    chown vcap:vcap $LOG_DIR $RUN_DIR $DATA_DIR
 
     # Remove temp backup files that might be left over because of a previously
     # aborted BGSAVE, just to save space
@@ -32,20 +25,6 @@ case $1 in
 
     # Recommended for running redis on a VM in production (https://www.pivotaltracker.com/story/show/74949514)
     sysctl vm.overcommit_memory=1
-
-    # Run backups at midnight, every night
-    # Add new entry to vcap crontab if not already present
-    if ! crontab -u vcap -l | grep --quiet $BIN_DIR
-    then
-      # WARNING: If you change this, you'll need to reconsider the check above,
-      # as the current implementation won't update existing crontab entries.
-      if crontab -u vcap -l
-      then
-             (crontab -u vcap -l; echo "0 0 * * * "'PATH=$PATH:/var/vcap/packages/aws-cli/bin'" ${BIN_DIR}/backup --config ${JOB_DIR}/config/backup.yml") | crontab -u vcap -
-      else
-             echo "0 0 * * * PATH="'$PATH:/var/vcap/packages/aws-cli/bin'" ${BIN_DIR}/backup --config ${JOB_DIR}/config/backup.yml" | crontab -u vcap -
-      fi
-    fi
 
     exec chpst -u vcap:vcap /var/vcap/packages/redis/bin/redis-server $CONFIG_PATH \
       2>&1 | tee --append $LOG_DIR/redis.log | logger -s -t redis-ctl

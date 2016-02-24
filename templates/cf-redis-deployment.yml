@@ -136,5 +136,4 @@ properties:
       auth:
         username: (( merge ))
         password: (( merge ))
-      backups: (( merge ))
       route_name: (( merge ))
