@@ -4,7 +4,7 @@ compilation:
   network: redis_z1
   reuse_compilation_vms: true
   workers: 2
-director_uuid: '----'
+director_uuid: DIRECTOR_UUID
 jobs:
 - instances: 1
   name: cf-redis-broker
@@ -73,23 +73,6 @@ jobs:
     release: cf-redis
 meta:
   apps_domain: bosh-lite.com
-  backups:
-    access_key_id: YOUR_S3_ACCESS_KEY_ID
-    bucket_name: YOUR_S3_BUCKET
-    endpoint_url: S3_ENDPOINT_FOR_YOUR_REGION
-    path: YOUR_S3_BACKUP_PATH
-    s3_region: S3_REGION
-    secret_access_key: YOUR_S3_SECRET_ACCESS_KEY
-  broker:
-    name: redis
-    password: admin
-    username: admin
-  cf:
-    admin_password: admin
-    admin_username: admin
-    api_url: https://api.bosh-lite.com
-  deployment_name: bosh-lite-redis
-  director_uuid: '----'
   environment: bosh-lite
   external_domain: bosh-lite.com
   nats:
@@ -97,18 +80,7 @@ meta:
     password: nats
     port: 4222
     username: nats
-  redis:
-    bg_save_command: yetanotherrandomstring
-    config_command: configalias
-    dedicated_plan:
-      instance_count: 1
-    save_command: anotherrandomstring
-    shared_plan:
-      instance_limit: 5
-      max_memory: 262144000
   release_name: cf-redis
-  route_name: redis-broker
-  service_name: redis
   syslog_aggregator:
     address: 127.0.0.1
     port: 1234
@@ -254,27 +226,16 @@ networks:
     - 10.244.3.81
     static: []
 properties:
-  broker:
-    name: redis
-    password: admin
-    username: admin
   cf:
     admin_password: admin
     admin_username: admin
     api_url: https://api.bosh-lite.com
-  loggregator:
-    etcd:
-      machines:
-      - 10.244.0.42
-  loggregator_endpoint:
-    shared_secret: loggregator-secret
-  metron_agent:
-    deployment: bosh-lite-redis
-    dropsonde_incoming_port: 3457
-    shared_secret: loggregator-secret
-    zone: z1
-  metron_endpoint:
-    shared_secret: loggregator-secret
+    apps_domain: bosh-lite.com
+    nats:
+      host: 10.244.0.6
+      password: nats
+      port: 4222
+      username: nats
   redis:
     agent:
       backend_port: 54321
@@ -285,6 +246,13 @@ properties:
         username: admin
       backend_host: 10.244.3.2
       backend_port: 12345
+      backups:
+        access_key_id: YOUR_S3_ACCESS_KEY_ID
+        bucket_name: YOUR_S3_BUCKET
+        endpoint_url: S3_ENDPOINT_FOR_YOUR_REGION
+        path: YOUR_S3_BACKUP_PATH
+        s3_region: S3_REGION
+        secret_access_key: YOUR_S3_SECRET_ACCESS_KEY
       dedicated_nodes:
       - 10.244.3.6
       enable_service_access: true
@@ -297,30 +265,21 @@ properties:
     host: 10.244.3.2
     maxmemory: 262144000
     save_command: anotherrandomstring
-  service-backup:
-    blobstore:
-      access_key_id: replace-with-AWS-access-key
-      bucket_name: replace-with-bucket-name-in-S3
-      bucket_path: replace-with-bucket-path-in-S3
-      secret_access_key: replace-with-AWS-secret-access-key
-    cron_schedule: 0 0 * * *
-    source_executable: /var/vcap/packages/redis-backups/bin/snapshot -config /var/vcap/jobs/redis-backups/config/backup-config.yml
-    source_folder: /var/vcap/store/redis-backup/
-  service_metrics:
-    execution_interval_seconds: 5
-    origin: p-redis
-releases:
+  syslog_aggregator:
+    address: 127.0.0.1
+    port: 1234
+  template_only:
+    dedicated_plan:
+      instance_count: 1
+    shared_plan:
+      instance_limit: 5
+      max_memory: 262144000
+additional_releases: []
+redis_releases:
 - name: cf-redis
   version: latest
-- name: redis-metrics
-  version: latest
-- name: service-metrics
-  version: latest
-- name: loggregator
-  version: latest
-- name: service-backup
-  version: latest
-- name: redis-backups
+releases:
+- name: cf-redis
   version: latest
 resource_pools:
 - cloud_properties:
@@ -336,3 +295,4 @@ update:
   canary_watch_time: 30000-180000
   max_in_flight: 4
   update_watch_time: 30000-180000
+

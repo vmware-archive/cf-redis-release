@@ -1,0 +1,49 @@
+#!/bin/sh -e
+
+BASE_DIR=$(cd $(dirname $0)/..; echo "$PWD")
+
+templates=$BASE_DIR/templates
+
+infrastructure=$1
+
+closed_source=""
+
+while getopts "e:c" opt; do
+  case $opt in
+    c)
+      closed_source="$templates/stubs/cf-redis-cs-jobs.yml"
+      ;;
+    e)
+      infrastructure=$OPTARG
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      ;;
+  esac
+done
+
+which spiff > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo "Please install spiff (https://github.com/cloudfoundry-incubator/spiff#installation)"
+  echo "before running this script"
+  exit 1
+fi
+
+# if [ $# -lt 1 ]; then
+#   echo "Usage: $0 <aws|vsphere|warden> <path/to/stub>"
+#   exit 1
+# fi
+
+if [ "$infrastructure" != "aws" ] && \
+   [ "$infrastructure" != "warden" ] && \
+   [ "$infrastructure" != "vsphere" ] ; then
+ echo "usage: ${0} <aws|warden|vsphere> [stubs...]"
+ exit 1
+fi
+
+spiff merge \
+ "$templates/cf-redis-deployment.yml" \
+ "$templates/cf-infrastructure-$infrastructure.yml" \
+ $closed_source \
+ "$templates/stubs/cf-redis-jobs.yml" \
+ "$templates/stubs/cf-redis-networks.yml" "$templates/stubs/cf-redis-meta.yml"

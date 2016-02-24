@@ -1,46 +1,43 @@
-require 'support/yaml_eq'
-require 'yaml'
-require 'process_helper'
+require 'rspec/shell/expectations'
 
-# Dummy fixture class
-class Clazz
-  include ProcessHelper
+RSpec.configure do |c|
+  c.include Rspec::Shell::Expectations
 end
 
 describe 'spiff manifests' do
-  before :each do
-    @clazz = Clazz.new
-  end
+  include Rspec::Shell::Expectations
+  let(:stubbed_env) { create_stubbed_env }
 
-  context 'open source bosh-lite' do
-    let(:stub) { 'templates/sample_stubs/sample_warden_stub.yml' }
+  context 'on bosh-lite' do
     let(:infrastructure) { 'warden' }
 
-    it 'should generate manifest' do
-      example_manifest = Tempfile.new("example-manifest.yml")
+    context 'open source deployment to bosh-lite' do
+      it 'should exit 0 on success' do
+        stdout, stderr, status = stubbed_env.execute("./scripts/generate-deployment-manifest -e warden")
 
-      @clazz.process("scripts/generate_deployment_manifest #{infrastructure} #{stub} > #{example_manifest.path}", expected_exit_status: 0)
+        expect(status.exitstatus).to eq(0)
+      end
 
-      expected = File.read("spec/fixtures/cf-redis-#{infrastructure}.yml")
-      actual = File.read(example_manifest.path)
-      expect(actual).to yaml_eq(expected)
+      it 'should exit 1 if not enough args given' do
+        stdout, stderr, status = stubbed_env.execute("./scripts/generate-deployment-manifest")
+
+        expect(status.exitstatus).to eq(1)
+      end
+
+      it 'should give the user a usage message not enough args given' do
+        stdout, stderr, status = stubbed_env.execute("./scripts/generate-deployment-manifest")
+
+        expect(stdout).to include("usage:")
+      end
     end
 
-    it 'should allow users to override the jobs section' do
-      custom_jobs_file = Tempfile.new("custom-jobs.yml")
-      custom_jobs_file.write({
-            'additional_releases' => [
-              {'name' => 'another-redis-release', 'version' => 'latest'},
-              {'name' => 'my-custom-release', 'version' => 'latest'}]}.to_yaml)
-      custom_jobs_file.close
-      example_manifest = Tempfile.new("example-manifest.yml")
+    context 'closed source deployment to bosh-lite' do
+      it 'should exit 0 on success' do
+        stdout, stderr, status = stubbed_env.execute("./scripts/generate-deployment-manifest -c -e warden")
 
-      @clazz.process("scripts/generate_deployment_manifest #{infrastructure} #{stub} #{custom_jobs_file.path} > #{example_manifest.path}", expected_exit_status: 0)
-
-      actual = YAML.load(File.read(example_manifest.path))
-      expect(actual['releases']).to include({ 'name' => 'cf-redis', 'version' => 'latest'})
-      expect(actual['releases']).to include({ 'name' => 'another-redis-release', 'version' => 'latest'})
-      expect(actual['releases']).to include({ 'name' => 'my-custom-release', 'version' => 'latest'})
+        expect(status.exitstatus).to eq(0)
+      end
     end
   end
+
 end

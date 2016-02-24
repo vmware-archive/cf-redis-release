@@ -1,0 +1,99 @@
+---
+meta: ~
+
+properties:
+  broker: (( .meta.broker ))
+  cf: (( .meta.cf ))
+  redis:
+    broker:
+      auth:
+        username: (( .meta.broker.username ))
+        password: (( .meta.broker.password ))
+      enable_service_access: true
+      service_name: (( .meta.service_name ))
+      route_name: (( .meta.route_name ))
+      backups: (( .meta.backups ))
+      network: redis_z1
+      backend_host: (( jobs.cf-redis-broker.networks.redis_z1.static_ips.[0] ))
+      backend_port: 12345
+      name: redis
+      service_instance_limit: (( .meta.redis.shared_plan.instance_limit ))
+      dedicated_nodes: (( jobs.dedicated-node.networks.redis_z1.static_ips ))
+    maxmemory: (( .meta.redis.shared_plan.max_memory ))
+    host: (( jobs.cf-redis-broker.networks.redis_z1.static_ips.[0] ))
+    config_command: (( .meta.redis.config_command ))
+    save_command: (( .meta.redis.save_command ))
+    bg_save_command: (( .meta.redis.bg_save_command ))
+    agent:
+      backend_port: 54321
+
+networks: ~
+
+releases:
+- name: (( .meta.release_name ))
+  version: latest
+
+jobs:
+- instances: 1
+  name: cf-redis-broker
+  networks:
+  - name: redis_z1
+    static_ips: (( merge || static_ips(0) ))
+  persistent_disk: 8192
+  resource_pool: redis_z1
+  templates:
+  - name: cf-redis-broker
+    release: (( .meta.release_name ))
+  - name: syslog-configurator
+    release: (( .meta.release_name ))
+- instances: (( .meta.redis.dedicated_plan.instance_count ))
+  name: dedicated-node
+  networks:
+  - name: redis_z1
+    static_ips: (( merge || static_ips(1,2,3,4,5,6,7,8,9,10) ))
+  persistent_disk: 8192
+  resource_pool: redis_z1
+  templates:
+  - name: dedicated-node
+    release: (( .meta.release_name ))
+  - name: syslog-configurator
+    release: (( .meta.release_name ))
+- instances: 1
+  lifecycle: errand
+  name: broker-registrar
+  networks:
+  - name: redis_z1
+  properties:
+    broker:
+      name: (( .properties.redis.broker.name || "redis" ))
+      host: (( .properties.redis.broker.route_name "." .meta.apps_domain ))
+      username: (( .properties.redis.broker.auth.username ))
+      password: (( .properties.redis.broker.auth.password ))
+  resource_pool: redis_z1
+  templates:
+  - name: broker-registrar
+    release: (( .meta.release_name ))
+- instances: 1
+  lifecycle: errand
+  name: broker-deregistrar
+  networks:
+  - name: redis_z1
+  properties:
+    broker:
+      name: (( .properties.redis.broker.name || "redis" ))
+      host: (( .properties.redis.broker.route_name "." .meta.apps_domain ))
+      username: (( .properties.redis.broker.auth.username ))
+      password: (( .properties.redis.broker.auth.password ))
+  resource_pool: redis_z1
+  templates:
+  - name: broker-deregistrar
+    release: (( .meta.release_name ))
+- instances: 1
+  lifecycle: errand
+  name: smoke-tests
+  networks:
+  - name: redis_z1
+  resource_pool: redis_z1
+  templates:
+  - name: smoke-tests
+    release: (( .meta.release_name ))

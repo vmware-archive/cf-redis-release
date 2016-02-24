@@ -1,6 +1,6 @@
 meta: ~
 
-director_uuid: (( merge ))
+director_uuid: (( meta.director_uuid ))
 
 compilation:
   cloud_properties:
@@ -11,17 +11,8 @@ compilation:
 
 networks: (( merge ))
 
-resource_pools:
-- cloud_properties:
-    ram: 1024
-    name: random
-  name: redis_z1
-  network: redis_z1
-  stemcell:
-    name: bosh-warden-boshlite-ubuntu-trusty-go_agent
-    version: latest
+jobs: (( merge ))
 
-properties:
-  template_only: (( merge ))
-  broker:
-    name: (( merge ))
+resource_pools: ~
+
+properties: (( merge ))
