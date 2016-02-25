@@ -1,12 +1,11 @@
 ---
 meta:
   deployment_name: bosh-lite-redis
-  director_uuid: YOUR_DIRECTOR_UUID
+  director_uuid: de7e613b-0f3a-47f8-8e94-cbd81af62746
   release_name: cf-redis
   apps_domain: bosh-lite.com
   environment: bosh-lite
   external_domain: bosh-lite.com
-  release_name: cf-redis
   syslog_aggregator:
     address: 127.0.0.1
     port: 1234

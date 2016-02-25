@@ -177,6 +177,7 @@ GEM
       cliver (~> 0.3.1)
       multi_json (~> 1.0)
       websocket-driver (>= 0.2.0)
+    process_helper (0.0.3)
     prof (0.29.4)
       bosh_cli
       capybara
@@ -241,6 +242,7 @@ DEPENDENCIES
   aws-sdk
   bosh_cli (= 1.2858.0)
   hula
+  process_helper
   prof
   pry
   rake

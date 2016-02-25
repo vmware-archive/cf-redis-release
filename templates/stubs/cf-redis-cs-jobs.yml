@@ -1,86 +1,90 @@
 ---
 meta: ~
 
-releases:
-- <<: (( merge ))
-- name: redis-metrics
-  version: latest
-- name: service-metrics
-  version: latest
-- name: loggregator
-  version: latest
-- name: service-backup
-  version: latest
-- name: redis-backups
-  version: latest
+additional_releases: (( closed_source.releases ))
 
-properties:
-  <<: (( merge ))
-  loggregator_endpoint:
-    shared_secret: loggregator-secret
-  service-backup:
-    blobstore:
-      bucket_name: replace-with-bucket-name-in-S3
-      bucket_path: replace-with-bucket-path-in-S3
-      access_key_id: replace-with-AWS-access-key
-      secret_access_key: replace-with-AWS-secret-access-key
-    source_folder: "/var/vcap/store/redis-backup/"
-    source_executable: "/var/vcap/packages/redis-backups/bin/snapshot -config /var/vcap/jobs/redis-backups/config/backup-config.yml"
-    cron_schedule: 0 0 * * *
-  service_metrics:
-    origin: p-redis
-    execution_interval_seconds: 5
-  metron_agent:
-    zone: z1
-    deployment: (( .meta.deployment_name ))
-    dropsonde_incoming_port: 3457
-    shared_secret: loggregator-secret
-  metron_endpoint:
-    shared_secret: loggregator-secret
-  loggregator:
-    etcd:
-      machines:
-      - 10.244.0.42
+additional_job_templates:
+  cf_redis_broker: (( closed_source.jobs.cf_redis_broker.templates ))
+  dedicated_node: (( closed_source.jobs.dedicated_node.templates ))
+
+properties: (( closed_source.properties ))
 
 jobs:
-- <<: ((merge on key))
 - name: cf-redis-broker
-  <<: (( merge ))
-  templates:
-  - <<: (( merge ))
-  - name: redis-broker-metrics
-    release: redis-metrics
-  - name: service-metrics
-    release: service-metrics
-  - name: metron_agent
-    release: loggregator
-  properties:
-    <<: (( merge ))
-    service_metrics:
-      metrics_command: "/var/vcap/packages/redis-broker-metrics/bin/redis-broker-metrics"
-      metrics_command_args:
-      - "-config=/var/vcap/jobs/cf-redis-broker/config/broker.yml"
-      monit_dependencies:
-      - cf-redis-broker
+  properties: (( closed_source.jobs.cf_redis_broker.properties ))
 - name: dedicated-node
-  <<: (( merge ))
-  templates:
-  - <<: (( merge ))
-  - name: redis-metrics
-    release: redis-metrics
-  - name: service-metrics
-    release: service-metrics
-  - name: metron_agent
-    release: loggregator
-  - name: redis-backups
-    release: redis-backups
-  - name: service-backup
-    release: service-backup
+  properties: (( closed_source.jobs.dedicated_node.properties ))
+
+closed_source:
   properties:
-    <<: (( merge ))
+    loggregator_endpoint:
+      shared_secret: loggregator-secret
+    service-backup:
+      blobstore:
+        bucket_name: replace-with-bucket-name-in-S3
+        bucket_path: replace-with-bucket-path-in-S3
+        access_key_id: replace-with-AWS-access-key
+        secret_access_key: replace-with-AWS-secret-access-key
+      source_folder: "/var/vcap/store/redis-backup/"
+      source_executable: "/var/vcap/packages/redis-backups/bin/snapshot -config /var/vcap/jobs/redis-backups/config/backup-config.yml"
+      cron_schedule: 0 0 * * *
     service_metrics:
-      metrics_command: "/var/vcap/packages/redis-metrics/bin/redis-metrics"
-      metrics_command_args:
-      - "-config=/var/vcap/store/redis/redis.conf"
-      monit_dependencies:
-      - redis
+      origin: p-redis
+      execution_interval_seconds: 5
+    metron_agent:
+      zone: z1
+      deployment: (( .meta.deployment_name ))
+      dropsonde_incoming_port: 3457
+      shared_secret: loggregator-secret
+    metron_endpoint:
+      shared_secret: loggregator-secret
+    loggregator:
+      etcd:
+        machines:
+        - 10.244.0.42
+  releases:
+  - name: redis-metrics
+    version: latest
+  - name: service-metrics
+    version: latest
+  - name: loggregator
+    version: latest
+  - name: service-backup
+    version: latest
+  - name: redis-backups
+    version: latest
+  jobs:
+    cf_redis_broker:
+      templates:
+      - name: redis-broker-metrics
+        release: redis-metrics
+      - name: service-metrics
+        release: service-metrics
+      - name: metron_agent
+        release: loggregator
+      properties:
+        service_metrics:
+          metrics_command: "/var/vcap/packages/redis-broker-metrics/bin/redis-broker-metrics"
+          metrics_command_args:
+          - "-config=/var/vcap/jobs/cf-redis-broker/config/broker.yml"
+          monit_dependencies:
+          - cf-redis-broker
+    dedicated_node:
+      templates:
+      - name: redis-metrics
+        release: redis-metrics
+      - name: service-metrics
+        release: service-metrics
+      - name: metron_agent
+        release: loggregator
+      - name: redis-backups
+        release: redis-backups
+      - name: service-backup
+        release: service-backup
+      properties:
+        service_metrics:
+          metrics_command: "/var/vcap/packages/redis-metrics/bin/redis-metrics"
+          metrics_command_args:
+          - "-config=/var/vcap/store/redis/redis.conf"
+          monit_dependencies:
+          - redis

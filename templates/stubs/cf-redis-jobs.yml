@@ -1,7 +1,9 @@
 ---
 meta: ~
 
+# PROPERTIES
 properties:
+  <<: (( merge ))
   broker: (( .meta.broker ))
   cf: (( .meta.cf ))
   redis:
@@ -29,9 +31,51 @@ properties:
 
 networks: ~
 
-releases:
+# RELEASES
+base_releases:
 - name: (( .meta.release_name ))
   version: latest
+
+additional_releases: (( merge || [] ))
+
+releases: (( base_releases additional_releases ))
+
+
+# JOBS
+job_templates:
+  cf_redis_broker:
+  - name: cf-redis-broker
+    release: (( .meta.release_name ))
+  - name: syslog-configurator
+    release: (( .meta.release_name ))
+  dedicated_node:
+  - name: dedicated-node
+    release: (( .meta.release_name ))
+  - name: syslog-configurator
+    release: (( .meta.release_name ))
+  broker_registrar:
+  - name: broker-registrar
+    release: (( .meta.release_name ))
+  broker_deregistrar:
+  - name: broker-deregistrar
+    release: (( .meta.release_name ))
+  smoke_tests:
+  - name: smoke-tests
+    release: (( .meta.release_name ))
+
+additional_job_templates:
+  cf_redis_broker: (( merge || [] ))
+  dedicated_node: (( merge || [] ))
+  broker_registrar: (( merge || [] ))
+  broker_deregistrar: (( merge || [] ))
+  smoke_tests: (( merge || [] ))
+
+additional_job_properties:
+  cf_redis_broker: (( merge || [] ))
+  dedicated_node: (( merge || [] ))
+  broker_registrar: (( merge || [] ))
+  broker_deregistrar: (( merge || [] ))
+  smoke_tests: (( merge || [] ))
 
 jobs:
 - instances: 1
@@ -41,11 +85,8 @@ jobs:
     static_ips: (( merge || static_ips(0) ))
   persistent_disk: 8192
   resource_pool: redis_z1
-  templates:
-  - name: cf-redis-broker
-    release: (( .meta.release_name ))
-  - name: syslog-configurator
-    release: (( .meta.release_name ))
+  templates: (( job_templates.cf_redis_broker additional_job_templates.cf_redis_broker ))
+  <<: (( merge ))
 - instances: (( .meta.redis.dedicated_plan.instance_count ))
   name: dedicated-node
   networks:
@@ -53,11 +94,8 @@ jobs:
     static_ips: (( merge || static_ips(1,2,3,4,5,6,7,8,9,10) ))
   persistent_disk: 8192
   resource_pool: redis_z1
-  templates:
-  - name: dedicated-node
-    release: (( .meta.release_name ))
-  - name: syslog-configurator
-    release: (( .meta.release_name ))
+  templates: (( job_templates.dedicated_node additional_job_templates.dedicated_node ))
+  <<: (( merge ))
 - instances: 1
   lifecycle: errand
   name: broker-registrar
@@ -70,9 +108,8 @@ jobs:
       username: (( .properties.redis.broker.auth.username ))
       password: (( .properties.redis.broker.auth.password ))
   resource_pool: redis_z1
-  templates:
-  - name: broker-registrar
-    release: (( .meta.release_name ))
+  templates: (( job_templates.broker_registrar additional_job_templates.broker_registrar ))
+  <<: (( merge ))
 - instances: 1
   lifecycle: errand
   name: broker-deregistrar
@@ -85,15 +122,13 @@ jobs:
       username: (( .properties.redis.broker.auth.username ))
       password: (( .properties.redis.broker.auth.password ))
   resource_pool: redis_z1
-  templates:
-  - name: broker-deregistrar
-    release: (( .meta.release_name ))
+  templates: (( job_templates.broker_deregistrar additional_job_templates.broker_deregistrar ))
+  <<: (( merge ))
 - instances: 1
   lifecycle: errand
   name: smoke-tests
   networks:
   - name: redis_z1
   resource_pool: redis_z1
-  templates:
-  - name: smoke-tests
-    release: (( .meta.release_name ))
+  templates: (( job_templates.smoke_tests additional_job_templates.smoke_tests ))
+  <<: (( merge ))
