@@ -20,11 +20,12 @@ closed_source:
     loggregator_endpoint:
       shared_secret: loggregator-secret
     service-backup:
-      blobstore:
-        bucket_name: replace-with-bucket-name-in-S3
-        bucket_path: replace-with-bucket-path-in-S3
-        access_key_id: replace-with-AWS-access-key
-        secret_access_key: replace-with-AWS-secret-access-key
+      destination:
+        s3:
+          bucket_name: replace-with-bucket-name-in-S3
+          bucket_path: replace-with-bucket-path-in-S3
+          access_key_id: replace-with-AWS-access-key
+          secret_access_key: replace-with-AWS-secret-access-key
       source_folder: "/var/vcap/store/redis-backup/"
       source_executable: "/var/vcap/packages/redis-backups/bin/snapshot -config /var/vcap/jobs/redis-backups/config/backup-config.yml"
       cron_schedule: 0 0 * * *
@@ -62,6 +63,10 @@ closed_source:
         release: service-metrics
       - name: metron_agent
         release: loggregator
+      - name: redis-backups
+        release: redis-backups
+      - name: service-backup
+        release: service-backup
       properties:
         service_metrics:
           metrics_command: "/var/vcap/packages/redis-broker-metrics/bin/redis-broker-metrics"
