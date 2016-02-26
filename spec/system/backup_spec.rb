@@ -41,6 +41,10 @@ describe 'backups' do
     '/var/vcap/packages/redis-backups/bin/snapshot ' +
       '-config /var/vcap/jobs/redis-backups/config/backup-config.yml'
   end
+  let(:manual_cleanup_command) do
+    '/var/vcap/packages/redis-backups/bin/cleanup ' +
+      '-config /var/vcap/jobs/redis-backups/config/backup-config.yml'
+  end
 
   context "shared vm plan" do
     let(:redis_save_command) { bosh_manifest.property("redis.save_command") }
@@ -96,6 +100,31 @@ describe 'backups' do
 
           # check not AOF format
           expect(contents).to_not include('SELECT')
+        end
+      end
+
+      describe 'manual cleanup' do
+        it 'deletes the dump.rdb file' do
+          service_broker.provision_and_bind(service.name, service.plan) do |service_binding, service_instance|
+            vm_ip = service_binding.credentials[:host]
+            result = ssh_gateway.execute_on(
+              vm_ip,
+              "touch #{destination_folder}/dump.rdb; ls #{destination_folder}"
+            )
+            expect(result.lines.join).to match("dump.rdb")
+
+            cleanup_result = ssh_gateway.execute_on(
+              vm_ip,
+              manual_cleanup_command
+            )
+            expect(cleanup_result.lines.join).to match('"event":"done","task":"perform-cleanup"')
+
+            ls_result = ssh_gateway.execute_on(
+              vm_ip,
+              "ls #{destination_folder}"
+            )
+            expect(ls_result.lines.join).to_not match("dump.rdb")
+          end
         end
       end
     end
@@ -157,6 +186,31 @@ describe 'backups' do
 
           # check not AOF format
           expect(contents).to_not include('SELECT')
+        end
+      end
+
+      describe 'manual cleanup' do
+        it 'deletes the dump.rdb file' do
+          service_broker.provision_and_bind(service.name, service.plan) do |service_binding, service_instance|
+            vm_ip = service_binding.credentials[:host]
+            result = ssh_gateway.execute_on(
+              vm_ip,
+              "touch #{destination_folder}/dump.rdb; ls #{destination_folder}"
+            )
+            expect(result.lines.join).to match("dump.rdb")
+
+            cleanup_result = ssh_gateway.execute_on(
+              vm_ip,
+              manual_cleanup_command
+            )
+            expect(cleanup_result.lines.join).to match('"event":"done","task":"perform-cleanup"')
+
+            ls_result = ssh_gateway.execute_on(
+              vm_ip,
+              "ls #{destination_folder}"
+            )
+            expect(ls_result.lines.join).to_not match("dump.rdb")
+          end
         end
       end
     end

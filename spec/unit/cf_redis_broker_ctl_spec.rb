@@ -19,7 +19,7 @@ describe 'cf-redis-broker job control script templating' do
       'syslog_aggregator.address' => '10.0.0.1',
       'syslog_aggregator.port' => '9999',
       'redis.broker.backend_port' => '9875',
-    }.fetch(property_name)
+    }.fetch(property_name, "")
   end
 
   def if_p(*property_names)
