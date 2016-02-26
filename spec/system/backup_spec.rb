@@ -28,8 +28,8 @@ describe 'backups' do
   let(:manual_backup_command) do
     "/var/vcap/packages/service-backup/bin/manual-backup s3 " +
       "--backup-creator-cmd '#{manual_snapshot_command}' " +
+      "--cleanup-cmd '#{manual_cleanup_command}' " +
       "--source-folder '#{destination_folder}' " +
-      "--cleanup-cmd '' " +
       "--dest-path '#{s3_backup_path}' " +
       "--aws-access-key-id '#{aws_access_key_id}' " +
       "--aws-secret-access-key '#{aws_secret_access_key}' " +
@@ -78,28 +78,43 @@ describe 'backups' do
       end
 
       describe 'manual backup' do
-        before do
-          instance_id = create_backup_for_service(service)
-
-          @s3_backup_file = s3_client.buckets[s3_backup_bucket].objects.
-            find_all {|object| object.key.include? "backup/#{Time.now.strftime("%Y/%m/%d")}"}.
-            find { |object| "dump.rdb" }
-        end
-
         after do
           @s3_backup_file.delete if @s3_backup_file
         end
 
-        it 'uploads data to S3 in RDB format' do
-          expect(@s3_backup_file.exists?).to eq(true)
-          expect(@s3_backup_file.content_length).not_to eq(0)
-          contents = @s3_backup_file.read
+        it 'uploads data to S3 in RDB format and removes local backup files' do
+          service_broker.provision_and_bind(service.name, service.plan) do |service_binding, service_instance|
+            vm_ip = service_binding.credentials[:host]
+            client = service_client_builder(service_binding)
 
-          # check RDB format
-          expect(contents).to match(/^REDIS/)
+            client.write(test_key, test_value)
+            client.run(redis_save_command)
 
-          # check not AOF format
-          expect(contents).to_not include('SELECT')
+            with_redis_under_stress(service_binding) do
+              result = ssh_gateway.execute_on(vm_ip, manual_backup_command)
+              expect(result.lines.join).to(match(/Upload backup completed without error/))
+            end
+
+            @s3_backup_file = s3_client.buckets[s3_backup_bucket].objects.
+              find_all {|object| object.key.include? "backup/#{Time.now.strftime("%Y/%m/%d")}"}.
+              find { |object| "dump.rdb" }
+
+            expect(@s3_backup_file.exists?).to eq(true)
+            expect(@s3_backup_file.content_length).not_to eq(0)
+            contents = @s3_backup_file.read
+
+            # check RDB format
+            expect(contents).to match(/^REDIS/)
+
+            # check not AOF format
+            expect(contents).to_not include('SELECT')
+
+            ls_result = ssh_gateway.execute_on(
+              vm_ip,
+              "ls #{destination_folder}"
+            )
+            expect(ls_result.lines.join).to_not match("dump.rdb")
+          end
         end
       end
 
@@ -164,28 +179,43 @@ describe 'backups' do
       end
 
       describe 'manual backup' do
-        before do
-          instance_id = create_backup_for_service(service)
-
-          @s3_backup_file = s3_client.buckets[s3_backup_bucket].objects.
-            find_all {|object| object.key.include? "backup/#{Time.now.strftime("%Y/%m/%d")}"}.
-            find { |object| "dump.rdb" }
-        end
-
         after do
           @s3_backup_file.delete if @s3_backup_file
         end
 
-        it 'uploads data to S3 in RDB format' do
-          expect(@s3_backup_file.exists?).to eq(true)
-          expect(@s3_backup_file.content_length).not_to eq(0)
-          contents = @s3_backup_file.read
+        it 'uploads data to S3 in RDB format and removes local backup files' do
+          service_broker.provision_and_bind(service.name, service.plan) do |service_binding, service_instance|
+            vm_ip = service_binding.credentials[:host]
+            client = service_client_builder(service_binding)
 
-          # check RDB format
-          expect(contents).to match(/^REDIS/)
+            client.write(test_key, test_value)
+            client.run(redis_save_command)
 
-          # check not AOF format
-          expect(contents).to_not include('SELECT')
+            with_redis_under_stress(service_binding) do
+              result = ssh_gateway.execute_on(vm_ip, manual_backup_command)
+              expect(result.lines.join).to(match(/Upload backup completed without error/))
+            end
+
+            @s3_backup_file = s3_client.buckets[s3_backup_bucket].objects.
+              find_all {|object| object.key.include? "backup/#{Time.now.strftime("%Y/%m/%d")}"}.
+              find { |object| "dump.rdb" }
+
+            expect(@s3_backup_file.exists?).to eq(true)
+            expect(@s3_backup_file.content_length).not_to eq(0)
+            contents = @s3_backup_file.read
+
+            # check RDB format
+            expect(contents).to match(/^REDIS/)
+
+            # check not AOF format
+            expect(contents).to_not include('SELECT')
+
+            ls_result = ssh_gateway.execute_on(
+              vm_ip,
+              "ls #{destination_folder}"
+            )
+            expect(ls_result.lines.join).to_not match("dump.rdb")
+          end
         end
       end
 
