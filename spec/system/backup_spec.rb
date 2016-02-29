@@ -26,7 +26,7 @@ describe 'backups' do
   let(:destination_folder) { bosh_manifest.property("service-backup.source_folder") }
 
   let(:manual_backup_command) do
-    "/var/vcap/packages/service-backup/bin/manual-backup s3 " +
+    "/var/vcap/packages/service-backup/bin/service-backup s3 " +
       "--backup-creator-cmd '#{manual_snapshot_command}' " +
       "--cleanup-cmd '#{manual_cleanup_command}' " +
       "--source-folder '#{destination_folder}' " +
