@@ -26,7 +26,8 @@ describe 'backups' do
   let(:destination_folder) { bosh_manifest.property("service-backup.source_folder") }
 
   let(:manual_backup_command) do
-    "/var/vcap/packages/service-backup/bin/service-backup s3 " +
+      "/var/vcap/packages/service-backup/bin/service-backup s3 " +
+      "--cron-schedule '* * * * *' " +
       "--backup-creator-cmd '#{manual_snapshot_command}' " +
       "--cleanup-cmd '#{manual_cleanup_command}' " +
       "--source-folder '#{destination_folder}' " +
@@ -92,7 +93,9 @@ describe 'backups' do
 
             with_redis_under_stress(service_binding) do
               result = ssh_gateway.execute_on(vm_ip, manual_backup_command)
-              expect(result.lines.join).to(match(/Upload backup completed without error/))
+              # Wait 2 minutes for cron to perform backup
+              sleep(120)
+              # expect(result.lines.join).to(match(/Upload backup completed without error/))
             end
 
             @s3_backup_file = s3_client.buckets[s3_backup_bucket].objects.
@@ -193,7 +196,9 @@ describe 'backups' do
 
             with_redis_under_stress(service_binding) do
               result = ssh_gateway.execute_on(vm_ip, manual_backup_command)
-              expect(result.lines.join).to(match(/Upload backup completed without error/))
+              # Wait 2 minutes for cron to perform backup
+              sleep(120)
+              # expect(result.lines.join).to(match(/Upload backup completed without error/))
             end
 
             @s3_backup_file = s3_client.buckets[s3_backup_bucket].objects.
@@ -243,23 +248,6 @@ describe 'backups' do
           end
         end
       end
-    end
-  end
-
-  def create_backup_for_service(service)
-    service_broker.provision_and_bind(service.name, service.plan) do |service_binding, service_instance|
-      vm_ip = service_binding.credentials[:host]
-      client = service_client_builder(service_binding)
-
-      client.write(test_key, test_value)
-      client.run(redis_save_command)
-
-      with_redis_under_stress(service_binding) do
-        result = ssh_gateway.execute_on(vm_ip, manual_backup_command)
-        expect(result.lines.join).to(match(/Upload backup completed without error/))
-      end
-
-      return service_instance.id
     end
   end
 
