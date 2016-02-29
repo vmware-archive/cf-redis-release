@@ -9,7 +9,9 @@ gem 'process_helper'
 group :test do
   gem 'rspec', '~> 3.1.0'
   gem 'pry'
+  gem 'pry-byebug'
   gem 'rspec-shell-expectations'
+  gem 'rspec-instafail'
 
   gem 'hula'
   gem 'prof'
