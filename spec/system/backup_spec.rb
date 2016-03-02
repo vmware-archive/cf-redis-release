@@ -1,146 +1,50 @@
 require 'system_spec_helper'
 
-require 'aws-sdk'
-
-require 'prof/marketplace_service'
-
 describe 'backups' do
+  let(:source_folder) { bosh_manifest.property("service-backup.source_folder") }
+  let(:service_name) { bosh_manifest.property('redis.broker.service_name') }
 
-  let(:redis_config_command) { bosh_manifest.property("redis.config_command") }
-  let(:broker_vm_ip) { bosh_director.ips_for_job('cf-redis-broker', bosh_manifest.deployment_name).first }
-  let(:aws_access_key_id) { bosh_manifest.property("service-backup.destination.s3.access_key_id") }
-  let(:aws_secret_access_key) { bosh_manifest.property("service-backup.destination.s3.secret_access_key") }
-
-  let(:s3_client) {
-    AWS::S3.new(
-      access_key_id: aws_access_key_id,
-      secret_access_key: aws_secret_access_key
-    )
-  }
-  let(:s3_backup_bucket) { bosh_manifest.property("service-backup.destination.s3.bucket_name") }
-  let(:s3_backup_path) { bosh_manifest.property("service-backup.destination.s3.bucket_path") }
-
-  let(:test_key) { "test_key" }
-  let(:test_value) { "test_value" }
-
-  let(:destination_folder) { bosh_manifest.property("service-backup.source_folder") }
-
-  let(:manual_backup_command) do
-      "/var/vcap/packages/service-backup/bin/service-backup s3 " +
-      "--cron-schedule '* * * * *' " +
-      "--backup-creator-cmd '#{manual_snapshot_command}' " +
-      "--cleanup-cmd '#{manual_cleanup_command}' " +
-      "--source-folder '#{destination_folder}' " +
-      "--dest-path '#{s3_backup_path}' " +
-      "--aws-access-key-id '#{aws_access_key_id}' " +
-      "--aws-secret-access-key '#{aws_secret_access_key}' " +
-      "--aws-cli-path /var/vcap/packages/aws-cli/bin/aws " +
-      "--dest-bucket '#{s3_backup_bucket}' " +
-      "--endpoint-url 'https://s3.amazonaws.com/' "
-  end
   let(:manual_snapshot_command) do
-    '/var/vcap/packages/redis-backups/bin/snapshot ' +
-      '-config /var/vcap/jobs/redis-backups/config/backup-config.yml'
+    '/var/vcap/packages/redis-backups/bin/snapshot -config /var/vcap/jobs/redis-backups/config/backup-config.yml'
   end
+
   let(:manual_cleanup_command) do
-    '/var/vcap/packages/redis-backups/bin/cleanup ' +
-      '-config /var/vcap/jobs/redis-backups/config/backup-config.yml'
+    '/var/vcap/packages/redis-backups/bin/cleanup -config /var/vcap/jobs/redis-backups/config/backup-config.yml'
   end
 
   context "shared vm plan" do
     let(:redis_save_command) { bosh_manifest.property("redis.save_command") }
+    let(:service_plan) { 'shared-vm' }
 
     describe 'service backups', :skip_service_backups => true do
-      let(:service) {
-        Prof::MarketplaceService.new(
-          name: bosh_manifest.property('redis.broker.service_name'),
-          plan: 'shared-vm'
-        )
-      }
-
       describe 'manual snapshot', :skip_service_backups => true do
         it 'creates a dump.rdb file' do
-          service_broker.provision_and_bind(service.name, service.plan) do |service_binding, service_instance|
-            vm_ip = service_binding.credentials[:host]
-            result = ssh_gateway.execute_on(
-              vm_ip,
-              manual_snapshot_command
-            )
+          with_remote_execution(service_name, service_plan) do |vm_execute|
+            result = vm_execute.call(manual_snapshot_command)
             expect(result.lines.join).to(match('"event":"done","task":"create-snapshot"'), 'done event not found')
 
-            ls_output = ssh_gateway.execute_on(
-              vm_ip, "ls -l #{destination_folder}dump.rdb"
-            )
-            expect(ls_output.lines.size).to(eql(1))
-            expect(ls_output.lines.first).to_not(match('No such file or directory'))
-            expect(ls_output.lines.first).to(match("#{destination_folder}dump.rdb"))
+            ls_output = vm_execute.call("ls -l #{source_folder}dump.rdb")
+            expect(ls_output.lines.size).to eql(1)
+            expect(ls_output.lines.first).to_not match('No such file or directory')
+            expect(ls_output.lines.first).to match("#{source_folder}dump.rdb")
           end
         end
       end
 
-      describe 'manual backup' do
-        after do
-          @s3_backup_file.delete if @s3_backup_file
-        end
-
-        it 'uploads data to S3 in RDB format and removes local backup files' do
-          service_broker.provision_and_bind(service.name, service.plan) do |service_binding, service_instance|
-            vm_ip = service_binding.credentials[:host]
-            client = service_client_builder(service_binding)
-
-            client.write(test_key, test_value)
-            client.run(redis_save_command)
-
-            with_redis_under_stress(service_binding) do
-              result = ssh_gateway.execute_on(vm_ip, manual_backup_command)
-              # Wait 2 minutes for cron to perform backup
-              sleep(120)
-              # expect(result.lines.join).to(match(/Upload backup completed without error/))
-            end
-
-            @s3_backup_file = s3_client.buckets[s3_backup_bucket].objects.
-              find_all {|object| object.key.include? "backup/#{Time.now.strftime("%Y/%m/%d")}"}.
-              find { |object| "dump.rdb" }
-
-            expect(@s3_backup_file.exists?).to eq(true)
-            expect(@s3_backup_file.content_length).not_to eq(0)
-            contents = @s3_backup_file.read
-
-            # check RDB format
-            expect(contents).to match(/^REDIS/)
-
-            # check not AOF format
-            expect(contents).to_not include('SELECT')
-
-            ls_result = ssh_gateway.execute_on(
-              vm_ip,
-              "ls #{destination_folder}"
-            )
-            expect(ls_result.lines.join).to_not match("dump.rdb")
-          end
-        end
+      it 'is configured correctly' do
+        assert_scheduled_backup_config
       end
 
       describe 'manual cleanup' do
         it 'deletes the dump.rdb file' do
-          service_broker.provision_and_bind(service.name, service.plan) do |service_binding, service_instance|
-            vm_ip = service_binding.credentials[:host]
-            result = ssh_gateway.execute_on(
-              vm_ip,
-              "touch #{destination_folder}/dump.rdb; ls #{destination_folder}"
-            )
+          with_remote_execution(service_name, service_plan) do |vm_execute|
+            result = vm_execute.call("touch #{source_folder}/dump.rdb; ls #{source_folder}")
             expect(result.lines.join).to match("dump.rdb")
 
-            cleanup_result = ssh_gateway.execute_on(
-              vm_ip,
-              manual_cleanup_command
-            )
+            cleanup_result = vm_execute.call(manual_cleanup_command)
             expect(cleanup_result.lines.join).to match('"event":"done","task":"perform-cleanup"')
 
-            ls_result = ssh_gateway.execute_on(
-              vm_ip,
-              "ls #{destination_folder}"
-            )
+            ls_result = vm_execute.call("ls #{source_folder}")
             expect(ls_result.lines.join).to_not match("dump.rdb")
           end
         end
@@ -150,104 +54,74 @@ describe 'backups' do
 
   context "dedicated vm plan" do
     let(:redis_save_command) { "BGSAVE" }
+    let(:service_plan) { 'dedicated-vm' }
 
     describe 'service backups', :skip_service_backups => true do
-      let(:service) {
-        Prof::MarketplaceService.new(
-          name: bosh_manifest.property('redis.broker.service_name'),
-          plan: 'dedicated-vm'
-        )
-      }
-
-      describe 'manual snapshot' do
-        let(:destination_folder) { bosh_manifest.property("service-backup.source_folder") }
-
-        it 'creates a dump.rdb file' do
-          service_broker.provision_and_bind(service.name, service.plan) do |service_binding, service_instance|
-            vm_ip = service_binding.credentials[:host]
-            result = ssh_gateway.execute_on(
-              vm_ip,
-              manual_snapshot_command
-            )
-            expect(result.lines.join).to(match('"event":"done","task":"create-snapshot"'), 'done event not found')
-
-            ls_output = ssh_gateway.execute_on(
-              vm_ip, "ls -l #{destination_folder}dump.rdb"
-            )
-            expect(ls_output.lines.size).to(eql(1))
-            expect(ls_output.lines.first).to_not(match('No such file or directory'))
-            expect(ls_output.lines.first).to(match("#{destination_folder}dump.rdb"))
-          end
-        end
+      it 'is configured correctly' do
+        assert_scheduled_backup_config
       end
 
-      describe 'manual backup' do
-        after do
-          @s3_backup_file.delete if @s3_backup_file
-        end
+      describe 'manual snapshot' do
+        it 'creates a dump.rdb file' do
+          with_remote_execution(service_name, service_plan) do |vm_execute|
+            result = vm_execute.call(manual_snapshot_command)
+            expect(result.lines.join).to(match('"event":"done","task":"create-snapshot"'), 'done event not found')
 
-        it 'uploads data to S3 in RDB format and removes local backup files' do
-          service_broker.provision_and_bind(service.name, service.plan) do |service_binding, service_instance|
-            vm_ip = service_binding.credentials[:host]
-            client = service_client_builder(service_binding)
-
-            client.write(test_key, test_value)
-            client.run(redis_save_command)
-
-            with_redis_under_stress(service_binding) do
-              result = ssh_gateway.execute_on(vm_ip, manual_backup_command)
-              # Wait 2 minutes for cron to perform backup
-              sleep(120)
-              # expect(result.lines.join).to(match(/Upload backup completed without error/))
-            end
-
-            @s3_backup_file = s3_client.buckets[s3_backup_bucket].objects.
-              find_all {|object| object.key.include? "backup/#{Time.now.strftime("%Y/%m/%d")}"}.
-              find { |object| "dump.rdb" }
-
-            expect(@s3_backup_file.exists?).to eq(true)
-            expect(@s3_backup_file.content_length).not_to eq(0)
-            contents = @s3_backup_file.read
-
-            # check RDB format
-            expect(contents).to match(/^REDIS/)
-
-            # check not AOF format
-            expect(contents).to_not include('SELECT')
-
-            ls_result = ssh_gateway.execute_on(
-              vm_ip,
-              "ls #{destination_folder}"
-            )
-            expect(ls_result.lines.join).to_not match("dump.rdb")
+            ls_output = vm_execute.call("ls -l #{source_folder}dump.rdb")
+            expect(ls_output.lines.size).to(eql(1))
+            expect(ls_output.lines.first).to_not(match('No such file or directory'))
+            expect(ls_output.lines.first).to(match("#{source_folder}dump.rdb"))
           end
         end
       end
 
       describe 'manual cleanup' do
         it 'deletes the dump.rdb file' do
-          service_broker.provision_and_bind(service.name, service.plan) do |service_binding, service_instance|
-            vm_ip = service_binding.credentials[:host]
-            result = ssh_gateway.execute_on(
-              vm_ip,
-              "touch #{destination_folder}/dump.rdb; ls #{destination_folder}"
-            )
+          with_remote_execution(service_name, service_plan) do |vm_execute|
+            result = vm_execute.call("touch #{source_folder}/dump.rdb; ls #{source_folder}")
             expect(result.lines.join).to match("dump.rdb")
 
-            cleanup_result = ssh_gateway.execute_on(
-              vm_ip,
-              manual_cleanup_command
-            )
+            cleanup_result = vm_execute.call(manual_cleanup_command)
             expect(cleanup_result.lines.join).to match('"event":"done","task":"perform-cleanup"')
 
-            ls_result = ssh_gateway.execute_on(
-              vm_ip,
-              "ls #{destination_folder}"
-            )
+            ls_result = vm_execute.call("ls #{source_folder}")
             expect(ls_result.lines.join).to_not match("dump.rdb")
           end
         end
       end
+    end
+  end
+
+  def assert_scheduled_backup_config
+    s3_backup_bucket = bosh_manifest.property("service-backup.destination.s3.bucket_name")
+    s3_backup_path = bosh_manifest.property("service-backup.destination.s3.bucket_path")
+    aws_access_key_id = bosh_manifest.property("service-backup.destination.s3.access_key_id")
+    aws_secret_access_key = bosh_manifest.property("service-backup.destination.s3.secret_access_key")
+
+    with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
+      with_redis_under_stress(service_binding) do
+        cmd = vm_execute.call('ps aux | grep service-backup | grep -v grep')
+          .split(' ').drop(10).join(' ').split('--')
+          .map{|line| line.strip.partition(' ')}
+          .each_with_object({}) {|e, hash| hash[e[0]] = e[-1]}
+
+        expect(cmd['/var/vcap/packages/service-backup/bin/service-backup']).to eq('s3')
+        expect(cmd['source-folder']).to eq(source_folder)
+        expect(cmd['backup-creator-cmd']).to eq(manual_snapshot_command)
+        expect(cmd['cron-schedule']).to eq('0 0 * * *')
+        expect(cmd['dest-path']).to eq(s3_backup_path)
+        expect(cmd['dest-bucket']).to eq(s3_backup_bucket)
+        expect(cmd['aws-access-key-id']).to eq(aws_access_key_id)
+        expect(cmd['aws-secret-access-key']).to eq(aws_secret_access_key)
+        expect(cmd['cleanup-cmd']).to eq(manual_cleanup_command)
+      end
+    end
+  end
+
+  def with_remote_execution(service_name, service_plan, &block)
+    service_broker.provision_and_bind(service_name, service_plan) do |service_binding|
+      vm_execute = Proc.new {|command| ssh_gateway.execute_on(service_binding.credentials[:host], command)}
+      block.call(vm_execute, service_binding)
     end
   end
 
@@ -282,7 +156,6 @@ describe 'backups' do
 
     with_repeated_action(service_binding, action) { yield }
 
-    client = service_client_builder(service_binding)
-    puts "Wrote #{client.info('used_memory_human')} of data to Redis"
+    service_client_builder(service_binding)
   end
 end
