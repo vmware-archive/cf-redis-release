@@ -10,15 +10,23 @@ the required submodules and install gems required to run the tests.
 
 ## Deploying
 
+Modify the sample stubs in `templates/sample_stubs` to suit your deployment environment.
+
+Run the `scripts/generate-deployment-manifest` script to generate a deployment manifest. Change the <INFRA> to `aws`, `vsphere` or `warden`.
+
+```
+./scripts/generate-deployment-manifest templates/sample_stubs/infrastructure-<INFRA>.yml templates/sample_stubs/meta.yml > manifests/cf-redis-custom.yml
+```
+
 Run the `scripts/deploy-release` script. Examples as follows:
 
 ```
 # Deploying locally to BOSH lite
-export BOSH_MANIFEST=manifests/cf-redis-lite.yml
+export BOSH_MANIFEST=manifests/cf-redis-custom.yml
 ./scripts/deploy-release lite
 
 # Deploying to a different BOSH director
-export BOSH_MANIFEST=manifests/cf-custom-redis.yml
+export BOSH_MANIFEST=manifests/cf-redis-custom.yml
 ./scripts/deploy-release my-bosh-alias
 ```
 
