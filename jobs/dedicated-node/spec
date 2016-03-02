@@ -14,8 +14,6 @@ templates:
   redis-agent.key.erb: config/ssl/redis-agent.key
   drain-redis.sh: bin/drain
 
-  backup.yml.erb: config/backup-config.yml
-
 packages:
 - redis
 - redis-common
@@ -24,6 +22,7 @@ packages:
 - python
 
 properties:
+
   redis.client_timeout:
     default: 0
     description: Close the connection after a client is idle for N seconds (0 to disable)
