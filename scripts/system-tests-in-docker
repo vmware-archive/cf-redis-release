@@ -1,0 +1,44 @@
+#!/bin/bash
+
+set -ex
+
+bosh_manifest_warning() {
+  echo "Must set BOSH_MANIFEST environment variable"
+
+  exit 1
+}
+[ -z "$BOSH_MANIFEST" ] && bosh_manifest_warning;
+
+bosh_template_warning() {
+  echo "
+  Your BOSH manifest has a templated variable instead of a static BOSH Director
+  UUID in it. This will not work due to an issue with how these tests run in
+  Docker. Please hard code the correct BOSH Director UUID into this file before
+  continuing."
+
+  exit 2
+}
+grep -q "status --uuid" "$BOSH_MANIFEST" && bosh_template_warning;
+
+if [ -z "$DOCKER_IMAGE" ]; then
+  DOCKER_IMAGE=cflondonservices/london-services-ci-base
+fi
+
+abs_path=$(cd "${BOSH_MANIFEST%/*}"; echo "$PWD/${BOSH_MANIFEST##*/}")
+
+manifest_dir=$(dirname "$abs_path")
+manifest_file=$(basename "$abs_path")
+
+docker_manifest_dir="/tmp/manifest"
+docker_dir=/home/vcap/pivotal-product
+
+pushd "$(dirname "$0")/.."
+docker run \
+  -e "BOSH_MANIFEST=$docker_manifest_dir/$manifest_file" \
+  --rm -it --volume "$PWD":"$docker_dir" \
+  --volume "$manifest_dir":"$docker_manifest_dir" \
+  --workdir "$docker_dir" \
+  "$DOCKER_IMAGE" \
+  bash -c "./scripts/system-tests"
+popd
+

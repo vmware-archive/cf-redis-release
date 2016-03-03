@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -e
+
+log() {
+  local _message=$1
+  echo -e "$_message"
+}
+
+check_args() {
+  if [ -z "$BOSH_MANIFEST" ]
+  then
+    log "Please set the BOSH_MANIFEST environment variable to the path to your manifest file"
+    log "E.G. export BOSH_MANIFEST=/home/example/cf-redis-release/manifests/bosh-lite.yml"
+    exit 1
+  fi
+}
+
+check_args
+
+bundle install && bundle exec rake spec

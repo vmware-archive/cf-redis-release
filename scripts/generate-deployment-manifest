@@ -1,0 +1,27 @@
+#!/bin/sh -e
+
+_usage() {
+  >&2 echo "usage: ${0} [infrastructure_stub.yml] [meta_stub.yml]"
+}
+
+BASE_DIR=$(cd $(dirname $0)/..; echo "$PWD")
+
+templates=$BASE_DIR/templates
+
+which spiff > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo "Please install spiff (https://github.com/cloudfoundry-incubator/spiff#installation)"
+  echo "before running this script"
+  exit 1
+fi
+
+if [ $# -lt 1 ]; then
+  _usage
+  exit 1
+fi
+
+spiff merge \
+  "$templates/stubs/cf-redis-deployment.yml" \
+  "$templates/stubs/cf-redis-jobs.yml" \
+  "$templates/stubs/cf-redis-infrastructure.yml" \
+  "$@"
