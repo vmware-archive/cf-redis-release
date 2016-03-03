@@ -4,7 +4,7 @@ describe 'metrics', :skip_metrics => true do
 
   before(:all) do
     @number_of_nodes = bosh_manifest.job('dedicated-node').static_ips.count
-    @outFile = Tempfile.new('smetrics')
+    @outFile = Tempfile.new('smetrics', encoding: 'utf-8')
     @pid = spawn(
       {
         "DOPPLER_ADDR" => doppler_address,
