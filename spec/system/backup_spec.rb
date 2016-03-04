@@ -55,35 +55,54 @@ describe 'backups' do
         end
       end
 
-      it 'uploads data to S3 in RDB format and removes local backup files' do
-        with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
-          client = service_client_builder(service_binding)
-          client.write('foo', 'bar')
-          client.run(redis_save_command)
-
-          with_redis_under_stress(service_binding) do
-            result = vm_execute.call(manual_backup_command).lines.join
-            expect(result).to match(/Perform backup completed without error/)
-            expect(result).to match(/Upload backup completed without error/)
-            expect(result).to match(/Cleanup completed without error/)
-          end
-
-          s3_client = AWS::S3.new(
+      describe 'end to end' do
+        let(:s3_client) do
+          AWS::S3.new(
             access_key_id: aws_access_key_id,
             secret_access_key: aws_secret_access_key
           )
-          s3_backup_file = s3_client.buckets[s3_backup_bucket].objects.
+        end
+
+        def find_s3_backup_file
+          s3_client.buckets[s3_backup_bucket].objects.
             find_all {|object| object.key.include? "backup/#{Time.now.strftime("%Y/%m/%d")}"}.
             find { |object| "dump.rdb" }
-          expect(s3_backup_file.exists?).to eq(true)
-          expect(s3_backup_file.content_length).not_to eq(0)
+        end
 
-          contents = s3_backup_file.read
-          expect(contents).to match(/^REDIS/)       # check RDB format
-          expect(contents).to_not include('SELECT') # check not AOF format
+        before do
+          s3_backup_file = find_s3_backup_file
+          s3_backup_file.delete if s3_backup_file
+        end
 
-          ls_result = vm_execute.call("ls #{source_folder}")
-          expect(ls_result.lines.size).to eq(0)
+        after do
+          s3_backup_file = find_s3_backup_file
+          s3_backup_file.delete if s3_backup_file
+        end
+
+        it 'uploads data to S3 in RDB format and removes local backup files' do
+          with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
+            client = service_client_builder(service_binding)
+            client.write('foo', 'bar')
+
+            with_redis_under_stress(service_binding) do
+              result = vm_execute.call(manual_backup_command).lines.join
+              expect(result).to match(/Perform backup completed without error/)
+              expect(result).to match(/Upload backup completed without error/)
+              expect(result).to match(/Cleanup completed without error/)
+            end
+
+            s3_backup_file = find_s3_backup_file
+            expect(s3_backup_file).not_to eq(nil)
+            expect(s3_backup_file.exists?).to eq(true)
+            expect(s3_backup_file.content_length).not_to eq(0)
+
+            contents = s3_backup_file.read
+            expect(contents).to match(/^REDIS/)       # check RDB format
+            expect(contents).to_not include('SELECT') # check not AOF format
+
+            ls_result = vm_execute.call("ls #{source_folder}")
+            expect(ls_result.lines.size).to eq(0)
+          end
         end
       end
 
@@ -118,16 +137,12 @@ describe 'backups' do
   end
 
   context "shared vm plan" do
-    let(:redis_save_command) { bosh_manifest.property("redis.save_command") }
     let(:service_plan) { 'shared-vm' }
-
     it_behaves_like 'backups are enabled'
   end
 
   context "dedicated vm plan" do
-    let(:redis_save_command) { "BGSAVE" }
     let(:service_plan) { 'dedicated-vm' }
-
     it_behaves_like 'backups are enabled'
   end
 
