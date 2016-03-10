@@ -32,6 +32,8 @@ describe 'backups' do
     "--dest-bucket '#{s3_backup_bucket}'"
   end
 
+  let(:dump_file_pattern) { /dump-.*-\d{4}-\d{2}-\d{2}-\d{2}:\d{2}\.rdb/ }
+
   shared_examples "backups are enabled" do
     describe 'service backups', :skip_service_backups => true do
       it 'is configured correctly' do
@@ -65,18 +67,20 @@ describe 'backups' do
 
         def find_s3_backup_file
           s3_client.buckets[s3_backup_bucket].objects.
-            find_all {|object| object.key.include? "backup/#{Time.now.strftime("%Y/%m/%d")}"}.
-            find { |object| "dump.rdb" }
+            find_all { |object| object.key.include? "backup/#{Time.now.strftime("%Y/%m/%d")}" }.
+            find { |object| object.key =~ dump_file_pattern }
+        end
+
+        def clean_s3_bucket
+          s3_client.buckets[s3_backup_bucket].clear!
         end
 
         before do
-          s3_backup_file = find_s3_backup_file
-          s3_backup_file.delete if s3_backup_file
+          clean_s3_bucket
         end
 
         after do
-          s3_backup_file = find_s3_backup_file
-          s3_backup_file.delete if s3_backup_file
+          clean_s3_bucket
         end
 
         it 'uploads data to S3 in RDB format and removes local backup files' do
@@ -107,29 +111,30 @@ describe 'backups' do
       end
 
       describe 'manual snapshot' do
-        it 'creates a dump.rdb file' do
+        it 'creates an RDB dump file' do
           with_remote_execution(service_name, service_plan) do |vm_execute|
             result = vm_execute.call(manual_snapshot_command)
             expect(result.lines.join).to(match('"event":"done","task":"create-snapshot"'), 'done event not found')
 
-            ls_output = vm_execute.call("ls -l #{source_folder}dump.rdb")
+            ls_output = vm_execute.call("ls -l #{source_folder}dump-*.rdb")
             expect(ls_output.lines.size).to eql(1)
-            expect(ls_output.lines.first).to match("#{source_folder}dump.rdb")
+            expect(ls_output.lines.first).to match(/#{source_folder}#{dump_file_pattern}/)
           end
         end
       end
 
       describe 'manual cleanup' do
-        it 'deletes the dump.rdb file' do
+        it 'deletes the RDB dump file' do
           with_remote_execution(service_name, service_plan) do |vm_execute|
-            result = vm_execute.call("touch #{source_folder}/dump.rdb; ls #{source_folder}")
-            expect(result.lines.join).to match("dump.rdb")
+            filename = "dump-instance-2010-01-01-01:01.rdb"
+            result = vm_execute.call("touch #{source_folder}/#{filename}; ls #{source_folder}")
+            expect(result.lines.join).to match(filename)
 
             cleanup_result = vm_execute.call(manual_cleanup_command)
             expect(cleanup_result.lines.join).to match('"event":"done","task":"perform-cleanup"')
 
             ls_result = vm_execute.call("ls #{source_folder}")
-            expect(ls_result.lines.join).to_not match("dump.rdb")
+            expect(ls_result.lines.join).to_not match(filename)
           end
         end
       end
