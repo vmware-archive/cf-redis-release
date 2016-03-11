@@ -84,7 +84,7 @@ jobs:
   - name: redis_z1
     static_ips: (( merge || static_ips(0) ))
   persistent_disk: 4096
-  resource_pool: redis_z1
+  resource_pool: (( resource_pools[0].name ))
   templates: (( job_templates.cf_redis_broker additional_job_templates.cf_redis_broker ))
   <<: (( merge ))
 - instances: (( .meta.redis.dedicated_plan.instance_count ))
@@ -93,7 +93,7 @@ jobs:
   - name: redis_z1
     static_ips: (( merge || static_ips(1,2,3,4,5,6,7,8,9,10) ))
   persistent_disk: 4096
-  resource_pool: redis_z1
+  resource_pool: (( resource_pools[0].name ))
   templates: (( job_templates.dedicated_node additional_job_templates.dedicated_node ))
   <<: (( merge ))
 - instances: 1
@@ -107,7 +107,7 @@ jobs:
       host: (( .properties.redis.broker.route_name "." .meta.apps_domain ))
       username: (( .properties.redis.broker.auth.username ))
       password: (( .properties.redis.broker.auth.password ))
-  resource_pool: redis_z1
+  resource_pool: (( resource_pools[0].name ))
   templates: (( job_templates.broker_registrar additional_job_templates.broker_registrar ))
   <<: (( merge ))
 - instances: 1
@@ -121,7 +121,7 @@ jobs:
       host: (( .properties.redis.broker.route_name "." .meta.apps_domain ))
       username: (( .properties.redis.broker.auth.username ))
       password: (( .properties.redis.broker.auth.password ))
-  resource_pool: redis_z1
+  resource_pool: (( resource_pools[0].name ))
   templates: (( job_templates.broker_deregistrar additional_job_templates.broker_deregistrar ))
   <<: (( merge ))
 - instances: 1
@@ -129,6 +129,6 @@ jobs:
   name: smoke-tests
   networks:
   - name: redis_z1
-  resource_pool: redis_z1
+  resource_pool: (( resource_pools[0].name ))
   templates: (( job_templates.smoke_tests additional_job_templates.smoke_tests ))
   <<: (( merge ))
