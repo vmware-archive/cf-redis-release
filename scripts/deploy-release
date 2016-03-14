@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ex
+set -e
 
 BOSH_TARGET_ALIAS="lite"
 WORKSPACE_BASE_DIR="$HOME/workspace"
