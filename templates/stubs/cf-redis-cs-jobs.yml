@@ -28,6 +28,7 @@ closed_source:
           secret_access_key: replace-with-AWS-secret-access-key
       source_folder: "/var/vcap/store/redis-backup/"
       source_executable: "/var/vcap/packages/redis-backups/bin/snapshot -config /var/vcap/jobs/redis-backups/config/backup-config.yml"
+      cleanup_executable: "/var/vcap/packages/redis-backups/bin/cleanup -config /var/vcap/jobs/redis-backups/config/backup-config.yml"
       cron_schedule: 0 0 * * *
     service_metrics:
       origin: p-redis

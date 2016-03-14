@@ -1,6 +1,8 @@
 ---
 meta: ~
 
+resource_pools: ~
+
 # PROPERTIES
 properties:
   <<: (( merge ))
@@ -15,14 +17,14 @@ properties:
       enable_service_access: true
       service_name: (( .meta.service_name ))
       route_name: (( .meta.route_name ))
-      network: redis_z1
-      backend_host: (( jobs.cf-redis-broker.networks.redis_z1.static_ips.[0] ))
+      network: (( .networks.[0].name ))
+      backend_host: (( jobs.cf-redis-broker.networks.[0].static_ips.[0] ))
       backend_port: 12345
       name: redis
       service_instance_limit: (( .meta.redis.shared_plan.instance_limit ))
-      dedicated_nodes: (( jobs.dedicated-node.networks.redis_z1.static_ips ))
+      dedicated_nodes: (( jobs.dedicated-node.networks.[0].static_ips ))
     maxmemory: (( .meta.redis.shared_plan.max_memory ))
-    host: (( jobs.cf-redis-broker.networks.redis_z1.static_ips.[0] ))
+    host: (( jobs.cf-redis-broker.networks.[0].static_ips.[0] ))
     config_command: (( .meta.redis.config_command ))
     save_command: (( .meta.redis.save_command ))
     bg_save_command: (( .meta.redis.bg_save_command ))
@@ -39,7 +41,6 @@ base_releases:
 additional_releases: (( merge || [] ))
 
 releases: (( base_releases additional_releases ))
-
 
 # JOBS
 job_templates:
@@ -81,54 +82,54 @@ jobs:
 - instances: 1
   name: cf-redis-broker
   networks:
-  - name: redis_z1
+  - name: (( .networks.[0].name ))
     static_ips: (( merge || static_ips(0) ))
   persistent_disk: 4096
-  resource_pool: (( resource_pools[0].name ))
+  resource_pool: (( .resource_pools.[0].name ))
   templates: (( job_templates.cf_redis_broker additional_job_templates.cf_redis_broker ))
   <<: (( merge ))
 - instances: (( .meta.redis.dedicated_plan.instance_count ))
   name: dedicated-node
   networks:
-  - name: redis_z1
+  - name: (( .networks.[0].name ))
     static_ips: (( merge || static_ips(1,2,3,4,5,6,7,8,9,10) ))
   persistent_disk: 4096
-  resource_pool: (( resource_pools[0].name ))
+  resource_pool: (( .resource_pools.[0].name ))
   templates: (( job_templates.dedicated_node additional_job_templates.dedicated_node ))
   <<: (( merge ))
 - instances: 1
   lifecycle: errand
   name: broker-registrar
   networks:
-  - name: redis_z1
+  - name: (( .networks.[0].name ))
   properties:
     broker:
       name: (( .properties.redis.broker.name || "redis" ))
       host: (( .properties.redis.broker.route_name "." .meta.apps_domain ))
       username: (( .properties.redis.broker.auth.username ))
       password: (( .properties.redis.broker.auth.password ))
-  resource_pool: (( resource_pools[0].name ))
+  resource_pool: (( .resource_pools.[0].name ))
   templates: (( job_templates.broker_registrar additional_job_templates.broker_registrar ))
   <<: (( merge ))
 - instances: 1
   lifecycle: errand
   name: broker-deregistrar
   networks:
-  - name: redis_z1
+  - name: (( .networks.[0].name ))
   properties:
     broker:
       name: (( .properties.redis.broker.name || "redis" ))
       host: (( .properties.redis.broker.route_name "." .meta.apps_domain ))
       username: (( .properties.redis.broker.auth.username ))
       password: (( .properties.redis.broker.auth.password ))
-  resource_pool: (( resource_pools[0].name ))
+  resource_pool: (( .resource_pools.[0].name ))
   templates: (( job_templates.broker_deregistrar additional_job_templates.broker_deregistrar ))
   <<: (( merge ))
 - instances: 1
   lifecycle: errand
   name: smoke-tests
   networks:
-  - name: redis_z1
-  resource_pool: (( resource_pools[0].name ))
+  - name: (( .networks.[0].name ))
+  resource_pool: (( .resource_pools.[0].name ))
   templates: (( job_templates.smoke_tests additional_job_templates.smoke_tests ))
   <<: (( merge ))
