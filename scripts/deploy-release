@@ -29,6 +29,13 @@ bosh_run_errand() {
 }
 
 check_args() {
+  if [ -z $BOSH_MANIFEST ]
+  then
+    log "Please set the BOSH_MANIFEST environment variable to the path to your manifest file"
+    log "E.G. export BOSH_MANIFEST=/home/example/cf-redis-release/manifests/bosh-lite.yml"
+    exit 1
+  fi
+
   if [ "$#" -lt 1 ]
   then
     log "[WARN] no BOSH target specified - defaulting to lite"
@@ -90,17 +97,8 @@ upload_backups_releases() {
   fi
 }
 
-generate_manifest() {
-  TMPFILE=$(mktemp)
-  ./scripts/generate-deployment-manifest $@ > $TMPFILE
-  echo "$TMPFILE"
-}
-
 main() {
   check_args "$@"
-
-  shift
-  BOSH_MANIFEST=$(generate_manifest $@)
 
   bosh_target_and_set_deployment "$BOSH_TARGET_ALIAS" "$BOSH_MANIFEST"
 

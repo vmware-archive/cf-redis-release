@@ -1,7 +1,7 @@
 ---
 meta:
-  deployment_name: cf-redis
-  director_uuid: "<%= `bundle exec bosh status --uuid`.strip %>"
+  deployment_name: bosh-lite-redis
+  director_uuid: REPLACE_ME
   release_name: cf-redis
   apps_domain: bosh-lite.com
   environment: bosh-lite
