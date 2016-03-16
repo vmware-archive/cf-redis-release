@@ -156,6 +156,8 @@ properties:
   redis.broker.nginx.port:
     default: 80
     description: "Port for nginx"
+  redis.broker.host:
+    description: "Host (DNS) or IP address used by the broker and bound applications to reach the service"
 
   redis.broker.dedicated_nodes:
     description: List of node IPs for the dedicated plan
