@@ -19,7 +19,7 @@ packages:
 - redis-common
 - cf-redis-nginx
 - redis
-- route-registrar
+- cf-redis-route-registrar
 - python
 
 properties:

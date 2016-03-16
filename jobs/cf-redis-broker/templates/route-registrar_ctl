@@ -21,12 +21,12 @@ start)
   echo $$ > $PIDFILE
 
   # Copy the config file to right folder
-  cp /var/vcap/jobs/cf-redis-broker/config/registrar_settings.yml /var/vcap/packages/route-registrar/registrar_settings.yml
+  cp /var/vcap/jobs/cf-redis-broker/config/registrar_settings.yml /var/vcap/packages/cf-redis-route-registrar/registrar_settings.yml
 
   # registrar_settings.yml must be in pwd
-  cd /var/vcap/packages/route-registrar
+  cd /var/vcap/packages/cf-redis-route-registrar
 
-  exec chpst -u vcap:vcap /var/vcap/packages/route-registrar/bin/route-registrar \
+  exec chpst -u vcap:vcap /var/vcap/packages/cf-redis-route-registrar/bin/route-registrar \
     >>$LOG_DIR/route-registrar.stdout.log \
     2>>$LOG_DIR/route-registrar.stderr.log
 ;;
