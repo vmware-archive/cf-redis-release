@@ -17,7 +17,7 @@ templates:
 packages:
 - cf-redis-broker
 - redis-common
-- nginx
+- cf-redis-nginx
 - redis
 - route-registrar
 - python
@@ -153,6 +153,9 @@ properties:
   redis.broker.subdomain:
     default: redis-broker
     description: Subdomain for route registrar
+  redis.broker.nginx.port:
+    default: 80
+    description: "Port for nginx"
 
   redis.broker.dedicated_nodes:
     description: List of node IPs for the dedicated plan

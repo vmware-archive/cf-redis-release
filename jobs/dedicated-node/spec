@@ -17,7 +17,7 @@ templates:
 packages:
 - redis
 - redis-common
-- nginx
+- cf-redis-nginx
 - cf-redis-broker
 - python
 

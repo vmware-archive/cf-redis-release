@@ -18,9 +18,6 @@ properties:
     default: https
   broker.host:
     description: 'Host address of the service broker'
-  broker.port:
-    description: 'Port for the service broker'
-    default: 80
   broker.username:
     description: 'Basic Auth username for the service broker'
   broker.password:
