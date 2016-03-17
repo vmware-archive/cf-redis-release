@@ -13,9 +13,10 @@ BROKER_SERVICE_NAME='<%= p("redis.broker.service_name") %>'
 BROKER_URL='<%= p("broker.protocol") %>://<%= p("broker.host") %>'
 BROKER_USERNAME='<%= p("broker.username") %>'
 BROKER_PASSWORD='<%= p("broker.password") %>'
+SKIP_SSL_VALIDATION='<%= p("cf.skip_ssl_validation") ? "--skip-ssl-validation" : "" %>'
 
 cf --version
-cf api --skip-ssl-validation $CF_API_URL
+cf api $SKIP_SSL_VALIDATION $CF_API_URL
 cf auth $CF_ADMIN_USERNAME $CF_ADMIN_PASSWORD
 cf create-service-broker $BROKER_NAME $BROKER_USERNAME $BROKER_PASSWORD $BROKER_URL || cf update-service-broker $BROKER_NAME $BROKER_USERNAME $BROKER_PASSWORD $BROKER_URL
 <% if p("redis.broker.enable_service_access") %>
