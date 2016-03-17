@@ -75,7 +75,8 @@ properties:
     address: 127.0.0.1
     port: 1234
   cf:
-    api_url: http://api.bosh-lite.com
+    skip_ssl_validation: true
+    api_url: https://api.bosh-lite.com
     apps_domain: bosh-lite.com
     admin_username: admin
     admin_password: admin

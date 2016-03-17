@@ -11,6 +11,9 @@ properties:
     description: 'Username of the admin user'
   cf.admin_password:
     description: 'Password of the admin user'
+  cf.skip_ssl_validation:
+    description: 'Skip SSL certificate validation'
+    default: true
   broker.name:
     description: 'Name of the service broker'
   broker.protocol:
