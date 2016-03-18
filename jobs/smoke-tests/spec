@@ -16,6 +16,9 @@ properties:
     description: 'Username of the admin user'
   cf.admin_password:
     description: 'Password of the admin user'
+  cf.skip_ssl_validation:
+    description: 'Skip SSL certificate validation'
+    default: true
   redis.broker.service_name:
     description: Service name displayed in the catalog metadata
     default: p-redis
