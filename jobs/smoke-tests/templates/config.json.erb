@@ -12,6 +12,6 @@
     <% if shared_vm_plan_enabled %>"shared-vm"<% end %><% if shared_vm_plan_enabled && dedicated_vm_plan_enabled %>,<% end %>
     <% if dedicated_vm_plan_enabled %>"dedicated-vm"<% end %>
   ],
-  "skip_ssl_validation": true,
+  "skip_ssl_validation": <%= p("cf.skip_ssl_validation") %>,
   "create_permissive_security_group": true
 }
