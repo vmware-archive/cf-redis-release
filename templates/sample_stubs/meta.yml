@@ -1,0 +1,37 @@
+---
+meta:
+  deployment_name: bosh-lite-redis
+  director_uuid: REPLACE_ME
+  release_name: cf-redis
+  apps_domain: bosh-lite.com
+  environment: bosh-lite
+  external_domain: bosh-lite.com
+  syslog_aggregator:
+    address: 127.0.0.1
+    port: 1234
+  broker:
+    name: redis
+    username: admin
+    password: admin
+    host: (( "redis-broker" "." .meta.external_domain ))
+  cf:
+    admin_username: admin
+    admin_password: admin
+    api_url: https://api.bosh-lite.com
+    apps_domain: (( .meta.apps_domain ))
+    nats:
+      host: 10.244.0.6
+      password: nats
+      port: 4222
+      username: nats
+  service_name: redis
+  route_name: redis-broker
+  redis:
+    dedicated_plan:
+      instance_count: 1
+    shared_plan:
+      instance_limit: 5
+      max_memory: 262144000
+    config_command: configalias
+    save_command: anotherrandomstring
+    bg_save_command: yetanotherrandomstring
