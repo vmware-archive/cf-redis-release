@@ -1,2 +1,4 @@
 --color
 --format documentation
+--require rspec/instafail
+--format RSpec::Instafail

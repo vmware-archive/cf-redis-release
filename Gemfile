@@ -8,6 +8,7 @@ gem 'rake'
 group :test do
   gem 'rspec', '~> 3.1.0'
   gem 'pry'
+  gem 'rspec-instafail'
 
   gem 'hula'
   gem 'prof'
