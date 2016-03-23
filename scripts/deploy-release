@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 BOSH_TARGET_ALIAS="lite"
 WORKSPACE_BASE_DIR="$HOME/workspace"
@@ -31,9 +31,8 @@ bosh_run_errand() {
 check_args() {
   if [ -z $BOSH_MANIFEST ]
   then
-    log "Please set the BOSH_MANIFEST environment variable to the path to your manifest file"
-    log "E.G. export BOSH_MANIFEST=/home/example/cf-redis-release/manifests/bosh-lite.yml"
-    exit 1
+    export BOSH_MANIFEST=$(mktemp)
+    $PWD/$GENERATE_MANIFEST_SCRIPT > $BOSH_MANIFEST`
   fi
 
   if [ "$#" -lt 1 ]
