@@ -94,6 +94,10 @@ jobs:
   - name: redis_z1
     static_ips: (( merge || static_ips(5) ))
   persistent_disk: 4096
+  properties:
+    redis:
+      broker:
+        subdomain: redis-broker-v346
   resource_pool: (( .resource_pools.[0].name ))
   templates: (( job_templates.cf_redis_broker additional_job_templates.cf_redis_broker ))
   <<: (( merge ))
