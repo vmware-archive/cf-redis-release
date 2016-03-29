@@ -45,7 +45,10 @@ module ExcludeHelper
   end
 
   def self.run_backup_spec?
-    manifest.fetch('properties.redis.broker').has_key?('backups')
+    manifest
+      .fetch('properties')
+      .fetch('redis')
+      .fetch('broker').has_key?('backups')
   end
 
   def self.warnings
