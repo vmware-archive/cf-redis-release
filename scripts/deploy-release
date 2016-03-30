@@ -29,10 +29,9 @@ bosh_run_errand() {
 }
 
 generate_manifest() {
-  "$PWD"/scripts/generate-deployment-manifest \
+  "$PWD"/scripts/generate-deployment-manifest warden \
   ~/workspace/london-ci-tools/manifests/redis/develop/ci-spiff/cf-redis-cs-jobs.yml \
-  ~/workspace/london-ci-tools/manifests/redis/develop/ci-spiff/infrastructure-warden.yml \
-  ~/workspace/london-ci-tools/manifests/redis/develop/ci-spiff/meta-warden.yml > "$BOSH_MANIFEST"
+  ~/workspace/london-ci-tools/manifests/redis/develop/ci-spiff > "$BOSH_MANIFEST"
 }
 
 check_args() {
