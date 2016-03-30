@@ -5,7 +5,7 @@ BASE_DIR=$(cd $(dirname $0)/..; echo "$PWD")
 templates=$BASE_DIR/templates
 
 infrastructure=$1
-additional_properties="${2:-''}"
+additional_properties=$2
 
 if [ ! -z $3 ]; then
   stubs_dir=$3
@@ -31,6 +31,6 @@ spiff merge \
  "$templates/stubs/cf-redis-deployment.yml" \
  "$templates/stubs/cf-redis-jobs.yml" \
  "$templates/stubs/cf-redis-infrastructure.yml" \
- "$additional_properties" \
+ $additional_properties \
  "$stubs_dir/infrastructure-$infrastructure.yml" \
  "$stubs_dir/meta-$infrastructure.yml"
