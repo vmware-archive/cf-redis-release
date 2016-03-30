@@ -28,11 +28,18 @@ bosh_run_errand() {
   bosh -n run errand "$_errand_name"
 }
 
+generate_manifest() {
+  "$PWD"/scripts/generate-deployment-manifest \
+  ~/workspace/london-ci-tools/manifests/redis/v346/ci-spiff/cf-redis-cs-jobs.yml \
+  ~/workspace/london-ci-tools/manifests/redis/v346/ci-spiff/infrastructure-warden.yml \
+  ~/workspace/london-ci-tools/manifests/redis/v346/ci-spiff/meta-warden.yml > "$BOSH_MANIFEST"
+}
+
 check_args() {
   if [ -z $BOSH_MANIFEST ]
   then
-    export BOSH_MANIFEST=$(mktemp)
-    $PWD/$GENERATE_MANIFEST_SCRIPT > $BOSH_MANIFEST`
+    export BOSH_MANIFEST=/tmp/redis-v346.yml
+    generate_manifest
   fi
 
   if [ "$#" -lt 1 ]
@@ -63,46 +70,11 @@ upload_release() {
   popd
 }
 
-upload_metrics_releases() {
-  local _bosh_deployment_manifest_path=$1
-  local _exit_code=0
-
-  set +e
-  grep "redis-metrics" "$_bosh_deployment_manifest_path" > /dev/null 2>&1
-  _exit_code=$?
-  set -e
-
-  if [ $_exit_code -eq 0 ]
-  then
-    upload_release "${WORKSPACE_BASE_DIR}/redis-metrics-release" "redis-metrics"
-    upload_release "${WORKSPACE_BASE_DIR}/service-metrics-release" "service-metrics"
-    upload_release "${WORKSPACE_BASE_DIR}/loggregator" "loggregator"
-  fi
-}
-
-upload_backups_releases() {
-  local _bosh_deployment_manifest_path=$1
-  local _exit_code=0
-
-  set +e
-  grep "redis-backups" "$_bosh_deployment_manifest_path" > /dev/null 2>&1
-  _exit_code=$?
-  set -e
-
-  if [ $_exit_code -eq 0 ]
-  then
-    upload_release "${WORKSPACE_BASE_DIR}/redis-backups-release" "redis-backups"
-    upload_release "${WORKSPACE_BASE_DIR}/service-backup-release" "service-backup"
-  fi
-}
-
 main() {
   check_args "$@"
 
   bosh_target_and_set_deployment "$BOSH_TARGET_ALIAS" "$BOSH_MANIFEST"
 
-  upload_metrics_releases "$BOSH_MANIFEST"
-  upload_backups_releases "$BOSH_MANIFEST"
   upload_release "${WORKSPACE_BASE_DIR}/cf-redis-release" "cf-redis"
 
   bosh_deploy
