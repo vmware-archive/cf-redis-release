@@ -28,11 +28,18 @@ bosh_run_errand() {
   bosh -n run errand "$_errand_name"
 }
 
+generate_manifest() {
+  "$PWD"/scripts/generate-deployment-manifest \
+  ~/workspace/london-ci-tools/manifests/redis/develop/ci-spiff/cf-redis-cs-jobs.yml \
+  ~/workspace/london-ci-tools/manifests/redis/develop/ci-spiff/infrastructure-warden.yml \
+  ~/workspace/london-ci-tools/manifests/redis/develop/ci-spiff/meta-warden.yml > "$BOSH_MANIFEST"
+}
+
 check_args() {
   if [ -z $BOSH_MANIFEST ]
   then
-    export BOSH_MANIFEST=$(mktemp)
-    $PWD/$GENERATE_MANIFEST_SCRIPT > $BOSH_MANIFEST
+    export BOSH_MANIFEST=/tmp/redis-lite.yml
+    generate_manifest
   fi
 
   if [ "$#" -lt 1 ]
