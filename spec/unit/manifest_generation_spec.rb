@@ -11,15 +11,13 @@ describe 'manifest generator' do
   context 'with no arguments' do
     it 'should exit with a non-zero status' do
       stdout, stderr, status = stubbed_env.execute("scripts/generate-deployment-manifest")
-
-      expect(stderr).to include("usage:")
+      expect(stdout).to include("usage:")
       expect(status.exitstatus).to eq(1)
     end
   end
 
   context 'with a bosh-lite' do
-    let(:stub) { 'templates/sample_stubs/meta.yml' }
-    let(:infrastructure) { 'templates/sample_stubs/infrastructure-warden.yml templates/sample_stubs/meta.yml' }
+    let(:infrastructure) { 'warden' }
     let(:example_manifest) { Tempfile.new("example-manifest.yml") }
     let(:custom_jobs_file) { Tempfile.new("custom-jobs.yml") }
     let(:actual_yaml) { YAML.load(File.read(example_manifest.path)) }
