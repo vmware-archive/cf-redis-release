@@ -10,6 +10,10 @@ describe 'backups' do
   let(:s3_backup_bucket) { bosh_manifest.property("service-backup.destination.s3.bucket_name") }
   let(:s3_backup_path) { bosh_manifest.property("service-backup.destination.s3.bucket_path") }
 
+  let(:identifier_command) do
+    '/var/vcap/packages/redis-backups/bin/identifier -config /var/vcap/jobs/redis-backups/config/backup-config.yml'
+  end
+
   let(:manual_snapshot_command) do
     '/var/vcap/packages/redis-backups/bin/snapshot -config /var/vcap/jobs/redis-backups/config/backup-config.yml'
   end
@@ -135,6 +139,33 @@ describe 'backups' do
 
             ls_result = vm_execute.call("ls #{source_folder}")
             expect(ls_result.lines.join).to_not match(filename)
+          end
+        end
+      end
+    end
+  end
+
+  describe "instance identifier" do
+    context "with a provisioned dedicated-vm plan" do
+      let(:service_plan) { 'dedicated-vm' }
+
+      it 'returns the correct instance ID' do
+        with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
+          id = vm_execute.call(identifier_command)
+          expect(id).to match(service_binding.service_instance.id)
+        end
+      end
+    end
+
+    context "with provisioned shared-vm plan" do
+      let(:service_plan) { 'shared-vm' }
+
+      it "returns the correct instance IDs" do
+        with_remote_execution(service_name, service_plan) do |_, service_binding1|
+          with_remote_execution(service_name, service_plan) do |vm_execute, service_binding2|
+            instance_ids = vm_execute.call(identifier_command)
+            expect(instance_ids).to match(service_binding1.service_instance.id)
+            expect(instance_ids).to match(service_binding2.service_instance.id)
           end
         end
       end
