@@ -10,7 +10,7 @@ describe 'metrics', :skip_metrics => true do
         "DOPPLER_ADDR" => doppler_address,
         "CF_ACCESS_TOKEN" => cf_auth_token
       },
-      'firehose_sample',
+      'firehose',
       [:out, :err] => [@outFile.path, 'w']
     )
   end

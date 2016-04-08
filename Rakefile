@@ -3,7 +3,7 @@ task spec: %w(spec:system spec:unit)
 
 desc 'Installs noaa'
 task :install_noaa do
-  `go get github.com/cloudfoundry/noaa/firehose_sample`
+  `go get github.com/cloudfoundry/noaa/samples/firehose`
 end
 
 namespace :spec do
