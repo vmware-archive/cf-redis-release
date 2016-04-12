@@ -20,7 +20,7 @@ module Helpers
     end
 
     def doppler_address
-      ENV['DOPPLER_ADDR'] || "wss://doppler.bosh-lite.com:443"
+      ENV['DOPPLER_ADDR'] || "wss://doppler.bosh-lite.com:4443"
     end
 
     def target_cf

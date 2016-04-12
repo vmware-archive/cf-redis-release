@@ -17,6 +17,7 @@ properties:
       route_name: (( .meta.route_name ))
       network: redis_z1
       backend_host: (( jobs.cf-redis-broker.networks.redis_z1.static_ips.[0] ))
+      host: (( jobs.cf-redis-broker.networks.redis_z1.static_ips.[0] ))
       backend_port: 12345
       name: redis
       service_instance_limit: (( .meta.redis.shared_plan.instance_limit ))

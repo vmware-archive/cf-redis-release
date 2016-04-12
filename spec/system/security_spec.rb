@@ -7,7 +7,7 @@ require 'prof/ssl/cipher_set'
 describe 'security' do
   describe 'the broker' do
     it 'uses latest version of nginx' do
-      output = ssh_gateway.execute_on(broker_host, '/var/vcap/packages/nginx/sbin/nginx -v').strip
+      output = ssh_gateway.execute_on(broker_host, '/var/vcap/packages/cf-redis-nginx/sbin/nginx -v').strip
       expect(output).to eql('nginx version: nginx/1.8.0')
     end
 
@@ -20,7 +20,7 @@ describe 'security' do
 
   describe 'the agents' do
     it 'uses latest version of nginx' do
-      output = ssh_gateway.execute_on(node_hosts.first, '/var/vcap/packages/nginx/sbin/nginx -v').strip
+      output = ssh_gateway.execute_on(node_hosts.first, '/var/vcap/packages/cf-redis-nginx/sbin/nginx -v').strip
       expect(output).to eql('nginx version: nginx/1.8.0')
     end
 
