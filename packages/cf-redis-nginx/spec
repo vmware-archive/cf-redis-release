@@ -1,5 +1,5 @@
 ---
-name: nginx
+name: cf-redis-nginx
 
 files:
   - nginx/nginx-1.8.0.tar.gz

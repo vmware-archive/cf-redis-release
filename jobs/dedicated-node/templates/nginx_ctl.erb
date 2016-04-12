@@ -41,7 +41,7 @@ case $1 in
 
     echo $$ > $PID_FILE
 
-    exec /var/vcap/packages/nginx/sbin/nginx -c $JOB_DIR/config/nginx.conf \
+    exec /var/vcap/packages/cf-redis-nginx/sbin/nginx -c $JOB_DIR/config/nginx.conf \
       >>$LOG_DIR/nginx.stdout.log 2>>$LOG_DIR/nginx.stderr.log
     ;;
 
