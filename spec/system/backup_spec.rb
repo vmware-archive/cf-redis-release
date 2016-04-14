@@ -118,7 +118,12 @@ describe 'backups' do
         it 'creates an RDB dump file' do
           with_remote_execution(service_name, service_plan) do |vm_execute|
             result = vm_execute.call(manual_snapshot_command)
-            expect(result.lines.join).to(match('"event":"done","task":"create-snapshot"'), 'done event not found')
+
+            task_line = result.lines.select { |line|
+              line.include?('"task":"create-snapshot"') && line.include?('"event":"done"')
+            }
+
+            expect(task_line.length).to be > 0, 'done event not found'
 
             ls_output = vm_execute.call("ls -l #{source_folder}dump-*.rdb")
             expect(ls_output.lines.size).to eql(1)
