@@ -10,7 +10,7 @@ describe 'manifest generator' do
 
   context 'with no arguments' do
     it 'should exit with a non-zero status' do
-      stdout, stderr, status = stubbed_env.execute("scripts/generate-deployment-manifest")
+      stdout, _stderr, status = stubbed_env.execute("scripts/generate-deployment-manifest")
       expect(stdout).to include("usage:")
       expect(status.exitstatus).to eq(1)
     end
@@ -23,7 +23,7 @@ describe 'manifest generator' do
     let(:actual_yaml) { YAML.load(File.read(example_manifest.path)) }
 
     it 'should generate manifest' do
-      stdout, stderr, status = stubbed_env.execute("scripts/generate-deployment-manifest #{infrastructure}")
+      stdout, _stderr, _status = stubbed_env.execute("scripts/generate-deployment-manifest #{infrastructure}")
 
       expected = File.read("spec/fixtures/cf-redis.yml")
       expect(stdout).to yaml_eq(expected)
@@ -36,7 +36,7 @@ describe 'manifest generator' do
       }.to_yaml)
       custom_jobs_file.close
 
-      stdout, stderr, status = stubbed_env.execute("scripts/generate-deployment-manifest #{infrastructure} #{custom_jobs_file.path} > #{example_manifest.path}")
+      stubbed_env.execute("scripts/generate-deployment-manifest #{infrastructure} #{custom_jobs_file.path} > #{example_manifest.path}")
 
       expect(actual_yaml['properties']).to include(sample_properties)
     end
@@ -50,7 +50,7 @@ describe 'manifest generator' do
       }.to_yaml)
       custom_jobs_file.close
 
-      stdout, stderr, status = stubbed_env.execute("scripts/generate-deployment-manifest #{infrastructure} #{custom_jobs_file.path} > #{example_manifest.path}")
+      stubbed_env.execute("scripts/generate-deployment-manifest #{infrastructure} #{custom_jobs_file.path} > #{example_manifest.path}")
 
       expect(actual_yaml['releases'].size).to be > additional_releases.size
       expect(actual_yaml['releases']).to include(additional_releases[0])
@@ -70,7 +70,7 @@ describe 'manifest generator' do
       }.to_yaml)
       custom_jobs_file.close
 
-      stdout, stderr, status = stubbed_env.execute("scripts/generate-deployment-manifest #{infrastructure} #{custom_jobs_file.path} > #{example_manifest.path}")
+      stubbed_env.execute("scripts/generate-deployment-manifest #{infrastructure} #{custom_jobs_file.path} > #{example_manifest.path}")
 
       redis_broker_job = actual_yaml['jobs'].select{|i| i['name'] == 'cf-redis-broker' }.first
       expect(redis_broker_job['properties']).to include({'closed'=>'source'})
@@ -85,7 +85,7 @@ describe 'manifest generator' do
       }.to_yaml)
       custom_jobs_file.close
 
-      stdout, stderr, status = stubbed_env.execute("scripts/generate-deployment-manifest #{infrastructure} #{custom_jobs_file.path} > #{example_manifest.path}")
+      stubbed_env.execute("scripts/generate-deployment-manifest #{infrastructure} #{custom_jobs_file.path} > #{example_manifest.path}")
 
       redis_broker_job = actual_yaml['jobs'].select{|i| i['name'] == 'cf-redis-broker' }.first
       expect(redis_broker_job['templates']).to include(job_template)

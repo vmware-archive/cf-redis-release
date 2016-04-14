@@ -93,6 +93,10 @@ meta:
   environment: bosh-lite
   external_domain: bosh-lite.com
   redis:
+    broker:
+      service_id: 7444c886-5f9b-42df-b271-7eb10fd566b3
+      shared_vm_plan_id: a5cd5502-84d3-4b83-8381-f24227e0df7a
+      dedicated_vm_plan_id: 1da3fbda-dcc1-4b1c-a5a7-ae2567c09633
     bg_save_command: yetanotherrandomstring
     config_command: configalias
     dedicated_plan:
@@ -282,6 +286,9 @@ properties:
       route_name: redis-broker
       service_instance_limit: 5
       service_name: redis
+      service_id: 7444c886-5f9b-42df-b271-7eb10fd566b3
+      shared_vm_plan_id: a5cd5502-84d3-4b83-8381-f24227e0df7a
+      dedicated_vm_plan_id: 1da3fbda-dcc1-4b1c-a5a7-ae2567c09633
     config_command: configalias
     host: 10.244.3.2
     maxmemory: 262144000
@@ -306,4 +313,3 @@ update:
   canary_watch_time: 30000-180000
   max_in_flight: 6
   update_watch_time: 30000-180000
-
