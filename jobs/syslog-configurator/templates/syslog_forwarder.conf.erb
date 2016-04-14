@@ -3,6 +3,7 @@ $MaxMessageSize 8k
 # Listen for logs over UDP
 #
 $ModLoad imudp
+$WorkDirectory /var/spool/rsyslog
 $UDPServerAddress 127.0.0.1
 $UDPServerRun 514
 
@@ -32,6 +33,43 @@ template(name="CfLogTemplate" type="list") {
         constant(value=" [job=<%= name %> index=<%= spec.index.to_i %>] ")
         property(name="msg")
 }
+
+module(load="imfile")
+
+# discard spam heartbeat from process-monitor
+:msg, contains, "process-monitor.redis instance already running" stop
+
+input(type="imfile"
+      File="/var/vcap/sys/log/*.log"
+      Tag="route-registrar:")
+
+input(type="imfile"
+      File="/var/vcap/sys/log/redis/*.log"
+      Tag="redis:")
+
+<% if_p("service-backup") do %>
+input(type="imfile"
+      File="/var/vcap/sys/log/service-backup/*.log"
+      Tag="service-backup:")
+<% end %>
+
+<% if_p("service_metrics") do %>
+input(type="imfile"
+      File="/var/vcap/sys/log/service-metrics/*.log"
+      Tag="service-metrics:")
+<% end %>
+
+input(type="imfile"
+      File="/var/vcap/sys/log/cf-redis-broker/*.log"
+      Tag="cf-redis-broker:")
+
+input(type="imfile"
+      File="/var/vcap/sys/log/metron_agent/*.log"
+      Tag="metron-agent:")
+
+input(type="imfile"
+      File="/var/vcap/sys/log/route-registrar/*.log"
+      Tag="route-registrar:")
 
 <% if_p("syslog_aggregator.address", "syslog_aggregator.port", "syslog_aggregator.transport") do |address, port, transport| %>
 
