@@ -27,6 +27,10 @@ meta:
   service_name: redis
   route_name: redis-broker
   redis:
+    broker:
+      service_id: e5f51187-f949-41a9-8e1f-17dced7cab30
+      shared_vm_plan_id: 8184289e-a603-42ff-b7ca-a15bb5d2253d
+      dedicated_vm_plan_id: 1da3fbda-dcc1-4b1c-a5a7-ae2567c09633
     dedicated_plan:
       instance_count: 1
     shared_plan:
