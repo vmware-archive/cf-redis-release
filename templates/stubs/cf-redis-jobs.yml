@@ -15,6 +15,9 @@ properties:
         password: (( .meta.broker.password ))
       enable_service_access: true
       service_name: (( .meta.service_name ))
+      service_id: (( .meta.redis.broker.service_id ))
+      shared_vm_plan_id: (( .meta.redis.broker.shared_vm_plan_id ))
+      dedicated_vm_plan_id: (( .meta.redis.broker.dedicated_vm_plan_id ))
       route_name: (( .meta.route_name ))
       network: redis_z1
       backend_host: (( jobs.cf-redis-broker.networks.redis_z1.static_ips.[0] ))
