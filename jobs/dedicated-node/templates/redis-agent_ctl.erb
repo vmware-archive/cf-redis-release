@@ -7,6 +7,14 @@ PIDFILE=/var/vcap/sys/run/redis-agent.pid
 BACKUP_SOURCE_DIR=<%= p('service-backup.source_folder') %>
 <% end %>
 
+<% if_p('redis-backup.stdout_filename') do %>
+touch <%= p('redis-backup.stdout_filename') %>
+<% end %>
+
+<% if_p('redis-backup.stderr_filename') do %>
+touch <%= p('redis-backup.stderr_filename') %>
+<% end %>
+
 source /var/vcap/packages/redis-common/utils.sh
 
 case $1 in
