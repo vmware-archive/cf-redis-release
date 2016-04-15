@@ -1,5 +1,6 @@
 ---
 meta:
+  branch: v424
   deployment_name: bosh-lite-redis
   director_uuid: REPLACE_ME
   release_name: cf-redis
