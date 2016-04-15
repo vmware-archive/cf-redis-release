@@ -22,7 +22,7 @@ properties:
       backend_host: (( jobs.cf-redis-broker.networks.redis_z1.static_ips.[0] ))
       host: (( jobs.cf-redis-broker.networks.redis_z1.static_ips.[0] ))
       backend_port: 12345
-      subdomain: (( .meta.redis.broker.subdomain ))
+      subdomain: (( .meta.redis.broker.subdomain || "redis-broker" ))
       name: (( .meta.redis.broker.name ))
       service_instance_limit: (( .meta.redis.shared_plan.instance_limit ))
       dedicated_nodes: (( jobs.dedicated-node.networks.redis_z1.static_ips ))
