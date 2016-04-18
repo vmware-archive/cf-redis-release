@@ -93,6 +93,10 @@ meta:
   environment: bosh-lite
   external_domain: bosh-lite.com
   redis:
+    broker:
+      service_id: e5f51187-f949-41a9-8e1f-17dced7cab30
+      shared_vm_plan_id: 8184289e-a603-42ff-b7ca-a15bb5d2253d
+      dedicated_vm_plan_id: 1da3fbda-dcc1-4b1c-a5a7-ae2567c09633
     bg_save_command: yetanotherrandomstring
     config_command: configalias
     dedicated_plan:
@@ -269,6 +273,9 @@ properties:
       backend_port: 54321
     bg_save_command: yetanotherrandomstring
     broker:
+      service_id: e5f51187-f949-41a9-8e1f-17dced7cab30
+      shared_vm_plan_id: 8184289e-a603-42ff-b7ca-a15bb5d2253d
+      dedicated_vm_plan_id: 1da3fbda-dcc1-4b1c-a5a7-ae2567c09633
       auth:
         password: admin
         username: admin
@@ -306,4 +313,3 @@ update:
   canary_watch_time: 30000-180000
   max_in_flight: 6
   update_watch_time: 30000-180000
-
