@@ -26,8 +26,8 @@ case $1 in
     echo $$ > $PIDFILE
 
     exec chpst -u vcap:vcap /var/vcap/packages/cf-redis-broker/bin/processmonitor \
-      >> $LOG_DIR/process-watcher.stdout.log \
-      2>> $LOG_DIR/process-watcher.stderr.log
+      > >(tee -a $LOG_DIR/process-watcher.stdout.log | logger -p processmonitor.info ) \
+      2> >(tee -a $LOG_DIR/process-watcher.stderr.log | logger -p processmonitor.err )
     ;;
 
   stop)

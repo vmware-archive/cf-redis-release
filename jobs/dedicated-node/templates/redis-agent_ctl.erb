@@ -18,8 +18,8 @@ case $1 in
     echo $$ > $PIDFILE
     exec chpst -u root:root /var/vcap/packages/cf-redis-broker/bin/agent \
       -agentConfig=/var/vcap/jobs/dedicated-node/config/agent.yml \
-      >> $LOG_DIR/redis-agent.stdout.log \
-      2>> $LOG_DIR/redis-agent.stderr.log
+      > >(tee -a $LOG_DIR/redis-agent.stdout.log | logger -p redis-agent.info ) \
+      2> >(tee -a $LOG_DIR/redis-agent.stderr.log | logger -p redis-agent.err )
     ;;
 
   stop)

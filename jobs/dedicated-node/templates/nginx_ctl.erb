@@ -42,7 +42,8 @@ case $1 in
     echo $$ > $PID_FILE
 
     exec /var/vcap/packages/nginx/sbin/nginx -c $JOB_DIR/config/nginx.conf \
-      >>$LOG_DIR/nginx.stdout.log 2>>$LOG_DIR/nginx.stderr.log
+      > >(tee -a $LOG_DIR/nginx.stdout.log | logger -p nginx.info) \
+      2> >(tee -a $LOG_DIR/nginx.stderr.log | logger -p nginx.err)
     ;;
 
   stop)
