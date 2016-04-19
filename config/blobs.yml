@@ -55,3 +55,7 @@ go/go1.4.3.linux-amd64.tar.gz:
   object_id: 064333e0-3863-4cf7-8d57-1dd1ac9560f3
   sha: 332b64236d30a8805fc8dd8b3a269915b4c507fe
   size: 61210288
+go/go1.5.4.linux-amd64.tar.gz:
+  object_id: c8d0307c-8edd-4f7a-962d-ec46cc155719
+  sha: 4c919c3390e86e557a8019ea644e835bc493be2a
+  size: 80180116
