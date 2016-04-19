@@ -27,8 +27,8 @@ start)
   cd /var/vcap/packages/cf-redis-route-registrar
 
   exec chpst -u vcap:vcap /var/vcap/packages/cf-redis-route-registrar/bin/route-registrar \
-    > >(tee -a $LOG_DIR/route-registrar.stdout.log | logger -p route-registrar.info ) \
-    2> >(tee -a $LOG_DIR/route-registrar.stderr.log | logger -p route-registrar.err )
+    > >(tee -a $LOG_DIR/route-registrar.stdout.log | logger -p local0.info ) \
+    2> >(tee -a $LOG_DIR/route-registrar.stderr.log | logger -p local0.err )
 ;;
 
 stop)
