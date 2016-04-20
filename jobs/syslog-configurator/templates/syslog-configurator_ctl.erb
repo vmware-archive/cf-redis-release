@@ -2,6 +2,10 @@
 
 JOB_DIR=/var/vcap/jobs/syslog-configurator
 PIDFILE=/var/vcap/sys/run/syslog-configurator.pid
+declare -a LOG_DIRS=(
+  "/var/vcap/sys/log/service-backup"
+  "/var/vcap/sys/log/service-metrics"
+)
 
 source /var/vcap/packages/redis-common/utils.sh
 
@@ -12,13 +16,20 @@ case $1 in
 
       CONFIG_DIR=$JOB_DIR/config
 
-      if [[ -z $CONFIG_DIR ]]
+      if [ ! -d $CONFIG_DIR ]
       then
         echo "$CONFIG_DIR not found"
         exit 1
       fi
 
-      cp $CONFIG_DIR/syslog_forwarder.conf /etc/rsyslog.d/00-syslog_forwarder.conf
+      cp $CONFIG_DIR/syslog_forwarder.conf /etc/rsyslog.d/01-syslog_forwarder.conf
+
+      for dir in "${LOG_DIRS[@]}"; do
+        mkdir -p $dir
+        if [ ! -f $dir/out.log ]; then
+          touch $dir/out.log
+        fi
+      done
 
       /usr/sbin/service rsyslog restart
 
