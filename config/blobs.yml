@@ -51,10 +51,6 @@ ruby/ruby-2.1.5.tar.gz:
   object_id: 698d02c7-61f9-4d14-893a-f4a8f085fc92
   sha: 9c0a238bd7839a4b51871641945a3da90997b8c2
   size: 15127433
-go/go1.4.3.linux-amd64.tar.gz:
-  object_id: 064333e0-3863-4cf7-8d57-1dd1ac9560f3
-  sha: 332b64236d30a8805fc8dd8b3a269915b4c507fe
-  size: 61210288
 redis/redis-3.0.5.tar.gz:
   object_id: 47795193-538a-4bf1-a229-51c61f74afcc
   sha: ad3ee178c42bfcfd310c72bbddffbbe35db9b4a6
@@ -67,3 +63,7 @@ redis/redis-3.0.6.tar.gz:
   object_id: 12fc413f-7eae-409f-93c0-1a6866b8bfdb
   sha: 4b1c7b1201984bca8f7f9c6c58862f6928cf0a25
   size: 1372648
+go/go1.5.4.linux-amd64.tar.gz:
+  object_id: d06a424a-1ab5-4559-988f-78b9fca29fe6
+  sha: 4c919c3390e86e557a8019ea644e835bc493be2a
+  size: 80180116
