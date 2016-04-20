@@ -21,9 +21,10 @@ if [ $? -ne 0 ]; then
 fi
 
 if [ "$infrastructure" != "aws" ] && \
+   [ "$infrastructure" != "azure" ] && \
    [ "$infrastructure" != "warden" ] && \
    [ "$infrastructure" != "vsphere" ] ; then
- echo "usage: ${0} <aws|warden|vsphere> [stubs...]"
+ echo "usage: ${0} <aws|azure|warden|vsphere> [stubs...]"
  exit 1
 fi
 
