@@ -22,7 +22,7 @@ case $1 in
         exit 1
       fi
 
-      cp $CONFIG_DIR/syslog_forwarder.conf /etc/rsyslog.d/01-syslog_forwarder.conf
+      cp $CONFIG_DIR/syslog_forwarder.conf /etc/rsyslog.d/05-syslog_forwarder.conf
 
       for dir in "${LOG_DIRS[@]}"; do
         mkdir -p $dir
