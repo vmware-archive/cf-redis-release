@@ -36,7 +36,7 @@ describe 'backups' do
     "--dest-bucket '#{s3_backup_bucket}'"
   end
 
-  let(:dump_file_pattern) { /dump-.*-\d{4}-\d{2}-\d{2}-\d{2}:\d{2}\.rdb/ }
+  let(:dump_file_pattern) { /\d{8}T\d{6}Z-.*_redis_backup.rdb/ }
 
   shared_examples "backups are enabled" do
     describe 'service backups', :skip_service_backups => true do
@@ -125,7 +125,7 @@ describe 'backups' do
 
             expect(task_line.length).to be > 0, 'done event not found'
 
-            ls_output = vm_execute.call("ls -l #{source_folder}dump-*.rdb")
+            ls_output = vm_execute.call("ls -l #{source_folder}*redis_backup.rdb")
             expect(ls_output.lines.size).to eql(1)
             expect(ls_output.lines.first).to match(/#{source_folder}#{dump_file_pattern}/)
           end
@@ -134,8 +134,10 @@ describe 'backups' do
 
       describe 'manual cleanup' do
         it 'deletes the RDB dump file' do
-          with_remote_execution(service_name, service_plan) do |vm_execute|
-            filename = "dump-instance-2010-01-01-01:01.rdb"
+          with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
+            instance_id = service_binding.service_instance.id
+            filename = "20100101T010100Z-#{instance_id}_#{service_plan}_redis_backup.rdb"
+
             result = vm_execute.call("touch #{source_folder}/#{filename}; ls #{source_folder}")
             expect(result.lines.join).to match(filename)
 
