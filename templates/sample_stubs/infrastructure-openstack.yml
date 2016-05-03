@@ -28,4 +28,4 @@ networks:
     - REPLACE_WITH_YOUR_DNS_SERVER
     cloud_properties:
       net_id: REPLACE_WITH_YOUR_SUBNET_ID
-      security_group: REPLACE_WITH_YOUR_SECURITY_GROUP_NAME
+      security_groups: REPLACE_WITH_YOUR_SECURITY_GROUPS_LIST # e.g. ["cf"]
