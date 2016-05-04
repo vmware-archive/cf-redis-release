@@ -894,4 +894,6 @@ builds:
     version: 424.22.0
   bcdaa6a9-0b48-425f-843d-e03081d514ff:
     version: 424.23.0
+  aceeef0a-211f-485e-bc37-0736b1bf20df:
+    version: 424.24.0
 format-version: '2'
