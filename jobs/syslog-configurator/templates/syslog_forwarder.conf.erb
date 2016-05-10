@@ -53,12 +53,12 @@ input(type="imfile"
 
 <% if_p("syslog_aggregator.address", "syslog_aggregator.port", "syslog_aggregator.transport") do |address, port, transport| %>
 
-<% if transport == "relp" %>
+<% if transport.downcase == "relp" %>
 $ModLoad omrelp
 *.* :omrelp:<%= address %>:<%= port %>;CfLogTemplate
-<% elsif transport == "udp" %>
+<% elsif transport.downcase == "udp" %>
 *.* @<%= address %>:<%= port %>;CfLogTemplate
-<% elsif transport == "tcp" %>
+<% elsif transport.downcase == "tcp" %>
 *.* @@<%= address %>:<%= port %>;CfLogTemplate
 <% else %>
 #only RELP, UDP, and TCP are supported
