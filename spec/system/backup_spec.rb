@@ -62,21 +62,18 @@ describe 'backups' do
       end
 
       describe 'end to end' do
-        let(:s3_client) do
-          AWS::S3.new(
-            access_key_id: aws_access_key_id,
-            secret_access_key: aws_secret_access_key
-          )
-        end
+        let(:s3_client) { Aws::S3::Client.new }
 
         def find_s3_backup_file
-          s3_client.buckets[s3_backup_bucket].objects.
+          s3_backup_file_meta = s3_client.list_objects(bucket: s3_backup_bucket).contents.
             find_all { |object| object.key.include? "backup/#{Time.now.strftime("%Y/%m/%d")}" }.
             find { |object| object.key =~ dump_file_pattern }
+          return nil if s3_backup_file_meta.nil?
+          s3_client.get_object(bucket: s3_backup_bucket, key: s3_backup_file_meta.key).body
         end
 
         def clean_s3_bucket
-          s3_client.buckets[s3_backup_bucket].clear!
+          Aws::S3::Bucket.new(name: s3_backup_bucket, client: s3_client).clear!
         end
 
         before do
@@ -93,23 +90,25 @@ describe 'backups' do
             client.write('foo', 'bar')
 
             with_redis_under_stress(service_binding) do
-              result = vm_execute.call(manual_backup_command).lines.join
+              cmd_result = vm_execute.call(manual_backup_command)
+              expect(cmd_result).to_not be_nil
+
+              result = cmd_result.lines.join
               expect(result).to match(/Perform backup completed without error/)
               expect(result).to match(/Upload backup completed without error/)
               expect(result).to match(/Cleanup completed without error/)
             end
 
             s3_backup_file = find_s3_backup_file
-            expect(s3_backup_file).not_to eq(nil)
-            expect(s3_backup_file.exists?).to eq(true)
-            expect(s3_backup_file.content_length).not_to eq(0)
+            expect(s3_backup_file).not_to be_nil
+            expect(s3_backup_file.size).to be > 0
 
-            contents = s3_backup_file.read
+            contents = s3_backup_file.read.encode('UTF-8', 'UTF-8', :invalid => :replace)
             expect(contents).to match(/^REDIS/)       # check RDB format
             expect(contents).to_not include('SELECT') # check not AOF format
 
             ls_result = vm_execute.call("ls #{source_folder}")
-            expect(ls_result.lines.size).to eq(0)
+            expect(ls_result).to be_nil
           end
         end
       end
@@ -118,6 +117,7 @@ describe 'backups' do
         it 'creates an RDB dump file' do
           with_remote_execution(service_name, service_plan) do |vm_execute|
             result = vm_execute.call(manual_snapshot_command)
+            expect(result).to_not be_nil
 
             task_line = result.lines.select { |line|
               line.include?('"task":"create-snapshot"') && line.include?('"event":"done"')
@@ -126,6 +126,7 @@ describe 'backups' do
             expect(task_line.length).to be > 0, 'done event not found'
 
             ls_output = vm_execute.call("ls -l #{source_folder}*redis_backup.rdb")
+            expect(ls_output).to_not be_nil
             expect(ls_output.lines.size).to eql(1)
             expect(ls_output.lines.first).to match(/#{source_folder}#{dump_file_pattern}/)
           end
@@ -139,13 +140,15 @@ describe 'backups' do
             filename = "20100101T010100Z-#{instance_id}_#{service_plan}_redis_backup.rdb"
 
             result = vm_execute.call("touch #{source_folder}/#{filename}; ls #{source_folder}")
+            expect(result).to_not be_nil
             expect(result.lines.join).to match(filename)
 
             cleanup_result = vm_execute.call(manual_cleanup_command)
+            expect(cleanup_result).to_not be_nil
             expect(cleanup_result.lines.join).to match('"event":"done","task":"perform-cleanup"')
 
             ls_result = vm_execute.call("ls #{source_folder}")
-            expect(ls_result.lines.join).to_not match(filename)
+            expect(ls_result.lines.join).to_not match(filename) unless ls_result.nil?
           end
         end
       end
