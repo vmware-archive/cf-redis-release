@@ -13,10 +13,12 @@ BACKUP_SOURCE_DIR=<%= p('service-backup.source_folder') %>
 
 <% if_p('redis-backup.stdout_filename') do %>
 touch <%= p('redis-backup.stdout_filename') %>
+chmod 666 <%= p('redis-backup.stdout_filename') %>
 <% end %>
 
 <% if_p('redis-backup.stderr_filename') do %>
 touch <%= p('redis-backup.stderr_filename') %>
+chmod 666 <%= p('redis-backup.stderr_filename') %>
 <% end %>
 
 PIDFILE=$RUN_DIR/unicorn.pid
