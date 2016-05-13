@@ -55,11 +55,11 @@ module ExcludeHelper
   def self.warnings
     message = "\n"
     if !metrics_available?
-      message += "WARNING: Skipping metrics tests, metrics are not available in this manifest\n"
+      message += "INFO: Skipping metrics tests, metrics are not available in this manifest\n"
     end
 
     if !service_backups_available?
-      message += "WARNING: Skipping service backups tests, service backups are not available in this manifest\n"
+      message += "INFO: Skipping service backups tests, service backups are not available in this manifest\n"
     end
 
     message + "\n"
@@ -81,12 +81,14 @@ RSpec.configure do |config|
   config.before(:all) do
     redis_service_broker.deprovision_service_instances!
 
-    Aws.config.update({
-      region: 'us-east-1',
-      credentials: Aws::Credentials.new(
-        bosh_manifest.property('service-backup.destination.s3.access_key_id'),
-        bosh_manifest.property('service-backup.destination.s3.secret_access_key')
-      )
-    })
+    if ExcludeHelper::service_backups_available?
+      Aws.config.update({
+        region: 'us-east-1',
+        credentials: Aws::Credentials.new(
+          bosh_manifest.property('service-backup.destination.s3.access_key_id'),
+          bosh_manifest.property('service-backup.destination.s3.secret_access_key')
+        )
+      })
+    end
   end
 end

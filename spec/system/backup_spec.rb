@@ -2,7 +2,7 @@ require 'system_spec_helper'
 
 require 'aws-sdk'
 
-describe 'backups' do
+describe 'backups', :skip_service_backups => true do
   let(:source_folder) { bosh_manifest.property("service-backup.source_folder") }
   let(:service_name) { bosh_manifest.property('redis.broker.service_name') }
   let(:aws_access_key_id) { bosh_manifest.property('service-backup.destination.s3.access_key_id') }
@@ -39,7 +39,7 @@ describe 'backups' do
   let(:dump_file_pattern) { /\d{8}T\d{6}Z-.*_redis_backup.rdb/ }
 
   shared_examples "backups are enabled" do
-    describe 'service backups', :skip_service_backups => true do
+    describe 'service backups' do
       it 'is configured correctly' do
         with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
           with_redis_under_stress(service_binding) do
