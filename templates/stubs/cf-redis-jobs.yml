@@ -21,7 +21,7 @@ properties:
       network: redis_z1
       backend_host: (( jobs.cf-redis-broker.networks.redis_z1.static_ips.[0] ))
       backend_port: 12345
-      name: redis
+      name: redisv346
       service_instance_limit: (( .meta.redis.shared_plan.instance_limit ))
       dedicated_nodes: (( jobs.dedicated-node.networks.redis_z1.static_ips ))
     maxmemory: (( .meta.redis.shared_plan.max_memory ))
