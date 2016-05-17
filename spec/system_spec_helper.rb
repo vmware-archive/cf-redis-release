@@ -75,5 +75,13 @@ RSpec.configure do |config|
 
   config.before(:all) do
     redis_service_broker.deprovision_service_instances!
+
+    Aws.config.update({
+        region: 'us-east-1',
+        credentials: Aws::Credentials.new(
+           bosh_manifest.property('redis.broker.backups.access_key_id'),
+           bosh_manifest.property('redis.broker.backups.secret_access_key')
+        )
+    })
   end
 end

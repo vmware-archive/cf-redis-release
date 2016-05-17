@@ -9,12 +9,7 @@ describe 'backups', :run_backup_spec => true do
   let(:redis_config_command) { bosh_manifest.property("redis.config_command") }
   let(:broker_vm_ip) { bosh_director.ips_for_job('cf-redis-broker', bosh_manifest.deployment_name).first }
 
-  let(:s3_client) {
-    AWS::S3.new(
-      access_key_id: bosh_manifest.property("redis.broker.backups.access_key_id"),
-      secret_access_key: bosh_manifest.property("redis.broker.backups.secret_access_key")
-    )
-  }
+  let(:s3_client) { Aws::S3::Client.new }
   let(:s3_backup_bucket) { bosh_manifest.property("redis.broker.backups.bucket_name") }
 
   let(:test_key) { "test_key" }
@@ -33,7 +28,10 @@ describe 'backups', :run_backup_spec => true do
       ].join(" ")
       crontab_output = ssh_gateway.execute_on(
         broker_vm_ip, "crontab -l -u vcap", root: true, discard_stderr: true
-      ).to_s.split("\n")
+      )
+
+      expect(crontab_output).not_to be_nil
+      crontab_output = crontab_output.to_s.split("\n")
 
       expect(crontab_output).to include(expected)
     end
@@ -49,19 +47,23 @@ describe 'backups', :run_backup_spec => true do
       before do
         instance_id = create_backup_for_service(service)
 
-        @s3_backup_file = s3_client.buckets[s3_backup_bucket].objects.
-          find_all {|object| object.key.include? "backups/#{Time.now.strftime("%Y/%m/%d")}"}.
+        s3_backup_file_meta = s3_client.list_objects(bucket: s3_backup_bucket).contents.
+          find_all { |object| object.key.include? "backups/#{Time.now.strftime("%Y/%m/%d")}" }.
           find { |object| object.key.include?(instance_id) }
+
+        unless s3_backup_file_meta.nil?
+          @s3_backup_file = s3_client.get_object(bucket: s3_backup_bucket, key: s3_backup_file_meta.key).body
+        end
       end
 
       after do
-        @s3_backup_file.delete if @s3_backup_file
+        Aws::S3::Bucket.new(name: s3_backup_bucket, client: s3_client).clear!
       end
 
       it 'uploads data to S3 in RDB format' do
-        expect(@s3_backup_file.exists?).to eq(true)
-        expect(@s3_backup_file.content_length).not_to eq(0)
-        contents = @s3_backup_file.read
+        expect(@s3_backup_file).not_to be_nil
+        expect(@s3_backup_file.size).to be > 0
+        contents = @s3_backup_file.read.encode('UTF-8', 'UTF-8', :invalid => :replace)
 
         # check RDB format
         expect(contents).to match(/^REDIS/)
@@ -71,8 +73,9 @@ describe 'backups', :run_backup_spec => true do
       end
 
       it 'restores the data from an S3 file' do
-        tempfile = Tempfile.new('backup.rdb')
-        @s3_backup_file.read { |chunk| tempfile << chunk }
+        expect(@s3_backup_file).not_to be_nil
+        tempfile = Tempfile.new('backup.rdb', :encoding => @s3_backup_file.external_encoding.name)
+        tempfile.write(@s3_backup_file.read)
         tempfile.close
 
         service_broker.provision_and_bind(service.name, service.plan) do |service_binding, service_instance|
@@ -82,6 +85,7 @@ describe 'backups', :run_backup_spec => true do
 
           restore_command = "/var/vcap/packages/cf-redis-broker/bin/restore #{service_instance.id} #{remote_path}; echo $?"
           restore_output = ssh_gateway.execute_on(broker_vm_ip, restore_command, root: true)
+          expect(restore_output).not_to be_nil
           expect(restore_output.lines.last.strip).to(eql('0'), 'restore command failed with non zero exit status')
 
           wait_until_redis_is_up(broker_vm_ip)
@@ -124,19 +128,23 @@ describe 'backups', :run_backup_spec => true do
       before do
         instance_id = create_backup_for_service(service)
 
-        @s3_backup_file = s3_client.buckets[s3_backup_bucket].objects.
-          find_all {|object| object.key.include? "backups/#{Time.now.strftime("%Y/%m/%d")}"}.
+        s3_backup_file_meta = s3_client.list_objects(bucket: s3_backup_bucket).contents.
+          find_all { |object| object.key.include? "backups/#{Time.now.strftime("%Y/%m/%d")}" }.
           find { |object| object.key.include?(instance_id) }
+
+        unless s3_backup_file_meta.nil?
+          @s3_backup_file = s3_client.get_object(bucket: s3_backup_bucket, key: s3_backup_file_meta.key).body
+        end
       end
 
       after do
-        @s3_backup_file.delete if @s3_backup_file
+        Aws::S3::Bucket.new(name: s3_backup_bucket, client: s3_client).clear!
       end
 
       it 'uploads data to S3 in RDB format' do
-        expect(@s3_backup_file.exists?).to eq(true)
-        expect(@s3_backup_file.content_length).not_to eq(0)
-        contents = @s3_backup_file.read
+        expect(@s3_backup_file).not_to be_nil
+        expect(@s3_backup_file.size).to be > 0
+        contents = @s3_backup_file.read.encode('UTF-8', 'UTF-8', :invalid => :replace)
 
         # check RDB format
         expect(contents).to match(/^REDIS/)
@@ -146,8 +154,9 @@ describe 'backups', :run_backup_spec => true do
       end
 
       it 'restores the data from an S3 file' do
-        tempfile = Tempfile.new('backup.rdb')
-        @s3_backup_file.read { |chunk| tempfile << chunk }
+        expect(@s3_backup_file).not_to be_nil
+        tempfile = Tempfile.new('backup.rdb', :encoding => @s3_backup_file.external_encoding.name)
+        tempfile.write(@s3_backup_file.read)
         tempfile.close
 
         service_broker.provision_and_bind(service.name, service.plan) do |service_binding, service_instance|
@@ -159,6 +168,7 @@ describe 'backups', :run_backup_spec => true do
 
           restore_command = "RESTORE_CONFIG_PATH=/var/vcap/jobs/dedicated-node/config/restore.yml /var/vcap/packages/cf-redis-broker/bin/restore #{service_instance.id} #{remote_path}; echo $?"
           restore_output = ssh_gateway.execute_on(dedicated_node_vm_ip, restore_command, root: true)
+          expect(restore_output).not_to be_nil
           expect(restore_output.lines.last.strip).to(eql('0'), 'restore command failed with non zero exit status')
 
           wait_until_redis_is_up(dedicated_node_vm_ip)

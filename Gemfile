@@ -1,20 +1,20 @@
 source 'https://rubygems.org'
 
-ruby '2.2.2'
+ruby '2.3.0'
 
 gem 'aws-sdk'
-gem 'bosh_cli', '1.2858.0'
+gem 'bosh_cli'
 gem 'redis'
 gem 'rake'
 gem 'process_helper'
 
 group :test do
-  gem 'rspec', '~> 3.1.0'
+  gem 'rspec'
   gem 'pry'
   gem 'pry-byebug'
   gem 'rspec-shell-expectations'
   gem 'rspec-instafail'
 
   gem 'hula'
-  gem 'prof'
+  gem 'prof', '0.31.9'
 end
