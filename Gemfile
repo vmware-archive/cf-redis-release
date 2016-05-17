@@ -16,5 +16,5 @@ group :test do
   gem 'rspec-instafail'
 
   gem 'hula'
-  gem 'prof', '0.31.9'
+  gem 'prof', '0.31.11'
 end

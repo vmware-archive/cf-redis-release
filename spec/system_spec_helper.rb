@@ -2,6 +2,7 @@ require 'helpers/environment'
 require 'prof/external_spec/spec_helper'
 require 'prof/matchers/only_support_ssl_with_cipher_set'
 require 'yaml'
+require 'aws-sdk'
 
 ROOT = File.expand_path('..', __dir__)
 

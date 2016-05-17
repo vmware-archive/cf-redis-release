@@ -242,7 +242,7 @@ GEM
       multi_json (~> 1.0)
       websocket-driver (>= 0.2.0)
     process_helper (0.0.3)
-    prof (0.31.9)
+    prof (0.31.11)
       bosh_cli
       capybara
       capybara-webkit
@@ -350,7 +350,7 @@ DEPENDENCIES
   bosh_cli
   hula
   process_helper
-  prof (= 0.31.9)
+  prof (= 0.31.11)
   pry
   pry-byebug
   rake
@@ -359,5 +359,8 @@ DEPENDENCIES
   rspec-instafail
   rspec-shell-expectations
 
+RUBY VERSION
+   ruby 2.3.0p0
+
 BUNDLED WITH
-   1.11.2
+   1.12.4
