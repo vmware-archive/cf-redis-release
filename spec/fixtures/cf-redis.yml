@@ -40,7 +40,7 @@ jobs:
   properties:
     broker:
       host: redis-broker.bosh-lite.com
-      name: redis
+      name: redisv346
       password: admin
       username: admin
   resource_pool: redis_z1
@@ -55,7 +55,7 @@ jobs:
   properties:
     broker:
       host: redis-broker.bosh-lite.com
-      name: redis
+      name: redisv346
       password: admin
       username: admin
   resource_pool: redis_z1
@@ -284,7 +284,7 @@ properties:
       dedicated_nodes:
       - 10.244.3.2
       enable_service_access: true
-      name: redis
+      name: redisv346
       network: redis_z1
       route_name: redis-broker
       service_instance_limit: 5
