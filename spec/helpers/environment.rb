@@ -57,12 +57,12 @@ module Helpers
       bosh_manifest.property('redis').fetch('agent').fetch('backend_port')
     end
 
-    def service_client_builder(binding)
+    def service_client_builder(service_binding)
       Support::RedisServiceClientBuilder.new(
         ssh_gateway:    ssh_gateway,
         save_command:   bosh_manifest.property('redis.save_command'),
         config_command: bosh_manifest.property('redis.config_command')
-      ).build(binding)
+      ).build(service_binding)
     end
   end
 end

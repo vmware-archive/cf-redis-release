@@ -7,12 +7,14 @@ require 'prof/ssl/cipher_set'
 describe 'security' do
   describe 'the broker' do
     it 'uses latest version of nginx' do
-      output = ssh_gateway.execute_on(broker_host, '/var/vcap/packages/nginx/sbin/nginx -v').strip
-      expect(output).to eql('nginx version: nginx/1.8.0')
+      output = ssh_gateway.execute_on(broker_host, '/var/vcap/packages/nginx/sbin/nginx -v')
+      expect(output).not_to be_nil
+      expect(output.strip).to eql('nginx version: nginx/1.8.0')
     end
 
     it 'does not listen publicly on the backend_port' do
       netstat_output = ssh_gateway.execute_on(broker_host, "netstat -l | grep #{broker_backend_port}")
+      expect(netstat_output).not_to be_nil
       expect(netstat_output.lines.count).to eq(1)
       expect(netstat_output).to include("localhost:#{broker_backend_port}")
     end
@@ -20,8 +22,9 @@ describe 'security' do
 
   describe 'the agents' do
     it 'uses latest version of nginx' do
-      output = ssh_gateway.execute_on(node_hosts.first, '/var/vcap/packages/nginx/sbin/nginx -v').strip
-      expect(output).to eql('nginx version: nginx/1.8.0')
+      output = ssh_gateway.execute_on(node_hosts.first, '/var/vcap/packages/nginx/sbin/nginx -v')
+      expect(output).not_to be_nil
+      expect(output.strip).to eql('nginx version: nginx/1.8.0')
     end
 
     it 'only supports HTTPS with restricted ciphers' do

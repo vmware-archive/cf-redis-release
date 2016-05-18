@@ -21,8 +21,8 @@ describe 'dedicated plan' do
   it_behaves_like 'a persistent cloud foundry service'
 
   it 'preserves data when recreating vms' do
-    service_broker.provision_and_bind(service.name, service.plan) do |binding|
-      service_client = service_client_builder(binding)
+    service_broker.provision_and_bind(service.name, service.plan) do | service_binding |
+      service_client = service_client_builder(service_binding)
       service_client.write('test_key', 'test_value')
       expect(service_client.read('test_key')).to eq('test_value')
 
@@ -60,42 +60,42 @@ describe 'dedicated plan' do
   describe 'redis configuration' do
     before(:all) do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @binding          = service_broker.bind_instance(@service_instance)
+      @service_binding  = service_broker.bind_instance(@service_instance)
     end
 
     after(:all) do
-      service_broker.unbind_instance(@binding)
+      service_broker.unbind_instance(@service_binding)
       service_broker.deprovision_instance(@service_instance)
     end
 
     it 'has the correct maxmemory' do
-      client = service_client_builder(@binding)
+      client = service_client_builder(@service_binding)
       expect(client.config['maxmemory'].to_i).to eq(max_memory)
     end
 
     it 'has the correct maxclients' do
-      client = service_client_builder(@binding)
+      client = service_client_builder(@service_binding)
       expect(client.config['maxclients']).to eq("10000")
     end
 
     it 'runs correct version of redis' do
-      client = service_client_builder(@binding)
+      client = service_client_builder(@service_binding)
       expect(client.info('redis_version')).to eq('3.0.4')
     end
 
     it 'requires a password' do
-      wrong_credentials = @binding.credentials.reject { |k, v| !([:host, :port].include?(k)) }
-      allow(@binding).to receive(:credentials).and_return(wrong_credentials)
+      wrong_credentials = @service_binding.credentials.reject { |k, v| !([:host, :port].include?(k)) }
+      allow(@service_binding).to receive(:credentials).and_return(wrong_credentials)
 
-      client = service_client_builder(@binding)
+      client = service_client_builder(@service_binding)
       expect { client.write('foo', 'bar') }.to raise_error(/NOAUTH Authentication required/)
     end
   end
 
   it 'retains data and keeps the same credentials after recreating the node' do
-    service_broker.provision_and_bind(service.name, service.plan) do |binding|
-      service_instance_host = binding.credentials.fetch(:host)
-      client                = service_client_builder(binding)
+    service_broker.provision_and_bind(service.name, service.plan) do | service_binding |
+      service_instance_host = service_binding.credentials.fetch(:host)
+      client                = service_client_builder(service_binding)
 
       # Write to dedicated node
       client.write('test_key', 'test_value')
@@ -116,9 +116,9 @@ describe 'dedicated plan' do
       @service_instances = allocate_all_instances!
       service_instance = @service_instances.pop
 
-      service_broker.bind_instance(service_instance) do |binding|
-        @old_credentials        = binding.credentials
-        @old_client             = service_client_builder(binding)
+      service_broker.bind_instance(service_instance) do | service_binding |
+        @old_credentials        = service_binding.credentials
+        @old_client             = service_client_builder(service_binding)
 
         @old_client.write('test_key', 'test_value')
         expect(@old_client.read('test_key')).to eq('test_value')
@@ -140,22 +140,22 @@ describe 'dedicated plan' do
     end
 
     it 'cleans the aof file' do
-      service_broker.provision_and_bind(service.name, service.plan) do |binding|
-        new_client = service_client_builder(binding)
+      service_broker.provision_and_bind(service.name, service.plan) do | service_binding |
+        new_client = service_client_builder(service_binding)
         expect(new_client.aof_contents).to_not include('test_value')
       end
     end
 
     it 'cleans the data' do
-      service_broker.provision_and_bind(service.name, service.plan) do |binding|
-        new_client = service_client_builder(binding)
+      service_broker.provision_and_bind(service.name, service.plan) do | service_binding |
+        new_client = service_client_builder(service_binding)
         expect(new_client.read('test_key')).to_not eq('test_value')
       end
     end
 
     it 'resets the configuration' do
-      service_broker.provision_and_bind(service.name, service.plan) do |binding|
-        new_client = service_client_builder(binding)
+      service_broker.provision_and_bind(service.name, service.plan) do | service_binding |
+        new_client = service_client_builder(service_binding)
         expect(new_client.config.fetch('maxmemory-policy')).to eq(@original_config_maxmem)
         expect(new_client.config.fetch('maxmemory-policy')).to_not eq('allkeys-lru')
       end
@@ -166,9 +166,9 @@ describe 'dedicated plan' do
     end
 
     it 'changes the credentials' do
-      service_broker.provision_and_bind(service.name, service.plan) do |binding|
+      service_broker.provision_and_bind(service.name, service.plan) do | service_binding |
         original_password = @old_credentials.fetch(:password)
-        new_password = binding.credentials.fetch(:password)
+        new_password = service_binding.credentials.fetch(:password)
 
         expect(new_password).to_not eq(original_password)
       end
