@@ -310,7 +310,7 @@ resource_pools:
     name: bosh-warden-boshlite-ubuntu-trusty-go_agent
     version: latest
 update:
-  canaries: 1
+  canaries: 5
   canary_watch_time: 30000-180000
   max_in_flight: 6
   update_watch_time: 30000-180000
