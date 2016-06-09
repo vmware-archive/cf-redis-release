@@ -109,4 +109,61 @@ describe 'shared plan' do
 
     it_behaves_like 'a redis instance'
   end
+
+  context 'when repeatedly draining a redis instance' do
+    before(:all) do
+      @service_instance = service_broker.provision_instance(service.name, service.plan)
+      @service_binding  = service_broker.bind_instance(@service_instance)
+      @vm_ip            = @service_binding.credentials[:host]
+
+      ps_output = ssh_gateway.execute_on(@vm_ip, 'ps aux | grep redis-serve[r]')
+      expect(ps_output).not_to be_nil
+      expect(ps_output.lines.length).to eq(1)
+
+      drain_command = '/var/vcap/jobs/cf-redis-broker/bin/drain'
+      root_execute_on(@vm_ip, drain_command)
+      sleep 1
+
+      ps_output = ssh_gateway.execute_on(@vm_ip, 'ps aux | grep redis-serve[r]')
+      expect(ps_output).to be_nil
+
+      root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit restart process-watcher')
+
+      for _ in 0..30 do
+        sleep 1
+
+        monit_output = root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit summary | grep process-watcher | grep running')
+        if !monit_output.strip.empty? then
+          break
+        end
+      end
+
+      monit_output = root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit summary | grep process-watcher | grep running')
+      expect(monit_output.strip).not_to be_empty
+
+      root_execute_on(@vm_ip, drain_command)
+      sleep 1
+    end
+
+    after(:all) do
+      service_broker.unbind_instance(@service_binding)
+      service_broker.deprovision_instance(@service_instance)
+    end
+
+    it 'successfuly drained the redis instance' do
+      ps_output = ssh_gateway.execute_on(@vm_ip, 'ps aux | grep redis-serve[r]')
+      puts ps_output
+      expect(ps_output).to be_nil
+    end
+  end
+
+  def root_execute_on(ip, command)
+    root_prompt = '[sudo] password for vcap: '
+    root_prompt_length = root_prompt.length
+
+    output = ssh_gateway.execute_on(ip, command, root: true)
+    expect(output).not_to be_nil
+    expect(output).to start_with(root_prompt)
+    return output.slice(root_prompt_length, output.length - root_prompt_length)
+  end
 end
