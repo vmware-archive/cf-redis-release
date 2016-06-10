@@ -101,7 +101,7 @@ describe 'shared plan' do
 
       root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit restart process-watcher')
 
-      for _ in 0..30 do
+      for _ in 0..45 do
         sleep 1
 
         monit_output = root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit summary | grep process-watcher | grep running')
@@ -118,13 +118,26 @@ describe 'shared plan' do
     end
 
     after(:all) do
+      root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit restart process-watcher')
+
+      for _ in 0..45 do
+        sleep 1
+
+        monit_output = root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit summary | grep process-watcher | grep running')
+        if !monit_output.strip.empty? then
+          break
+        end
+      end
+
+      monit_output = root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit summary | grep process-watcher | grep running')
+      expect(monit_output.strip).not_to be_empty
+
       service_broker.unbind_instance(@service_binding)
       service_broker.deprovision_instance(@service_instance)
     end
 
     it 'successfuly drained the redis instance' do
       ps_output = ssh_gateway.execute_on(@vm_ip, 'ps aux | grep redis-serve[r]')
-      puts ps_output
       expect(ps_output).to be_nil
     end
   end
