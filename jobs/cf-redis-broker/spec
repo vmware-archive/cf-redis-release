@@ -2,6 +2,8 @@
 name: cf-redis-broker
 
 templates:
+  pre-start.erb: bin/pre-start
+
   cf-redis-broker_ctl.erb: bin/cf-redis-broker_ctl
   process-watcher_ctl.erb: bin/process-watcher_ctl
   nginx_ctl.erb: bin/nginx_ctl
