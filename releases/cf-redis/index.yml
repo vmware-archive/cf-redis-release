@@ -738,4 +738,6 @@ builds:
     version: 346.22.0
   607c3f4f-6dc9-44c1-bd47-ef4bdae07821:
     version: 346.23.0
+  436852cf-1af9-4578-82ff-bc9e0a6f53f7:
+    version: 346.24.0
 format-version: '2'
