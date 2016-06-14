@@ -20,7 +20,8 @@ meta:
     api_url: https://api.bosh-lite.com
     apps_domain: (( .meta.apps_domain ))
     nats:
-      host: 10.244.0.6
+      machines:
+        - 10.244.0.6
       password: nats
       port: 4222
       username: nats

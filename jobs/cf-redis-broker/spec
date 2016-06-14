@@ -175,7 +175,7 @@ properties:
 
   cf.apps_domain:
     description: Domain shared by the UAA and CF API eg 'bosh-lite.com'
-  cf.nats.host:
+  cf.nats.machines:
     description: Hostname/IP of NATS
   cf.nats.port:
     description: Port that NATS listens on
