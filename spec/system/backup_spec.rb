@@ -94,9 +94,9 @@ describe 'backups', :skip_service_backups => true do
               expect(cmd_result).to_not be_nil
 
               result = cmd_result.lines.join
-              expect(result).to match(/Perform backup completed without error/)
-              expect(result).to match(/Upload backup completed without error/)
-              expect(result).to match(/Cleanup completed without error/)
+              expect(result).to match(/Perform backup completed successfully/)
+              expect(result).to match(/Upload backup completed successfully/)
+              expect(result).to match(/Cleanup completed successfully/)
             end
 
             s3_backup_file = find_s3_backup_file
