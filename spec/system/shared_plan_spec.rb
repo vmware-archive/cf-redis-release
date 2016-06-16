@@ -74,7 +74,7 @@ describe 'shared plan' do
 
       it 'appear in ephemeral storage' do
         host = @service_binding.credentials.fetch(:host)
-        ephemeral_pids = ssh_gateway.execute_on(host, 'find /var/vcap/data/shared-instance-pidfiles/ -name *.pid 2>/dev/null')
+        ephemeral_pids = ssh_gateway.execute_on(host, 'find /var/vcap/sys/run/shared-instance-pidfiles/ -name *.pid 2>/dev/null')
         expect(ephemeral_pids).to_not be_nil
         expect(ephemeral_pids.lines.length).to eq(1), "Actual output of find was: #{ephemeral_pids}"
       end
