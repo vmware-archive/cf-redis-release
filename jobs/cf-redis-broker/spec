@@ -37,6 +37,9 @@ properties:
   redis.log_directory:
     default: /var/vcap/sys/log/redis
     description: The directory which stores the redis server logs
+  redis.pidfile_directory:
+    default: /var/vcap/sys/run/shared-instance-pidfiles
+    description: The directory in which we store shared instance pid files
   redis.conf_path:
     default: /var/vcap/jobs/cf-redis-broker/config/redis.conf
     description: The shared conf file for all Redis instances

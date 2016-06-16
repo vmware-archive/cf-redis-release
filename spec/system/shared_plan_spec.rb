@@ -37,7 +37,7 @@ describe 'shared plan' do
 
   let(:maxmemory) { bosh_manifest.property('redis.maxmemory') }
 
-  describe 'redis configuration' do
+  context 'when a service has been bound' do
     before(:all) do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
       @service_binding  = service_broker.bind_instance(@service_instance)
@@ -48,20 +48,39 @@ describe 'shared plan' do
       service_broker.deprovision_instance(@service_instance)
     end
 
-    it 'has the correct maxclients' do
-      service_client = service_client_builder(@service_binding)
-      expect(service_client.config.fetch('maxclients')).to eq("10000")
+    describe 'configuration' do
+      it 'has the correct maxclients' do
+        service_client = service_client_builder(@service_binding)
+        expect(service_client.config.fetch('maxclients')).to eq("10000")
+      end
+
+      it 'has the correct maxmemory' do
+        service_client = service_client_builder(@service_binding)
+        expect(service_client.config.fetch('maxmemory').to_i).to eq(maxmemory)
+      end
+
+      it 'runs correct version of redis' do
+        service_client = service_client_builder(@service_binding)
+        expect(service_client.info('redis_version')).to eq('3.0.7')
+      end
     end
 
-    it 'has the correct maxmemory' do
-      service_client = service_client_builder(@service_binding)
-      expect(service_client.config.fetch('maxmemory').to_i).to eq(maxmemory)
+    describe 'pidfiles' do
+      it 'do not appear in persistent storage' do
+        host = @service_binding.credentials.fetch(:host)
+        persisted_pids = ssh_gateway.execute_on(host, 'find /var/vcap/store/ -name "redis-server.pid" 2>/dev/null')
+        expect(persisted_pids).to be_nil, "Actual output of find was: #{persisted_pids}"
+      end
+
+      it 'appear in ephemeral storage' do
+        host = @service_binding.credentials.fetch(:host)
+        ephemeral_pids = ssh_gateway.execute_on(host, 'find /var/vcap/data/shared-instance-pidfiles/ -name *.pid 2>/dev/null')
+        expect(ephemeral_pids).to_not be_nil
+        expect(ephemeral_pids.lines.length).to eq(1), "Actual output of find was: #{ephemeral_pids}"
+      end
     end
 
-    it 'runs correct version of redis' do
-      service_client = service_client_builder(@service_binding)
-      expect(service_client.info('redis_version')).to eq('3.0.7')
-    end
+
   end
 
   context 'when redis related properties changed in the manifest' do

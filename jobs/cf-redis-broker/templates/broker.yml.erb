@@ -23,6 +23,7 @@ redis:
   dedicated_vm_plan_id: <%= p('redis.broker.dedicated_vm_plan_id') %>
   host: <%= ip %>
   data_directory: <%= p('redis.data_directory') %>
+  pidfile_directory: <%= p('redis.pidfile_directory') %>
   redis_conf_path: <%= p('redis.conf_path') %>
   log_directory: <%= p('redis.log_directory') %>
   process_check_interval: <%= p('redis.broker.process_check_interval') %>
