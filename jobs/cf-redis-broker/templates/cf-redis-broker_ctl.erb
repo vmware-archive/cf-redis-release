@@ -6,6 +6,7 @@ LOG_DIR=/var/vcap/sys/log/cf-redis-broker
 BIN_DIR=/var/vcap/packages/cf-redis-broker/bin
 INSTANCE_LOG_DIR=<%= p('redis.log_directory') %>
 DATA_DIR=<%= p('redis.data_directory') %>
+PIDFILE_DIR=<%= p('redis.pidfile_directory') %>
 STATEFILE_DIR=`dirname <%= p('redis.statefile_path') %>`
 <% if_p('service-backup.source_folder') do %>
 BACKUP_SOURCE_DIR=<%= p('service-backup.source_folder') %>
@@ -22,6 +23,8 @@ chmod 666 <%= p('redis-backup.stderr_filename') %>
 <% end %>
 
 PIDFILE=$RUN_DIR/unicorn.pid
+BACKUP_LOG_DIR=/var/vcap/sys/log/backup
+BACKUP_TMP_DIR=<%= p('redis.broker.backups.backup_tmp_dir') %>
 
 source /var/vcap/packages/redis-common/utils.sh
 
@@ -32,8 +35,32 @@ case $1 in
   start)
     pid_guard $PIDFILE "Redis Broker"
 
-    mkdir -p $RUN_DIR $LOG_DIR $DATA_DIR $INSTANCE_LOG_DIR $STATEFILE_DIR $BACKUP_SOURCE_DIR
-    chown vcap:vcap $RUN_DIR $LOG_DIR $DATA_DIR $INSTANCE_LOG_DIR $STATEFILE_DIR $BACKUP_SOURCE_DIR
+    <% unless p('redis.broker.backups.restore_available') %>
+      echo "restore binary feature flag is off" | tee --append $LOG_DIR/cf-redis-broker.stdout.log | logger -s -t cf-redis-broker
+      rm -f $BIN_DIR/restore
+    <% end %>
+
+    mkdir -p $RUN_DIR $LOG_DIR $DATA_DIR $INSTANCE_LOG_DIR $STATEFILE_DIR $BACKUP_LOG_DIR $BACKUP_TMP_DIR $PIDFILE_DIR $BACKUP_SOURCE_DIR
+    chown vcap:vcap $RUN_DIR $LOG_DIR $DATA_DIR $INSTANCE_LOG_DIR $STATEFILE_DIR $BACKUP_LOG_DIR $BACKUP_TMP_DIR $PIDFILE_DIR $BACKUP_SOURCE_DIR
+
+    # Run backups at midnight, every night
+    # Remove any backup entry from root's crontab, we used to add it to the root crontab on the broker in older versions
+    if crontab -l | grep --quiet $BIN_DIR
+    then
+      crontab -l | grep -v $BIN_DIR | crontab -
+    fi
+    # Add new entry to vcap crontab if not already present
+    if ! crontab -u vcap -l | grep --quiet $BIN_DIR
+    then
+      # WARNING: If you change this, you'll need to reconsider the check above,
+      # as the current implementation won't update existing crontab entries.
+      if crontab -u vcap -l
+      then
+             (crontab -u vcap -l; echo "0 0 * * * PATH="'$PATH:/var/vcap/packages/aws-cli/bin'" ${BIN_DIR}/backup --config ${JOB_DIR}/config/backup.yml") | crontab -u vcap -
+      else
+             echo "0 0 * * * PATH="'$PATH:/var/vcap/packages/aws-cli/bin'" ${BIN_DIR}/backup --config ${JOB_DIR}/config/backup.yml" | crontab -u vcap -
+      fi
+    fi
 
     # Recommended for running redis on a VM in production (https://www.pivotaltracker.com/story/show/74949514)
     sysctl vm.overcommit_memory=1

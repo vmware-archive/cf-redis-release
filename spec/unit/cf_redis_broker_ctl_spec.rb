@@ -19,6 +19,10 @@ describe 'cf-redis-broker job control script templating' do
       'syslog_aggregator.address' => '10.0.0.1',
       'syslog_aggregator.port' => '9999',
       'redis.broker.backend_port' => '9875',
+      'redis.broker.backups.endpoint_url' => endpoint_url,
+      'redis.broker.backups.bucket_name' => bucket_name,
+      'redis.broker.backups.backup_tmp_dir' => 'some/backup/tmp/dir',
+      'redis.broker.backups.restore_available' => true,
     }.fetch(property_name, "")
   end
 
@@ -33,10 +37,48 @@ describe 'cf-redis-broker job control script templating' do
     ERB.new(broker_job_ctl_script).result(binding)
   end
 
-  it 'does not raise' do
-    expect {
-      template_out_script
-    }.to_not raise_error
+  context 'when both the s3 endpoint and bucket name properties are set' do
+    let(:endpoint_url) { 'some_url' }
+    let(:bucket_name) { 'bucket_name' }
+
+    it 'does not raise' do
+      expect {
+        template_out_script
+      }.to_not raise_error
+    end
+  end
+
+  context 'when neither the s3 endpoint nor bucket name properties are set' do
+    let(:endpoint_url) { '' }
+    let(:bucket_name) { '' }
+
+    it 'does not raise' do
+      expect {
+        template_out_script
+      }.to_not raise_error
+    end
+  end
+
+  context 'when the s3 endpoint but not the bucket name property is set' do
+    let(:endpoint_url) { 'some_url' }
+    let(:bucket_name) { '' }
+
+    it 'does not raise' do
+      expect {
+        template_out_script
+      }.to_not raise_error
+    end
+  end
+
+  context 'when the bucket name but not the s3 endpoint property is set' do
+    let(:endpoint_url) { '' }
+    let(:bucket_name) { 'bucket' }
+
+    it 'does not raise' do
+      expect {
+        template_out_script
+      }.to_not raise_error
+    end
   end
 
 end

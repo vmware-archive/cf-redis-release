@@ -1,0 +1,10 @@
+#!/bin/bash -e
+
+DATA_DIRECTORY=<%= p('redis.data_directory') %>
+
+if [ -d $DATA_DIRECTORY ]
+then
+  pushd $DATA_DIRECTORY
+    find . -name "redis-server.pid" -exec rm {} \;
+  popd
+fi
