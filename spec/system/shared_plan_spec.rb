@@ -148,8 +148,9 @@ describe 'shared plan' do
 
       root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit restart process-watcher')
 
-      for _ in 0..45 do
-        sleep 1
+      for _ in 0..12 do
+        puts "Waiting for process-watcher to restart"
+        sleep 5
 
         monit_output = root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit summary | grep process-watcher | grep running')
         if !monit_output.strip.empty? then
@@ -167,8 +168,9 @@ describe 'shared plan' do
     after(:all) do
       root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit restart process-watcher')
 
-      for _ in 0..45 do
-        sleep 1
+      for _ in 0..12 do
+        puts "Waiting for process-watcher to restart"
+        sleep 5
 
         monit_output = root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit summary | grep process-watcher | grep running')
         if !monit_output.strip.empty? then
