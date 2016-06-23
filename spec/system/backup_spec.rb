@@ -4,7 +4,7 @@ require 'aws-sdk'
 
 require 'prof/marketplace_service'
 
-describe 'backups', :run_backup_spec => true do
+describe 'backups', :skip_backups => true do
 
   let(:redis_config_command) { bosh_manifest.property("redis.config_command") }
   let(:broker_vm_ip) { bosh_director.ips_for_job('cf-redis-broker', bosh_manifest.deployment_name).first }

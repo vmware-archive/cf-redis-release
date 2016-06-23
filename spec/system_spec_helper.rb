@@ -85,7 +85,7 @@ RSpec.configure do |config|
   config.full_backtrace = true
   config.filter_run_excluding :skip_metrics => !ExcludeHelper::metrics_available?
   config.filter_run_excluding :skip_service_backups => !ExcludeHelper::service_backups_available?
-  config.filter_run_excluding :run_backup_spec => !ExcludeHelper::service_backups_available? && ExcludeHelper::run_backup_spec?
+  config.filter_run_excluding :skip_backups => ExcludeHelper::service_backups_available? && !ExcludeHelper::run_backup_spec?
 
   config.before(:all) do
     redis_service_broker.deprovision_service_instances!
@@ -98,9 +98,7 @@ RSpec.configure do |config|
           bosh_manifest.property('service-backup.destination.s3.secret_access_key')
         )
       })
-    end
-
-    if !ExcludeHelper::service_backups_available? && ExcludeHelper::run_backup_spec?
+    elsif ExcludeHelper::run_backup_spec?
       Aws.config.update({
         region: 'us-east-1',
         credentials: Aws::Credentials.new(

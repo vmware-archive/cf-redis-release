@@ -9,6 +9,7 @@ properties:
   syslog_aggregator: (( .meta.syslog_aggregator ))
   redis:
     broker:
+      <<: (( merge ))
       auth:
         username: (( .meta.broker.username ))
         password: (( .meta.broker.password ))
