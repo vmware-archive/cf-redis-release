@@ -48,34 +48,36 @@ describe 'shared plan' do
       service_broker.deprovision_instance(@service_instance)
     end
 
-    it 'has the correct maxclients' do
-      service_client = service_client_builder(@service_binding)
-      expect(service_client.config.fetch('maxclients')).to eq("10000")
+    describe 'configuration' do
+      it 'has the correct maxclients' do
+        service_client = service_client_builder(@service_binding)
+        expect(service_client.config.fetch('maxclients')).to eq("10000")
+      end
+
+      it 'has the correct maxmemory' do
+        service_client = service_client_builder(@service_binding)
+        expect(service_client.config.fetch('maxmemory').to_i).to eq(maxmemory)
+      end
+
+      it 'runs correct version of redis' do
+        service_client = service_client_builder(@service_binding)
+        expect(service_client.info('redis_version')).to eq('3.2.1')
+      end
     end
 
-    it 'has the correct maxmemory' do
-      service_client = service_client_builder(@service_binding)
-      expect(service_client.config.fetch('maxmemory').to_i).to eq(maxmemory)
-    end
+    describe 'pidfiles' do
+      it 'do not appear in persistent storage' do
+        host = @service_binding.credentials.fetch(:host)
+        persisted_pids = ssh_gateway.execute_on(host, 'find /var/vcap/store/ -name "redis-server.pid" 2>/dev/null')
+        expect(persisted_pids).to be_nil, "Actual output of find was: #{persisted_pids}"
+      end
 
-    it 'runs correct version of redis' do
-      service_client = service_client_builder(@service_binding)
-      expect(service_client.info('redis_version')).to eq('3.2.1')
-    end
-  end
-
-  describe 'pidfiles' do
-    it 'do not appear in persistent storage' do
-      host = @service_binding.credentials.fetch(:host)
-      persisted_pids = ssh_gateway.execute_on(host, 'find /var/vcap/store/ -name "redis-server.pid" 2>/dev/null')
-      expect(persisted_pids).to be_nil, "Actual output of find was: #{persisted_pids}"
-    end
-
-    it 'appear in ephemeral storage' do
-      host = @service_binding.credentials.fetch(:host)
-      ephemeral_pids = ssh_gateway.execute_on(host, 'find /var/vcap/sys/run/shared-instance-pidfiles/ -name *.pid 2>/dev/null')
-      expect(ephemeral_pids).to_not be_nil
-      expect(ephemeral_pids.lines.length).to eq(1), "Actual output of find was: #{ephemeral_pids}"
+      it 'appear in ephemeral storage' do
+        host = @service_binding.credentials.fetch(:host)
+        ephemeral_pids = ssh_gateway.execute_on(host, 'find /var/vcap/sys/run/shared-instance-pidfiles/ -name *.pid 2>/dev/null')
+        expect(ephemeral_pids).to_not be_nil
+        expect(ephemeral_pids.lines.length).to eq(1), "Actual output of find was: #{ephemeral_pids}"
+      end
     end
   end
 
