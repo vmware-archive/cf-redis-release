@@ -176,8 +176,16 @@ describe 'shared plan' do
         end
       end
 
-      monit_output = root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit summary | grep process-watcher | grep running')
-      expect(monit_output.strip).not_to be_empty
+      monit_output = root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit summary')
+      pattern = /\'process-watcher\'\s+([\w ]+)/
+      process_watcher_status = pattern.match(monit_output)[1]
+
+      if process_watcher_status != "running"
+        puts "process-watcher did not restart within timeout"
+        puts monit_output
+      end
+
+      expect(process_watcher_status).to eq("running")
 
       service_broker.unbind_instance(@service_binding)
       service_broker.deprovision_instance(@service_instance)
