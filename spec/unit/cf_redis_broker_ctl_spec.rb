@@ -23,6 +23,7 @@ describe 'cf-redis-broker job control script templating' do
       'redis.broker.backups.bucket_name' => bucket_name,
       'redis.broker.backups.backup_tmp_dir' => 'some/backup/tmp/dir',
       'redis.broker.backups.restore_available' => true,
+      'redis.pidfile_directory' => '/tmp/foo',
     }.fetch(property_name)
   end
 
