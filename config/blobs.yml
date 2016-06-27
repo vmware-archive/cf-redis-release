@@ -79,3 +79,7 @@ go/go1.6.2.linux-amd64.tar.gz:
   object_id: db4d0df9-4317-46ea-899e-57d992862394
   sha: b8318b09de06076d5397e6ec18ebef3b45cd315d
   size: 84840658
+cf-cli/cf-cli_6.19.0_linux_x86-64.tgz:
+  object_id: ef96336e-a63f-403f-8bb9-5cd775e1f5c5
+  sha: 625170654ffa4568dae97b4d3915e87557b29261
+  size: 6450885
