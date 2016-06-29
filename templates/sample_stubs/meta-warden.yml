@@ -33,7 +33,7 @@ meta:
       shared_vm_plan_id: a5cd5502-84d3-4b83-8381-f24227e0df7a
       dedicated_vm_plan_id: 1da3fbda-dcc1-4b1c-a5a7-ae2567c09633
     dedicated_plan:
-      instance_count: 1
+      instance_count: 2
     shared_plan:
       instance_limit: 5
       max_memory: 262144000

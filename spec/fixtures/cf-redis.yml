@@ -19,12 +19,13 @@ jobs:
     release: cf-redis
   - name: syslog-configurator
     release: cf-redis
-- instances: 1
+- instances: 2
   name: dedicated-node
   networks:
   - name: redis_z1
     static_ips:
     - 10.244.3.6
+    - 10.244.3.10
   persistent_disk: 4096
   resource_pool: redis_z1
   templates:
@@ -101,7 +102,7 @@ meta:
     bg_save_command: yetanotherrandomstring
     config_command: configalias
     dedicated_plan:
-      instance_count: 1
+      instance_count: 2
     save_command: anotherrandomstring
     shared_plan:
       instance_limit: 5
@@ -281,6 +282,7 @@ properties:
       backend_port: 12345
       dedicated_nodes:
       - 10.244.3.6
+      - 10.244.3.10
       enable_service_access: true
       name: redisv424
       network: redis_z1
