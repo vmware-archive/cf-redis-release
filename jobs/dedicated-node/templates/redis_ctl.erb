@@ -47,8 +47,8 @@ case $1 in
       fi
     fi
 
-    exec chpst -u vcap:vcap /var/vcap/packages/redis/bin/redis-server $CONFIG_PATH \
-      2>&1 | tee --append $LOG_DIR/redis.log | logger -s -t redis-ctl
+    # All logging is configured in redis.conf.erb - as we daemonize the process, redirecting stdout is not possible
+    exec chpst -u vcap:vcap /var/vcap/packages/redis/bin/redis-server $CONFIG_PATH
 
     ;;
 
