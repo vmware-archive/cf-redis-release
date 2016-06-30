@@ -85,7 +85,7 @@ RSpec.configure do |config|
   config.full_backtrace = true
   config.filter_run_excluding :skip_metrics => !ExcludeHelper::metrics_available?
   config.filter_run_excluding :skip_service_backups => !ExcludeHelper::service_backups_available?
-  config.filter_run_excluding :skip_backups => ExcludeHelper::service_backups_available? && !ExcludeHelper::run_backup_spec?
+  config.filter_run_excluding :skip_backups => ExcludeHelper::service_backups_available? || !ExcludeHelper::run_backup_spec?
 
   config.before(:all) do
     redis_service_broker.deprovision_service_instances!
