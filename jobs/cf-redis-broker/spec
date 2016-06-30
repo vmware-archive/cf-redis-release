@@ -215,3 +215,8 @@ properties:
     description: The user to use when authenticating with NATS
   cf.nats.password:
     description: The password to use when authenticating with NATS
+
+  syslog_aggregator.address:
+    description: The address of the syslog aggregator
+  syslog_aggregator.port:
+    description: The port to connect to the syslog aggregator over
