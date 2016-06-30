@@ -18,6 +18,7 @@ case $1 in
 
     mkdir -p $LOG_DIR $RUN_DIR $DATA_DIR $BACKUP_LOG_DIR $BACKUP_TMP_DIR
     chown vcap:vcap $LOG_DIR $RUN_DIR $DATA_DIR $BACKUP_LOG_DIR $BACKUP_TMP_DIR
+    [ -e $LOG_DIR/redis.log ] && chown vcap:vcap $LOG_DIR/redis.log
 
     <% unless p('redis.broker.backups.restore_available') %>
       echo "restore binary feature flag is off" | tee --append $LOG_DIR/cf-redis-broker.stdout.log | logger -s -t redis-ctl
