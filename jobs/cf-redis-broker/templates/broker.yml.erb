@@ -29,6 +29,13 @@ redis:
   process_check_interval: <%= p('redis.broker.process_check_interval') %>
   start_redis_timeout: <%= p('redis.broker.start_redis_timeout') %>
   service_instance_limit: <%= p('redis.broker.service_instance_limit') %>
+  provider_display_name: <%= p('redis.broker.provider_display_name') %>
+  documentation_url: <%= p('redis.broker.documentation_url') %>
+  support_url: <%= p('redis.broker.support_url') %>
+  display_name: <%= p('redis.broker.display_name') %>
+  long_description: <%= p('redis.broker.long_description') %>
+  description: <%= p('redis.broker.description') %>
+  icon_image: <%= p('redis.broker.icon_image') %>
   dedicated:
     nodes: <%= p('redis.broker.dedicated_nodes') %>
     port: <%= p('redis.broker.dedicated_port') %>
