@@ -1,0 +1,30 @@
+---
+meta: ~
+
+compilation:
+  cloud_properties:
+    instance_type: (( merge || "m3.medium" ))
+
+resource_pools:
+- name: redis_z1
+  stemcell:
+    name: bosh-openstack-kvm-ubuntu-trusty-go_agent
+    version: (( merge || "latest" ))
+  cloud_properties:
+    instance_type: (( merge || "m3.medium" ))
+
+networks:
+- name: redis_z1
+  type: manual
+  subnets:
+  - range: 10.0.16.0/20
+    gateway: 10.0.16.1
+    reserved:
+    - 10.0.16.2 - 10.0.16.254
+    static:
+    - 10.0.17.1 - 10.0.17.100
+    dns:
+    - 10.0.0.2
+    cloud_properties:
+      subnet: YOUR_SUBNET_ID
+      security_group: YOUR_SECURITY_GROUP_NAME
