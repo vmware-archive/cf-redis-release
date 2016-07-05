@@ -6,6 +6,7 @@ templates:
 
   cf-redis-broker_ctl.erb: bin/cf-redis-broker_ctl
   process-watcher_ctl.erb: bin/process-watcher_ctl
+  process-destroyer_ctl.erb: bin/process-destroyer_ctl
   nginx_ctl.erb: bin/nginx_ctl
   route-registrar_ctl: bin/route-registrar_ctl
 

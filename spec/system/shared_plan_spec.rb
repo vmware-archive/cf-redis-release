@@ -146,18 +146,7 @@ describe 'shared plan' do
 
       root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit restart process-watcher')
 
-      for _ in 0..12 do
-        puts "Waiting for process-watcher to restart"
-        sleep 5
-
-        monit_output = root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit summary | grep process-watcher | grep running')
-        if !monit_output.strip.empty? then
-          break
-        end
-      end
-
-      monit_output = root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit summary | grep process-watcher | grep running')
-      expect(monit_output.strip).not_to be_empty
+      expect(wait_for_process_start('process-watcher')).to eq(true)
 
       root_execute_on(@vm_ip, drain_command)
       sleep 1
@@ -166,32 +155,42 @@ describe 'shared plan' do
     after(:all) do
       root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit restart process-watcher')
 
-      for _ in 0..12 do
-        puts "Waiting for process-watcher to restart"
-        sleep 5
-
-        monit_output = root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit summary | grep process-watcher | grep running')
-        if !monit_output.strip.empty? then
-          break
-        end
-      end
-
-      monit_output = root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit summary')
-      pattern = /\'process-watcher\'\s+([\w ]+)/
-      process_watcher_status = pattern.match(monit_output)[1]
-
-      if process_watcher_status != "running"
-        puts "process-watcher did not restart within timeout"
-        puts monit_output
-      end
-
-      expect(process_watcher_status).to eq("running")
+      expect(wait_for_process_start('process-watcher')).to eq(true)
 
       service_broker.unbind_instance(@service_binding)
       service_broker.deprovision_instance(@service_instance)
     end
 
     it 'successfuly drained the redis instance' do
+      ps_output = ssh_gateway.execute_on(@vm_ip, 'ps aux | grep redis-serve[r]')
+      expect(ps_output).to be_nil
+    end
+  end
+
+  describe 'process destroyer' do
+    before do
+      @service_instance = service_broker.provision_instance(service.name, service.plan)
+      @service_binding  = service_broker.bind_instance(@service_instance)
+      @vm_ip            = @service_binding.credentials[:host]
+
+      ps_output = ssh_gateway.execute_on(@vm_ip, 'ps aux | grep redis-serve[r]')
+      expect(ps_output).not_to be_nil
+    end
+
+    after do
+      root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit restart process-watcher')
+
+      expect(wait_for_process_start('process-watcher')).to eq(true)
+
+      service_broker.unbind_instance(@service_binding)
+      service_broker.deprovision_instance(@service_instance)
+    end
+
+    it 'kills all redis-server processes when stopped' do
+      root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit stop process-destroyer')
+
+      wait_for_process_stop('process-destroyer')
+
       ps_output = ssh_gateway.execute_on(@vm_ip, 'ps aux | grep redis-serve[r]')
       expect(ps_output).to be_nil
     end
@@ -205,5 +204,37 @@ describe 'shared plan' do
     expect(output).not_to be_nil
     expect(output).to start_with(root_prompt)
     return output.slice(root_prompt_length, output.length - root_prompt_length)
+  end
+
+  def process_running?(process_name)
+    monit_output = root_execute_on(@vm_ip, "/var/vcap/bosh/bin/monit summary | grep #{process_name} | grep running")
+    !monit_output.strip.empty?
+  end
+
+  def process_not_monitored?(process_name)
+    monit_output = root_execute_on(@vm_ip, "/var/vcap/bosh/bin/monit summary | grep #{process_name} | grep 'not monitored'")
+    !monit_output.strip.empty?
+  end
+
+  def wait_for_process_stop(process_name)
+    for _ in 0..12 do
+      puts "Waiting for #{process_name} to stop"
+      sleep 5
+      return true if process_not_monitored?(process_name)
+    end
+
+    puts "Process #{process_name} did not stop within 60 seconds"
+    return false
+  end
+
+  def wait_for_process_start(process_name)
+    for _ in 0..12 do
+      puts "Waiting for #{process_name} to start"
+      sleep 5
+      return true if process_running?(process_name)
+    end
+
+    puts "Process #{process_name} did not start within 60 seconds"
+    return false
   end
 end

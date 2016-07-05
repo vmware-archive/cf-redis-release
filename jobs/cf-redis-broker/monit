@@ -1,7 +1,14 @@
 check process process-watcher
   with pidfile /var/vcap/sys/run/cf-redis-broker/process-watcher.pid
+  depends on process-destroyer
   start program "/var/vcap/jobs/cf-redis-broker/bin/process-watcher_ctl start" with timeout 60 seconds
   stop program "/var/vcap/jobs/cf-redis-broker/bin/process-watcher_ctl stop" with timeout 60 seconds
+  group vcap
+
+check process process-destroyer
+  with pidfile /var/vcap/sys/run/cf-redis-broker/process-destroyer.pid
+  start program "/var/vcap/jobs/cf-redis-broker/bin/process-destroyer_ctl start" with timeout 60 seconds
+  stop program "/var/vcap/jobs/cf-redis-broker/bin/process-destroyer_ctl stop" with timeout 60 seconds
   group vcap
 
 check process cf-redis-broker

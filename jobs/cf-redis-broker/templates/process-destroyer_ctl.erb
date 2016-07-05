@@ -1,0 +1,23 @@
+#!/bin/bash -e
+
+PIDFILE=/var/vcap/sys/run/cf-redis-broker/process-destroyer.pid
+
+source /var/vcap/packages/redis-common/utils.sh
+
+case $1 in
+
+  start)
+    echo $$ > $PIDFILE
+    while true; do sleep 10000; done
+    ;;
+
+  stop)
+    pkill redis-server
+    kill_and_wait $PIDFILE 55
+    ;;
+
+  *)
+    echo "Usage: process-watcher_ctl {start|stop}"
+    ;;
+
+esac
