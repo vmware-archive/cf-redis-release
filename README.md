@@ -44,7 +44,7 @@ You can generate an example bosh-lite deployment manifest as follows:
 
 ```
 bosh target lite
-./scripts/generate_deployment_manifest warden templates/sample_stubs/sample_warden_stub.yml > cf-redis-lite.yml
+./scripts/generate-deployment-manifest warden templates/sample_stubs/infrastructure-warden.yml > cf-redis-lite.yml
 ```
 
 - You can increase the count of the `dedicated-vm` plan nodes from the example of `1`
