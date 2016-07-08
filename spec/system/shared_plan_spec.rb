@@ -16,20 +16,41 @@ describe 'shared plan' do
   # TODO do not manually run drain once bosh bug fixed
   let(:manually_drain) { '/var/vcap/jobs/cf-redis-broker/bin/drain' }
 
-  it 'preserves data when recreating vms' do
-    service_broker.provision_and_bind(service.name, service.plan) do | service_binding |
-      service_client = service_client_builder(service_binding)
-      service_client.write('test_key', 'test_value')
-      expect(service_client.read('test_key')).to eq('test_value')
+  context 'when recreating vms' do
+    before(:all) do
+      @service_instance = service_broker.provision_instance(service.name, service.plan)
+      @service_binding  = service_broker.bind_instance(@service_instance)
 
-      # TODO do not manually run drain once bosh bug fixed
+      @service_client = service_client_builder(@service_binding)
+      @service_client.write('test_key', 'test_value')
+      expect(@service_client.read('test_key')).to eq('test_value')
+
+      host = @service_binding.credentials.fetch(:host)
+
+      @prestop_timestamp = ssh_gateway.execute_on(host, "date +%s")
       bosh_director.stop(environment.bosh_service_broker_job_name, 0)
-      host = service_binding.credentials.fetch(:host)
-      ssh_gateway.execute_on(host, manually_drain, root: true)
+
+      @vm_log = root_execute_on(host, "cat /var/log/syslog")
 
       bosh_director.recreate_all([environment.bosh_service_broker_job_name])
+    end
 
-      expect(service_client.read('test_key')).to eq('test_value')
+    after(:all) do
+      service_broker.unbind_instance(@service_binding)
+      service_broker.deprovision_instance(@service_instance)
+    end
+
+    it 'preserves data' do
+      expect(@service_client.read('test_key')).to eq('test_value')
+    end
+
+    it 'logs redis broker shutdown' do
+      shutdown_log_count = @vm_log.lines.drop_while do |log_line|
+        log_is_earlier?(log_line, @prestop_timestamp)
+      end.count do |line|
+        line.match(/Starting Redis Broker shutdown/)
+      end
+      expect(shutdown_log_count).to eq(1)
     end
   end
 
@@ -207,5 +228,52 @@ describe 'shared plan' do
     expect(output).not_to be_nil
     expect(output).to start_with(root_prompt)
     return output.slice(root_prompt_length, output.length - root_prompt_length)
+  end
+
+  def process_running?(process_name)
+    monit_output = root_execute_on(@vm_ip, "/var/vcap/bosh/bin/monit summary | grep #{process_name} | grep running")
+    !monit_output.strip.empty?
+  end
+
+  def process_not_monitored?(process_name)
+    monit_output = root_execute_on(@vm_ip, "/var/vcap/bosh/bin/monit summary | grep #{process_name} | grep 'not monitored'")
+    !monit_output.strip.empty?
+  end
+
+  def wait_for_process_stop(process_name)
+    for _ in 0..12 do
+      puts "Waiting for #{process_name} to stop"
+      sleep 5
+      return true if process_not_monitored?(process_name)
+    end
+
+    puts "Process #{process_name} did not stop within 60 seconds"
+    return false
+  end
+
+  def wait_for_process_start(process_name)
+    for _ in 0..12 do
+      puts "Waiting for #{process_name} to start"
+      sleep 5
+      return true if process_running?(process_name)
+    end
+
+    puts "Process #{process_name} did not start within 60 seconds"
+    return false
+  end
+
+  def log_is_earlier?(log_line, timestamp)
+    match = log_line.scan( /\{.*\}$/ ).first
+
+    return true if match.nil?
+
+    begin
+      json_log = JSON.parse(match)
+    rescue JSON::ParserError
+      return true
+    end
+
+    log_timestamp = json_log["timestamp"].to_i
+    log_timestamp <= timestamp.to_i
   end
 end
