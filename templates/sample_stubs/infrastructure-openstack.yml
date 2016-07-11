@@ -1,0 +1,31 @@
+---
+meta: ~
+
+compilation:
+  cloud_properties:
+    instance_type: m1.medium
+
+resource_pools:
+- name: redis_z1
+  stemcell:
+    name: bosh-openstack-kvm-ubuntu-trusty-go_agent
+    version: (( merge || "latest" ))
+  cloud_properties:
+    instance_type: m1.medium
+
+networks:
+- name: redis_z1
+  type: manual
+  subnets:
+  - range: 10.10.10.0/24
+    gateway: 10.10.10.1
+    reserved:
+    - 10.10.10.2 - 10.10.10.99
+    - 10.10.10.140 - 10.10.10.254
+    static:
+    - 10.10.10.100 - 10.10.10.120
+    dns:
+    - REPLACE_WITH_YOUR_DNS_SERVER
+    cloud_properties:
+      net_id: REPLACE_WITH_YOUR_SUBNET_ID
+      security_groups: REPLACE_WITH_YOUR_SECURITY_GROUPS_LIST # e.g. ["cf"]
