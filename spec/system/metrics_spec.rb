@@ -56,14 +56,15 @@ describe 'metrics', :skip_metrics => true do
     expect(metric).to include('deployment:"cf-redis"')
     expect(metric).to include('eventType:ValueMetric')
     expect(metric).to match(/timestamp:\d/)
-    expect(metric).to match(/index:"\d"/)
+    expect(metric).to match(/index:"[\dabcdef-]*"/)
     expect(metric).to match(/ip:"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"/)
   end
 
   def find_metric(metric_name, job_name, job_index)
+    job_id = metron_id_from_job_index(job_name, job_index)
     60.times do
       File.open(firehose_out_file, "r") do |file|
-        regex = /(?=.*name:"#{metric_name}")(?=.*job:"#{job_name}")(?=.*index:"#{job_index}")/
+        regex = /(?=.*job:"#{job_name}")(?=.*index:"#{job_id}")(?=.*name:"#{metric_name}")/
         matches = file.readlines.grep(regex)
         if matches.size > 0
           return matches[0]
@@ -71,7 +72,14 @@ describe 'metrics', :skip_metrics => true do
       end
       sleep 1
     end
-    fail("metric '#{metric_name}' for job '#{job_name}' with index '#{job_index}' not found")
+    fail("metric '#{metric_name}' for job '#{job_name}' with index '#{job_id}' not found")
+  end
+
+  def metron_id_from_job_index(job_name, job_index)
+    ip = bosh_manifest.job(job_name).static_ips[job_index]
+
+    metron_agent_config = ssh_gateway.execute_on(ip, 'cat /var/vcap/jobs/metron_agent/config/metron_agent.json').to_s
+    JSON.parse(metron_agent_config)["Index"]
   end
 
   def firehose_out_file
