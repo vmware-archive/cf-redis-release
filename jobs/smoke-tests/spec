@@ -27,3 +27,5 @@ properties:
   redis.broker.dedicated_nodes:
     description: List of node IPs for the dedicated plan
     default: []
+  redis.broker.host:
+    description: IP of the broker node
