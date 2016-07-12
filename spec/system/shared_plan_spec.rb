@@ -1,3 +1,4 @@
+require 'logger'
 require 'system_spec_helper'
 require 'support/redis_service_client'
 require 'system/shared_examples/redis_instance'
@@ -6,6 +7,8 @@ require 'prof/external_spec/shared_examples/service'
 require 'prof/marketplace_service'
 
 describe 'shared plan' do
+  logger = Logger.new(STDOUT)
+
   def service
     Prof::MarketplaceService.new(
       name: bosh_manifest.property('redis.broker.service_name'),
@@ -105,8 +108,6 @@ describe 'shared plan' do
         expect(ephemeral_pids.lines.length).to eq(1), "Actual output of find was: #{ephemeral_pids}"
       end
     end
-
-
   end
 
   context 'when redis related properties changed in the manifest' do
@@ -175,18 +176,8 @@ describe 'shared plan' do
 
       root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit restart process-watcher')
 
-      for _ in 0..12 do
-        puts "Waiting for process-watcher to restart"
-        sleep 5
-
-        monit_output = root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit summary | grep process-watcher | grep running')
-        if !monit_output.strip.empty? then
-          break
-        end
-      end
-
-      monit_output = root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit summary | grep process-watcher | grep running')
-      expect(monit_output.strip).not_to be_empty
+      running = wait_for_process_start 'process-watcher'
+      expect(running).to be true
 
       root_execute_on(@vm_ip, drain_command)
       sleep 1
@@ -195,26 +186,8 @@ describe 'shared plan' do
     after(:all) do
       root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit restart process-watcher')
 
-      for _ in 0..12 do
-        puts "Waiting for process-watcher to restart"
-        sleep 5
-
-        monit_output = root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit summary | grep process-watcher | grep running')
-        if !monit_output.strip.empty? then
-          break
-        end
-      end
-
-      monit_output = root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit summary')
-      pattern = /\'process-watcher\'\s+([\w ]+)/
-      process_watcher_status = pattern.match(monit_output)[1]
-
-      if process_watcher_status != "running"
-        puts "process-watcher did not restart within timeout"
-        puts monit_output
-      end
-
-      expect(process_watcher_status).to eq("running")
+      running = wait_for_process_start 'process-watcher'
+      expect(running).to be true
 
       service_broker.unbind_instance(@service_binding)
       service_broker.deprovision_instance(@service_instance)
@@ -226,45 +199,37 @@ describe 'shared plan' do
     end
   end
 
-  def root_execute_on(ip, command)
-    root_prompt = '[sudo] password for vcap: '
-    root_prompt_length = root_prompt.length
-
-    output = ssh_gateway.execute_on(ip, command, root: true)
-    expect(output).not_to be_nil
-    expect(output).to start_with(root_prompt)
-    return output.slice(root_prompt_length, output.length - root_prompt_length)
-  end
-
   def process_running?(process_name)
     monit_output = root_execute_on(@vm_ip, "/var/vcap/bosh/bin/monit summary | grep #{process_name} | grep running")
+    return false if monit_output.nil?
     !monit_output.strip.empty?
   end
 
   def process_not_monitored?(process_name)
     monit_output = root_execute_on(@vm_ip, "/var/vcap/bosh/bin/monit summary | grep #{process_name} | grep 'not monitored'")
+    return false if monit_output.nil?
     !monit_output.strip.empty?
   end
 
   def wait_for_process_stop(process_name)
-    for _ in 0..12 do
-      puts "Waiting for #{process_name} to stop"
+    for _ in 0..18 do
+      logger.info("Waiting for #{process_name} to stop")
       sleep 5
       return true if process_not_monitored?(process_name)
     end
 
-    puts "Process #{process_name} did not stop within 60 seconds"
+    logger.error("Process #{process_name} did not stop within 90 seconds")
     return false
   end
 
   def wait_for_process_start(process_name)
-    for _ in 0..12 do
-      puts "Waiting for #{process_name} to start"
+    for _ in 0..18 do
+      logger.info("Waiting for #{process_name} to start")
       sleep 5
       return true if process_running?(process_name)
     end
 
-    puts "Process #{process_name} did not start within 60 seconds"
+    logger.error("Process #{process_name} did not start within 90 seconds")
     return false
   end
 
