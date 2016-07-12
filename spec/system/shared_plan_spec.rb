@@ -13,9 +13,6 @@ describe 'shared plan' do
     )
   end
 
-  # TODO do not manually run drain once bosh bug fixed
-  let(:manually_drain) { '/var/vcap/jobs/cf-redis-broker/bin/drain' }
-
   context 'when recreating vms' do
     before(:all) do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
@@ -29,6 +26,10 @@ describe 'shared plan' do
 
       @prestop_timestamp = ssh_gateway.execute_on(host, "date +%s")
       bosh_director.stop(environment.bosh_service_broker_job_name, 0)
+
+      # TODO - #126119045
+      # do not manually run drain once bosh bug fixed
+      root_execute_on(host, '/var/vcap/jobs/cf-redis-broker/bin/drain')
 
       @vm_log = root_execute_on(host, "cat /var/log/syslog")
 
