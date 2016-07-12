@@ -13,6 +13,10 @@ describe 'shared plan' do
     )
   end
 
+  # TODO - #126119045
+  # do not manually run drain once bosh bug fixed
+  let(:manually_drain) { '/var/vcap/jobs/cf-redis-broker/bin/drain' }
+
   context 'when recreating vms' do
     before(:all) do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
@@ -151,6 +155,7 @@ describe 'shared plan' do
     it_behaves_like 'a redis instance'
   end
 
+  # Regression test - Go 1.5.x didn't always properly handle SIGTERM
   context 'when repeatedly draining a redis instance' do
     before(:all) do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
