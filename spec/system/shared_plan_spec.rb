@@ -1,4 +1,3 @@
-require 'logger'
 require 'system_spec_helper'
 require 'support/redis_service_client'
 require 'system/shared_examples/redis_instance'
@@ -7,8 +6,6 @@ require 'prof/external_spec/shared_examples/service'
 require 'prof/marketplace_service'
 
 describe 'shared plan' do
-  logger = Logger.new(STDOUT)
-
   def service
     Prof::MarketplaceService.new(
       name: bosh_manifest.property('redis.broker.service_name'),

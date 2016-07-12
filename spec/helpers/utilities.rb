@@ -7,3 +7,7 @@ def root_execute_on(ip, command)
   expect(output).to start_with(root_prompt)
   return output.slice(root_prompt_length, output.length - root_prompt_length)
 end
+
+def logger
+  @logger ||= Logger.new(STDOUT)
+end
