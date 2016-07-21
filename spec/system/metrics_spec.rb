@@ -22,7 +22,9 @@ describe 'metrics', :skip_metrics => true do
 
   describe 'broker metrics' do
     ["/p-redis/service-broker/dedicated_vm_plan/total_instances",
-     "/p-redis/service-broker/dedicated_vm_plan/available_instances"
+     "/p-redis/service-broker/dedicated_vm_plan/available_instances",
+     "/p-redis/service-broker/shared_vm_plan/available_instances",
+     "/p-redis/service-broker/shared_vm_plan/total_instances",
     ].each do |metric_name|
       it "contains #{metric_name} metric for redis broker" do
         assert_metric(metric_name, 'cf-redis-broker', 0)
@@ -33,12 +35,13 @@ describe 'metrics', :skip_metrics => true do
   describe 'redis metrics' do
     ["/p-redis/info/cpu/used_cpu_sys",
      "/p-redis/info/memory/used_memory",
+     "/p-redis/info/memory/maxmemory",
      "/p-redis/info/stats/total_commands_processed",
      "/p-redis/info/stats/total_connections_received",
      "/p-redis/info/memory/mem_fragmentation_ratio",
      "/p-redis/info/stats/evicted_keys",
      "/p-redis/info/server/uptime_in_seconds",
-     "/p-redis/info/server/uptime_in_days"
+     "/p-redis/info/server/uptime_in_days",
     ].each do |metric_name|
       it "contains #{metric_name} metric for all dedicated nodes" do
         @number_of_nodes.times do |idx|
