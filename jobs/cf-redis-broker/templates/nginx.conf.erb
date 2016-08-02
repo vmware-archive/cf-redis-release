@@ -17,6 +17,8 @@ events {
 http {
   server_tokens off;
 
+  server_names_hash_bucket_size <%= p('redis.broker.nginx.bucket_size') %>;
+
   server {
     listen <%= p('redis.broker.nginx.port') %>;
 
