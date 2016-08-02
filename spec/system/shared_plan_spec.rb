@@ -239,13 +239,13 @@ describe 'shared plan' do
   end
 
   def wait_for_process_start(process_name)
-    for _ in 0..12 do
+    for _ in 0..18 do
       puts "Waiting for #{process_name} to start"
       sleep 5
       return true if process_running?(process_name)
     end
 
-    puts "Process #{process_name} did not start within 60 seconds"
+    puts "Process #{process_name} did not start within 90 seconds"
     return false
   end
 
