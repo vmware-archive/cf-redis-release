@@ -22,7 +22,7 @@ message_bus_servers:
     user: <%= p('cf.nats.username') %>
     password: <%= p('cf.nats.password') %>
 <% end %>
-external_host: <%= p('redis.broker.subdomain') %>.<%= p('cf.apps_domain') %>
+host: <%= p('redis.broker.subdomain') %>.<%= p('cf.apps_domain') %>
 external_ip: <%= ip %>
 port: <%= p('redis.broker.nginx.port') %>
 health_checker:
