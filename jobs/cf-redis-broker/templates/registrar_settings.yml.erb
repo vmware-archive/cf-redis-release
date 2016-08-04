@@ -17,11 +17,10 @@
 %>
 
 message_bus_servers:
-<% for machine in p('cf.nats.machines') %>
-  - host: <%= machine %>:<%= p('cf.nats.port') %>
-    user: <%= p('cf.nats.username') %>
-    password: <%= p('cf.nats.password') %>
-<% end %>
+- host: <%= p('cf.nats.host') %>:<%= p('cf.nats.port') %>
+  user: <%= p('cf.nats.username') %>
+  password: <%= p('cf.nats.password') %>
+
 host: <%= ip %>
 port: <%= p('redis.broker.nginx.port') %>
 health_checker:
