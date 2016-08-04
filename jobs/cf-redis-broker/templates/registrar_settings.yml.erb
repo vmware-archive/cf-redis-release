@@ -17,12 +17,22 @@
 %>
 
 message_bus_servers:
-  - host: <%= p('cf.nats.host') %>:<%= p('cf.nats.port') %>
+<% for machine in p('cf.nats.machines') %>
+  - host: <%= machine %>:<%= p('cf.nats.port') %>
     user: <%= p('cf.nats.username') %>
     password: <%= p('cf.nats.password') %>
-external_host: <%= p('redis.broker.subdomain') %>.<%= p('cf.apps_domain') %>
-external_ip: <%= ip %>
-port: 80
+<% end %>
+host: <%= ip %>
+port: <%= p('redis.broker.nginx.port') %>
 health_checker:
   name: redis-broker
   interval_in_seconds: 10
+
+routes:
+- name: "broker_<%= index %>"
+  port: 80
+  uris:
+  - <%= p('redis.broker.subdomain') %>.<%= p('cf.apps_domain') %>
+  registration_interval: 10
+  health_check:
+    name: redis-broker
