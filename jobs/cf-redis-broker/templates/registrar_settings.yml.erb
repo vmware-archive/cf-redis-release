@@ -22,7 +22,7 @@ message_bus_servers:
   password: <%= p('cf.nats.password') %>
 
 host: <%= ip %>
-port: <%= p('redis.broker.nginx.port') %>
+port: <%= p('redis.broker.port') %>
 health_checker:
   name: redis-broker
   interval_in_seconds: 10
