@@ -31,7 +31,7 @@ routes:
 - name: "broker_<%= index %>"
   port: 80
   uris:
-  - <%= p('redis.broker.subdomain') %>.<%= p('cf.apps_domain') %>
+  - <%= p('redis.broker.subdomain') %>.<%= p('cf.system_domain') %>
   registration_interval: 10
   health_check:
     name: redis-broker

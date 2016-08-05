@@ -199,6 +199,8 @@ properties:
     description: The name of the network that the redis broker runs on.
 
   cf.apps_domain:
+    description: Domain used by `cf push`ed apps
+  cf.system_domain:
     description: Domain shared by the UAA and CF API eg 'bosh-lite.com'
   cf.nats.host:
     description: Hostname/IP of NATS
