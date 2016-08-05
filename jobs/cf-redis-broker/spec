@@ -232,6 +232,8 @@ properties:
     description: Image displayed in Apps Manager
 
   cf.apps_domain:
+    description: Domain used by `cf push`ed apps
+  cf.system_domain:
     description: Domain shared by the UAA and CF API eg 'bosh-lite.com'
   cf.nats.machines:
     description: Hostname/IP of NATS
