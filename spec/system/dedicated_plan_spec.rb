@@ -96,38 +96,33 @@ describe 'dedicated plan' do
     end
 
     it 'logs instance provisioning' do
-      @vm_log = root_execute_on(@service_broker_host, 'cat /var/log/syslog')
-
-      provision_log_count = @vm_log.lines.drop_while do |log_line|
-        log_is_earlier?(log_line, @preprovision_timestamp)
-      end.count do |line|
+      vm_log = root_execute_on(@service_broker_host, 'cat /var/log/syslog')
+      contains_expected_log = drop_log_lines_before(@preprovision_timestamp, vm_log).any? do |line|
         line.include?('Successfully provisioned Redis instance') &&
         line.include?('dedicated-vm') &&
         line.include?(@service_instance.id)
       end
-      expect(provision_log_count).to eq(1)
+
+      expect(contains_expected_log).to be true
     end
   end
 
   describe 'redis deprovisioning' do
     before(:all) do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
+      @predeprovision_timestamp = ssh_gateway.execute_on(@service_broker_host, 'date +%s')
+      service_broker.deprovision_instance(@service_instance)
     end
 
     it 'logs instance deprovisioning' do
-      predeprovision_timestamp = ssh_gateway.execute_on(@service_broker_host, 'date +%s')
-      service_broker.deprovision_instance(@service_instance)
-
-      @vm_log = root_execute_on(@service_broker_host, 'cat /var/log/syslog')
-
-      provision_log_count = @vm_log.lines.drop_while do |log_line|
-        log_is_earlier?(log_line, predeprovision_timestamp)
-      end.count do |line|
+      vm_log = root_execute_on(@service_broker_host, 'cat /var/log/syslog')
+      contains_expected_log = drop_log_lines_before(@predeprovision_timestamp, vm_log).any? do |line|
         line.include?('Successfully deprovisioned Redis instance') &&
         line.include?('dedicated-vm') &&
         line.include?(@service_instance.id)
       end
-      expect(provision_log_count).to eq(1)
+
+      expect(contains_expected_log).to be true
     end
   end
 

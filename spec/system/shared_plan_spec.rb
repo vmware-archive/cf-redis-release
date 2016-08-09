@@ -34,16 +34,14 @@ describe 'shared plan' do
     end
 
     it 'logs instance provisioning' do
-      @vm_log = root_execute_on(@service_broker_host, 'cat /var/log/syslog')
-
-      provision_log_count = @vm_log.lines.drop_while do |log_line|
-        log_is_earlier?(log_line, @preprovision_timestamp)
-      end.count do |line|
+      vm_log = root_execute_on(@service_broker_host, 'cat /var/log/syslog')
+      contains_expected_log = drop_log_lines_before(@preprovision_timestamp, vm_log).any? do |line|
         line.include?('Successfully provisioned Redis instance') &&
         line.include?('shared-vm') &&
         line.include?(@service_instance.id)
       end
-      expect(provision_log_count).to eq(1)
+
+      expect(contains_expected_log).to be true
     end
   end
 
@@ -56,16 +54,14 @@ describe 'shared plan' do
     end
 
     it 'logs instance deprovisioning' do
-      @vm_log = root_execute_on(@service_broker_host, 'cat /var/log/syslog')
-
-      provision_log_count = @vm_log.lines.drop_while do |log_line|
-        log_is_earlier?(log_line, @predeprovision_timestamp)
-      end.count do |line|
+      vm_log = root_execute_on(@service_broker_host, 'cat /var/log/syslog')
+      contains_expected_log = drop_log_lines_before(@predeprovision_timestamp, vm_log).any? do |line|
         line.include?('Successfully deprovisioned Redis instance') &&
         line.include?('shared-vm') &&
         line.include?(@service_instance.id)
       end
-      expect(provision_log_count).to eq(1)
+
+      expect(contains_expected_log).to be true
     end
   end
 
@@ -98,12 +94,11 @@ describe 'shared plan' do
     end
 
     it 'logs redis broker shutdown' do
-      shutdown_log_count = @vm_log.lines.drop_while do |log_line|
-        log_is_earlier?(log_line, @prestop_timestamp)
-      end.count do |line|
-        line.match(/Starting Redis Broker shutdown/)
+      contains_expected_shutdown_log = drop_log_lines_before(@prestop_timestamp, @vm_log).any? do |line|
+        line.include?('Starting Redis Broker shutdown')
       end
-      expect(shutdown_log_count).to eq(1)
+
+      expect(contains_expected_shutdown_log).to be true
     end
   end
 

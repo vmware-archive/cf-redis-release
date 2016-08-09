@@ -22,3 +22,9 @@ def log_is_earlier?(log_line, timestamp)
   log_timestamp = json_log["timestamp"].to_i
   log_timestamp < timestamp.to_i
 end
+
+def drop_log_lines_before(time, log_lines)
+  log_lines.lines.drop_while do |log_line|
+    log_is_earlier?(log_line, @preprovision_timestamp)
+  end
+end
