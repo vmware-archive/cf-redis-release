@@ -13,6 +13,10 @@ describe 'dedicated plan' do
     )
   end
 
+  before(:all) do
+    @service_broker_host = bosh_director.ips_for_job(environment.bosh_service_broker_job_name, bosh_manifest.deployment_name).first
+  end
+
   let(:redis_config_command) { bosh_manifest.property('redis.config_command') }
 
   # TODO do not manually run drain once bosh bug fixed
@@ -54,10 +58,11 @@ describe 'dedicated plan' do
 
   it_behaves_like 'a redis instance'
 
-  describe 'redis configuration' do
+  describe 'redis provisioning' do
     before(:all) do
-      @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @binding          = service_broker.bind_instance(@service_instance)
+      @preprovision_timestamp = ssh_gateway.execute_on(@service_broker_host, "date +%s")
+      @service_instance       = service_broker.provision_instance(service.name, service.plan)
+      @binding                = service_broker.bind_instance(@service_instance)
     end
 
     after(:all) do
@@ -65,27 +70,64 @@ describe 'dedicated plan' do
       service_broker.deprovision_instance(@service_instance)
     end
 
-    it 'has the correct maxmemory' do
-      client = service_client_builder(@binding)
-      expect(client.config['maxmemory'].to_i).to be > 0
+    describe 'configuration' do
+      it 'has the correct maxmemory' do
+        client = service_client_builder(@binding)
+        expect(client.config['maxmemory'].to_i).to be > 0
+      end
+
+      it 'has the correct maxclients' do
+        client = service_client_builder(@binding)
+        expect(client.config['maxclients']).to eq("10000")
+      end
+
+      it 'runs correct version of redis' do
+        client = service_client_builder(@binding)
+        expect(client.info('redis_version')).to eq('3.2.1')
+      end
+
+      it 'requires a password' do
+        wrong_credentials = @binding.credentials.reject { |k, v| !([:host, :port].include?(k)) }
+        allow(@binding).to receive(:credentials).and_return(wrong_credentials)
+
+        client = service_client_builder(@binding)
+        expect { client.write('foo', 'bar') }.to raise_error(/NOAUTH Authentication required/)
+      end
     end
 
-    it 'has the correct maxclients' do
-      client = service_client_builder(@binding)
-      expect(client.config['maxclients']).to eq("10000")
+    it 'logs instance provisioning' do
+      @vm_log = root_execute_on(@service_broker_host, 'cat /var/log/syslog')
+
+      provision_log_count = @vm_log.lines.drop_while do |log_line|
+        log_is_earlier?(log_line, @preprovision_timestamp)
+      end.count do |line|
+        line.include?('Successfully provisioned Redis instance') &&
+        line.include?('dedicated-vm') &&
+        line.include?(@service_instance.id)
+      end
+      expect(provision_log_count).to eq(1)
+    end
+  end
+
+  describe 'redis deprovisioning' do
+    before(:all) do
+      @service_instance = service_broker.provision_instance(service.name, service.plan)
     end
 
-    it 'runs correct version of redis' do
-      client = service_client_builder(@binding)
-      expect(client.info('redis_version')).to eq('3.2.1')
-    end
+    it 'logs instance deprovisioning' do
+      predeprovision_timestamp = ssh_gateway.execute_on(@service_broker_host, 'date +%s')
+      service_broker.deprovision_instance(@service_instance)
 
-    it 'requires a password' do
-      wrong_credentials = @binding.credentials.reject { |k, v| !([:host, :port].include?(k)) }
-      allow(@binding).to receive(:credentials).and_return(wrong_credentials)
+      @vm_log = root_execute_on(@service_broker_host, 'cat /var/log/syslog')
 
-      client = service_client_builder(@binding)
-      expect { client.write('foo', 'bar') }.to raise_error(/NOAUTH Authentication required/)
+      provision_log_count = @vm_log.lines.drop_while do |log_line|
+        log_is_earlier?(log_line, predeprovision_timestamp)
+      end.count do |line|
+        line.include?('Successfully deprovisioned Redis instance') &&
+        line.include?('dedicated-vm') &&
+        line.include?(@service_instance.id)
+      end
+      expect(provision_log_count).to eq(1)
     end
   end
 

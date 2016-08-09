@@ -13,8 +13,61 @@ describe 'shared plan' do
     )
   end
 
+  before(:all) do
+    @service_broker_host = bosh_director.ips_for_job(
+      environment.bosh_service_broker_job_name,
+      bosh_manifest.deployment_name,
+    ).first
+  end
+
   # TODO do not manually run drain once bosh bug fixed
   let(:manually_drain) { '/var/vcap/jobs/cf-redis-broker/bin/drain' }
+
+  describe 'redis provisioning' do
+    before(:all) do
+      @preprovision_timestamp = ssh_gateway.execute_on(@service_broker_host, 'date +%s')
+      @service_instance       = service_broker.provision_instance(service.name, service.plan)
+    end
+
+    after(:all) do
+      service_broker.deprovision_instance(@service_instance)
+    end
+
+    it 'logs instance provisioning' do
+      @vm_log = root_execute_on(@service_broker_host, 'cat /var/log/syslog')
+
+      provision_log_count = @vm_log.lines.drop_while do |log_line|
+        log_is_earlier?(log_line, @preprovision_timestamp)
+      end.count do |line|
+        line.include?('Successfully provisioned Redis instance') &&
+        line.include?('shared-vm') &&
+        line.include?(@service_instance.id)
+      end
+      expect(provision_log_count).to eq(1)
+    end
+  end
+
+  describe 'redis deprovisioning' do
+    before(:all) do
+      @service_instance = service_broker.provision_instance(service.name, service.plan)
+
+      @predeprovision_timestamp = ssh_gateway.execute_on(@service_broker_host, "date +%s")
+      service_broker.deprovision_instance(@service_instance)
+    end
+
+    it 'logs instance deprovisioning' do
+      @vm_log = root_execute_on(@service_broker_host, 'cat /var/log/syslog')
+
+      provision_log_count = @vm_log.lines.drop_while do |log_line|
+        log_is_earlier?(log_line, @predeprovision_timestamp)
+      end.count do |line|
+        line.include?('Successfully deprovisioned Redis instance') &&
+        line.include?('shared-vm') &&
+        line.include?(@service_instance.id)
+      end
+      expect(provision_log_count).to eq(1)
+    end
+  end
 
   context 'when recreating vms' do
     before(:all) do
@@ -247,20 +300,5 @@ describe 'shared plan' do
 
     puts "Process #{process_name} did not start within 90 seconds"
     return false
-  end
-
-  def log_is_earlier?(log_line, timestamp)
-    match = log_line.scan( /\{.*\}$/ ).first
-
-    return true if match.nil?
-
-    begin
-      json_log = JSON.parse(match)
-    rescue JSON::ParserError
-      return true
-    end
-
-    log_timestamp = json_log["timestamp"].to_i
-    log_timestamp <= timestamp.to_i
   end
 end
