@@ -13,10 +13,32 @@ jobs:
     static_ips:
     - 10.244.3.2
   persistent_disk: 4096
+  properties:
+    nats:
+      machines:
+      - 10.244.0.6
+      password: nats
+      port: 4222
+      user: nats
+    route_registrar:
+      routes:
+      - health_check:
+          name: redis-broker
+          script_path: "/var/vcap/jobs/cf-redis-broker/bin/health_check.sh"
+        name: broker_0
+        port: 80
+        registration_interval: 10s
+        tags:
+          component: redis-broker
+          env: production
+        uris:
+        - redis-broker.bosh-lite.com
   resource_pool: redis_z1
   templates:
   - name: cf-redis-broker
     release: cf-redis
+  - name: route_registrar
+    release: routing
   - name: syslog-configurator
     release: cf-redis
 - instances: 2
@@ -308,6 +330,8 @@ properties:
     port: 1234
 releases:
 - name: cf-redis
+  version: latest
+- name: routing
   version: latest
 resource_pools:
 - cloud_properties:

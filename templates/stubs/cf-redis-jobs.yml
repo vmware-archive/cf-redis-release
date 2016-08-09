@@ -98,6 +98,11 @@ jobs:
   resource_pool: (( .resource_pools.[0].name ))
   templates: (( job_templates.cf_redis_broker additional_job_templates.cf_redis_broker ))
   properties:
+    nats:
+      machines: (( .meta.cf.nats.machines ))
+      port: (( .meta.cf.nats.port ))
+      password: (( .meta.cf.nats.password ))
+      user: (( .meta.cf.nats.username ))
     route_registrar:
       routes:
       - name: "broker_0"
@@ -107,10 +112,10 @@ jobs:
           component: redis-broker
           env: production
         uris:
-          - (( .properties.redis.broker.subdomain "." .properties.cf.system_domain ))
+        - (( .properties.redis.broker.subdomain "." .properties.cf.system_domain ))
         health_check:
           name: redis-broker
-          timeout: 10s
+          script_path: /var/vcap/jobs/cf-redis-broker/bin/health_check.sh
     <<: (( merge ))
 - instances: (( .meta.redis.dedicated_plan.instance_count ))
   name: dedicated-node

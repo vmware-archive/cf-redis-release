@@ -18,8 +18,6 @@ describe 'logging' do
         'nginx.stdout.log',
         'process-watcher.stderr.log',
         'process-watcher.stdout.log',
-        'route-registrar.stdout.log',
-        'route-registrar.stderr.log',
       ]
     }
   }

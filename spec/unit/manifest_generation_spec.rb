@@ -1,10 +1,13 @@
 require 'support/yaml_eq'
 require 'yaml'
+require 'logger'
 require 'pry'
 require 'rspec/shell/expectations'
 
 
 describe 'manifest generator' do
+  log = Logger.new(STDOUT)
+
   include Rspec::Shell::Expectations
   let(:stubbed_env) { create_stubbed_env }
 
@@ -23,8 +26,10 @@ describe 'manifest generator' do
     let(:actual_yaml) { YAML.load(File.read(example_manifest.path)) }
 
     it 'should generate manifest' do
-      stdout, _stderr, _status = stubbed_env.execute("scripts/generate-deployment-manifest #{infrastructure}")
+      stdout, stderr, status = stubbed_env.execute("scripts/generate-deployment-manifest #{infrastructure}")
 
+      log.info(stderr) if stderr
+      expect(status.exitstatus).to eq 0
       expected = File.read("spec/fixtures/cf-redis.yml")
       expect(stdout).to yaml_eq(expected)
     end

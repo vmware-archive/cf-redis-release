@@ -7,6 +7,3 @@
 [submodule "src/cf-redis-smoke-tests"]
 	path = src/cf-redis-smoke-tests
 	url = https://github.com/pivotal-cf/cf-redis-smoke-tests.git
-[submodule "src/route-registrar"]
-	path = src/route-registrar
-	url = https://github.com/cloudfoundry-incubator/route-registrar.git
