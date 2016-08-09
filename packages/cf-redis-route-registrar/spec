@@ -1,6 +1,0 @@
----
-name: cf-redis-route-registrar
-dependencies:
-- go
-files:
-- route-registrar/**/*

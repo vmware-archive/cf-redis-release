@@ -23,9 +23,3 @@ check process broker-nginx
   start program "/var/vcap/jobs/cf-redis-broker/bin/nginx_ctl start"
   stop program "/var/vcap/jobs/cf-redis-broker/bin/nginx_ctl stop"
   group vcap
-
-check process cf-redis-route-registrar
-  with pidfile /var/vcap/sys/run/cf-redis-broker/route-registrar.pid
-  start program "/var/vcap/jobs/cf-redis-broker/bin/route-registrar_ctl start" with timeout 10 seconds
-  stop program "/var/vcap/jobs/cf-redis-broker/bin/route-registrar_ctl stop" with timeout 10 seconds
-  group vcap

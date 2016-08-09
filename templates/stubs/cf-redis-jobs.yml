@@ -42,6 +42,8 @@ networks: ~
 base_releases:
 - name: (( .meta.release_name ))
   version: latest
+- name: routing
+  version: latest
 
 additional_releases: (( merge || [] ))
 
@@ -53,6 +55,8 @@ job_templates:
   cf_redis_broker:
   - name: cf-redis-broker
     release: (( .meta.release_name ))
+  - name: route_registrar
+    release: routing
   - name: syslog-configurator
     release: (( .meta.release_name ))
   dedicated_node:
@@ -93,7 +97,21 @@ jobs:
   persistent_disk: 4096
   resource_pool: (( .resource_pools.[0].name ))
   templates: (( job_templates.cf_redis_broker additional_job_templates.cf_redis_broker ))
-  <<: (( merge ))
+  properties:
+    route_registrar:
+      routes:
+      - name: "broker_0"
+        registration_interval: 10s
+        port: 80
+        tags:
+          component: redis-broker
+          env: production
+        uris:
+          - (( .properties.redis.broker.subdomain "." .properties.cf.system_domain ))
+        health_check:
+          name: redis-broker
+          timeout: 10s
+    <<: (( merge ))
 - instances: (( .meta.redis.dedicated_plan.instance_count ))
   name: dedicated-node
   networks:

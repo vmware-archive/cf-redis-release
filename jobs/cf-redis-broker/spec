@@ -8,14 +8,12 @@ templates:
   process-watcher_ctl.erb: bin/process-watcher_ctl
   process-destroyer_ctl.erb: bin/process-destroyer_ctl
   nginx_ctl.erb: bin/nginx_ctl
-  route-registrar_ctl: bin/route-registrar_ctl
 
   broker.yml.erb: config/broker.yml
   backup.yml.erb: config/backup.yml
   restore.yml.erb: config/restore.yml
   nginx.conf.erb: config/nginx.conf
   redis.conf.erb: config/redis.conf
-  registrar_settings.yml.erb: config/registrar_settings.yml
 
   drain.sh: bin/drain
 
@@ -24,7 +22,6 @@ packages:
 - redis-common
 - cf-redis-nginx
 - redis
-- cf-redis-route-registrar
 - python
 - aws-cli
 
