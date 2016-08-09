@@ -5,6 +5,7 @@ templates:
   pre-start.erb: bin/pre-start
 
   cf-redis-broker_ctl.erb: bin/cf-redis-broker_ctl
+  health_check.sh.erb: bin/health_check.sh
   process-watcher_ctl.erb: bin/process-watcher_ctl
   process-destroyer_ctl.erb: bin/process-destroyer_ctl
   nginx_ctl.erb: bin/nginx_ctl
@@ -156,9 +157,6 @@ properties:
   redis.broker.backend_host:
     default: localhost
     description: The port for the broker unicorn process to run on
-  redis.broker.subdomain:
-    default: redis-broker
-    description: Subdomain for route registrar
   redis.broker.nginx.port:
     default: 80
     description: "Port for nginx"

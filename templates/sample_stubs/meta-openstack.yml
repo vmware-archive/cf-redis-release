@@ -18,6 +18,7 @@ meta:
     admin_password: REPLACE_WITH_ADMIN_PASSWORD
     api_url: (( "https://api" "." .meta.external_domain ))
     apps_domain: (( .meta.apps_domain ))
+    system_domain: (( .meta.external_domain ))
     skip_ssl_validation: false # Optional, change to `true` in envs with self-signed SSL certs
     nats:
       host: REPLACE_WITH_NATS_HOST

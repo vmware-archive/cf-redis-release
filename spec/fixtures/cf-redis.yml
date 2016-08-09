@@ -84,6 +84,7 @@ meta:
     admin_username: admin
     api_url: https://api.bosh-lite.com
     apps_domain: bosh-lite.com
+    system_domain: bosh-lite.com
     nats:
       machines:
         - 10.244.0.6
@@ -267,6 +268,7 @@ properties:
     admin_username: admin
     api_url: https://api.bosh-lite.com
     apps_domain: bosh-lite.com
+    system_domain: bosh-lite.com
     nats:
       machines:
         - 10.244.0.6
