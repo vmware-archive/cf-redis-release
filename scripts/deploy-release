@@ -35,7 +35,7 @@ generate_manifest() {
 }
 
 check_args() {
-  if [ -z $BOSH_MANIFEST ]
+  if [ -z "$BOSH_MANIFEST" ]
   then
     export BOSH_MANIFEST=/tmp/redis-lite.yml
     generate_manifest
@@ -64,7 +64,7 @@ upload_release() {
   local _name=$2
   pushd "$_workdir"
   update_release
-  bosh -n create release --force --name $_name
+  bosh -n create release --force --name "$_name"
   bosh -n upload release --rebase || log "[WARN] Attempted a --rebase, but there were no job or package changes."
   popd
 }
@@ -109,6 +109,7 @@ main() {
 
   upload_metrics_releases "$BOSH_MANIFEST"
   upload_backups_releases "$BOSH_MANIFEST"
+  upload_release "${WORKSPACE_BASE_DIR}/routing-release" "routing"
   upload_release "${WORKSPACE_BASE_DIR}/cf-redis-release" "cf-redis"
 
   bosh_deploy

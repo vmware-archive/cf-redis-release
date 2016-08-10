@@ -3,10 +3,21 @@
 This repository contains a BOSH release for a Cloud Foundry Redis service
 broker.
 
-## Updating
+## Prepare Workspace
 
-Clone the repository and run `scripts/update-release`. This will initialize
-the required submodules and install gems required to run the tests.
+Clone the `cf-redis-release` repo into `~/workspace` using:
+
+```
+git clone https://github.com/pivotal-cf/cf-redis-release ~/workspace/cf-redis-release
+~/workspace/cf-redis-release/scripts/update-release
+```
+
+The `routing-release` is a dependent release of `cf-redis-release`, clone it
+using:
+
+```
+git clone https://github.com/cloudfoundry-incubator/routing-release ~/workspace/routing-release
+```
 
 ## Deploying
 
