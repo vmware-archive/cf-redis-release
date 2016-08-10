@@ -99,10 +99,10 @@ jobs:
   templates: (( job_templates.cf_redis_broker additional_job_templates.cf_redis_broker ))
   properties:
     nats:
-      machines: (( .meta.cf.nats.machines ))
-      port: (( .meta.cf.nats.port ))
-      password: (( .meta.cf.nats.password ))
-      user: (( .meta.cf.nats.username ))
+      machines: (( .meta.nats.machines ))
+      port: (( .meta.nats.port ))
+      password: (( .meta.nats.password ))
+      user: (( .meta.nats.user ))
     route_registrar:
       routes:
       - name: "broker_0"

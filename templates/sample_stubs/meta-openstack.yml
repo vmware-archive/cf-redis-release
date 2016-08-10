@@ -20,11 +20,12 @@ meta:
     apps_domain: (( .meta.apps_domain ))
     system_domain: (( .meta.external_domain ))
     skip_ssl_validation: false # Optional, change to `true` in envs with self-signed SSL certs
-    nats:
-      host: REPLACE_WITH_NATS_HOST
-      password: REPLACE_WITH_NATS_PASSWORD
-      port: REPLACE_WITH_NATS_PORT
-      username: REPLACE_WITH_NATS_USERNAME
+  nats:
+    machines:
+    - REPLACE_WITH_NATS_MACHINES_HOST
+    password: REPLACE_WITH_NATS_PASSWORD
+    port: REPLACE_WITH_NATS_PORT
+    user: REPLACE_WITH_NATS_USERNAME
   service_name: redis
   route_name: redis-broker
   redis:

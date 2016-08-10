@@ -230,14 +230,6 @@ properties:
     description: Domain used by `cf push`ed apps
   cf.system_domain:
     description: Domain shared by the UAA and CF API eg 'bosh-lite.com'
-  cf.nats.machines:
-    description: Hostname/IP of NATS
-  cf.nats.port:
-    description: Port that NATS listens on
-  cf.nats.username:
-    description: The user to use when authenticating with NATS
-  cf.nats.password:
-    description: The password to use when authenticating with NATS
 
   syslog_aggregator.address:
     description: The address of the syslog aggregator

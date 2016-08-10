@@ -20,12 +20,12 @@ meta:
     api_url: https://api.bosh-lite.com
     apps_domain: (( .meta.apps_domain ))
     system_domain: (( .meta.external_domain ))
-    nats:
-      machines:
-        - 10.244.0.6
-      password: nats
-      port: 4222
-      username: nats
+  nats:
+    machines:
+    - 10.244.0.6
+    password: nats
+    port: 4222
+    user: nats
   service_name: redis
   route_name: redis-broker
   redis:
