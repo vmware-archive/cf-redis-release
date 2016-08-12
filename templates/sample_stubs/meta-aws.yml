@@ -4,7 +4,7 @@ meta:
   director_uuid: REPLACE_WITH_DIRECTOR_ID
   release_name: cf-redis
   apps_domain: REPLACE_WITH_APP_DOMAIN
-  external_domain: REPLACE_WITH_DOMAIN
+  system_domain: REPLACE_WITH_DOMAIN
   syslog_aggregator:
     address: REPLACE_WITH_SYSLOG_AGGREGATOR_HOST
     port: REPLACE_WITH_SYSLOG_AGGREGATOR_PORT
@@ -12,19 +12,19 @@ meta:
     name: redis
     username: REPLACE_WITH_BROKER_USERNAME
     password: REPLACE_WITH_BROKER_PASSWORD
-    host: (( "redis-broker" "." .meta.external_domain ))
+    host: (( "redis-broker" "." .meta.system_domain ))
   cf:
     admin_username: REPLACE_WITH_ADMIN_USERNAME
     admin_password: REPLACE_WITH_ADMIN_PASSWORD
-    api_url: (( "https://api" "." .meta.external_domain ))
+    api_url: (( "https://api" "." .meta.system_domain ))
     apps_domain: (( .meta.apps_domain ))
     skip_ssl_validation: false # Optional, change to `true` in envs with self-signed SSL certs
-    nats:
-      machines:
-        - LIST_OF_NATS_HOSTS
-      password: REPLACE_WITH_NATS_PASSWORD
-      port: REPLACE_WITH_NATS_PORT
-      username: REPLACE_WITH_NATS_USERNAME
+  nats:
+    machines:
+      - LIST_OF_NATS_HOSTS
+    password: REPLACE_WITH_NATS_PASSWORD
+    port: REPLACE_WITH_NATS_PORT
+    username: REPLACE_WITH_NATS_USERNAME
   service_name: redis
   route_name: redis-broker
   redis:
