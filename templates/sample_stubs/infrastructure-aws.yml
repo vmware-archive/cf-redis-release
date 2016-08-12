@@ -3,6 +3,7 @@ meta: ~
 
 compilation:
   cloud_properties:
+    availability_zone: YOUR_AVAILABILITY_ZONE
     instance_type: m3.medium
 
 resource_pools:
@@ -11,6 +12,7 @@ resource_pools:
     name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
     version: (( merge || "latest" ))
   cloud_properties:
+    availability_zone: YOUR_AVAILABILITY_ZONE
     instance_type: m3.medium
 
 networks:
