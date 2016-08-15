@@ -89,7 +89,6 @@ additional_job_properties:
   smoke_tests: (( merge || [] ))
 
 jobs:
-- <<: (( merge || [] ))
 - instances: 1
   name: cf-redis-broker
   networks:
