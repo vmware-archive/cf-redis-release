@@ -20,15 +20,15 @@ properties:
       dedicated_vm_plan_id: (( .meta.redis.broker.dedicated_vm_plan_id ))
       route_name: (( .meta.route_name ))
       network: redis_z1
-      backend_host: (( jobs.cf-redis-broker.networks.redis_z1.static_ips.[0] ))
-      host: (( jobs.cf-redis-broker.networks.redis_z1.static_ips.[0] ))
+      backend_host: (( base_jobs.cf-redis-broker.networks.redis_z1.static_ips.[0] ))
+      host: (( base_jobs.cf-redis-broker.networks.redis_z1.static_ips.[0] ))
       backend_port: 12345
       subdomain: (( .meta.redis.broker.subdomain || "redis-broker" ))
       name: (( .meta.redis.broker.name ))
       service_instance_limit: (( .meta.redis.shared_plan.instance_limit ))
-      dedicated_nodes: (( jobs.dedicated-node.networks.redis_z1.static_ips ))
+      dedicated_nodes: (( base_jobs.dedicated-node.networks.redis_z1.static_ips ))
     maxmemory: (( .meta.redis.shared_plan.max_memory ))
-    host: (( jobs.cf-redis-broker.networks.redis_z1.static_ips.[0] ))
+    host: (( base_jobs.cf-redis-broker.networks.redis_z1.static_ips.[0] ))
     config_command: (( .meta.redis.config_command ))
     save_command: (( .meta.redis.save_command ))
     bg_save_command: (( .meta.redis.bg_save_command ))
@@ -88,7 +88,9 @@ additional_job_properties:
   broker_deregistrar: (( merge || [] ))
   smoke_tests: (( merge || [] ))
 
-jobs:
+additional_jobs: (( merge || [] ))
+
+base_jobs:
 - instances: 1
   name: cf-redis-broker
   networks:
@@ -162,3 +164,5 @@ jobs:
   resource_pool: (( .resource_pools.[0].name ))
   templates: (( job_templates.smoke_tests additional_job_templates.smoke_tests ))
   <<: (( merge ))
+
+jobs: (( base_jobs additional_jobs ))
