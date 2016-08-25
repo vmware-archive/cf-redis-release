@@ -1,7 +1,7 @@
 # abort script on any command that exits with a non zero value
 set -e
 
-PACKAGE_NAME=github.com/pivotal-cf/cf-redis-broker
+PACKAGE_NAME=github.com/pivotal-cf/cf-redis-smoke-tests
 PACKAGE_DIR=${BOSH_INSTALL_TARGET}/src/${PACKAGE_NAME}
 
 mkdir -p $(dirname $PACKAGE_DIR)
