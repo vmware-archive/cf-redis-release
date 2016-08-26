@@ -11,3 +11,12 @@ cp -a $(basename $PACKAGE_NAME)/ $PACKAGE_DIR
 export GOROOT=$(readlink -nf /var/vcap/packages/go)
 export GOPATH=$BOSH_INSTALL_TARGET:${PACKAGE_DIR}/Godeps/_workspace
 export PATH=$GOROOT/bin:$PATH
+
+OWN_GODEPS_PATH=${PACKAGE_DIR}/Godeps/_workspace/src/github.com/pivotal-cf/cf-redis-smoke-tests/
+
+mkdir -p OWN_GODEPS_PATH
+FOLDERS=( cf redis service )
+for FOLDER in "${FOLDERS[@]}"
+do
+  cp -r ${PACKAGE_DIR}/${FOLDER} ${OWN_GODEPS_PATH}
+done
