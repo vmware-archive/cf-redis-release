@@ -2,10 +2,13 @@
 
 set -e
 
-cd /var/vcap/packages/cf-redis-smoke-tests/src
+cd /var/vcap/packages/cf-redis-smoke-tests/src/github.com/pivotal-cf/cf-redis-smoke-tests
 
 export GOPATH=$PWD/Godeps/_workspace
 export GOROOT=/var/vcap/packages/go
 export PATH=/var/vcap/packages/cf-cli/bin:$GOPATH/bin:$GOROOT/bin:$PATH
+
+mkdir -p Godeps/_workspace/src/github.com/pivotal-cf/
+cp -r /var/vcap/packages/cf-redis-smoke-tests/src/github.com/pivotal-cf/cf-redis-smoke-tests Godeps/_workspace/src/github.com/pivotal-cf/
 
 CONFIG_PATH=/var/vcap/jobs/smoke-tests/config.json ./bin/test
