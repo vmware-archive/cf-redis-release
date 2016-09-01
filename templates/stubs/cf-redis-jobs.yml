@@ -124,7 +124,7 @@ base_jobs:
   networks:
   - name: redis_z1
     static_ips: (( merge || static_ips(1,2,3,4,5,6,7,8,9,10) ))
-  persistent_disk: (( .meta.redis.shared_plan.persistent_disk_size || 4096 ))
+  persistent_disk: (( .meta.redis.dedicated_plan.persistent_disk_size || 4096 ))
   resource_pool: (( .resource_pools.[0].name ))
   templates: (( job_templates.dedicated_node additional_job_templates.dedicated_node ))
   <<: (( merge ))
