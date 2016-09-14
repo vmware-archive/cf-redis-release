@@ -1,6 +1,0 @@
----
-name: aws-cli
-files:
-- aws-cli/awscli-bundle.zip
-dependencies:
-- python

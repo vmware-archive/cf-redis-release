@@ -3,7 +3,6 @@ name: cf-redis-broker
 
 templates:
   pre-start.erb: bin/pre-start
-
   cf-redis-broker_ctl.erb: bin/cf-redis-broker_ctl
   health_check.sh.erb: bin/health_check.sh
   process-watcher_ctl.erb: bin/process-watcher_ctl
@@ -11,8 +10,6 @@ templates:
   nginx_ctl.erb: bin/nginx_ctl
 
   broker.yml.erb: config/broker.yml
-  backup.yml.erb: config/backup.yml
-  restore.yml.erb: config/restore.yml
   nginx.conf.erb: config/nginx.conf
   redis.conf.erb: config/redis.conf
 
@@ -24,9 +21,11 @@ packages:
 - cf-redis-nginx
 - redis
 - python
-- aws-cli
 
 properties:
+  redis.pidfile_directory:
+    default: /var/vcap/sys/run/shared-instance-pidfiles
+    description: The directory in which we store shared instance pid files
   redis.statefile_path:
     default: /var/vcap/store/cf-redis-broker/statefile.json
     description: Path to the broker statefile
@@ -36,9 +35,6 @@ properties:
   redis.log_directory:
     default: /var/vcap/sys/log/redis
     description: The directory which stores the redis server logs
-  redis.pidfile_directory:
-    default: /var/vcap/sys/run/shared-instance-pidfiles
-    description: The directory in which we store shared instance pid files
   redis.conf_path:
     default: /var/vcap/jobs/cf-redis-broker/config/redis.conf
     description: The shared conf file for all Redis instances
@@ -177,30 +173,6 @@ properties:
     default: redis
     description: Name of the broker, to be used in cf commandline operations and by the broker-registrar
 
-  redis.broker.backups.restore_available:
-    default: true
-    description: "Makes the backup restore binary available"
-  redis.broker.backups.access_key_id:
-    default: ""
-    description: "Access Key ID for the S3-compatible blob store that backups will be uploaded to"
-  redis.broker.backups.secret_access_key:
-    default: ""
-    description: "Secret Access Key for the S3-compatible blob store that backups will be uploaded to"
-  redis.broker.backups.endpoint_url:
-    default: "https://s3.amazonaws.com"
-    description: "HTTP(S) endpoint of the S3-compatible blob store that backups will be uploaded to"
-  redis.broker.backups.bucket_name:
-    default: ""
-    description: "Name of the bucket into which backups will be uploaded"
-  redis.broker.backups.path:
-    default: ""
-    description: "Path within the above bucket to which backups will be uploaded"
-  redis.broker.backups.bg_save_timeout:
-    default: 3600
-    description: "Timeout in seconds for Redis background save to complete when backing up instance"
-  redis.broker.backups.backup_tmp_dir:
-    default: /var/vcap/store/tmp_backup
-    description: "Temporary directory to use for backups. MUST be on same device (persistent disk) as redis data"
   redis.broker.network:
     description: The name of the network that the redis broker runs on.
 
