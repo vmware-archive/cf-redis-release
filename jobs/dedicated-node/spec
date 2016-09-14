@@ -22,7 +22,9 @@ packages:
 - python
 
 properties:
-
+  service-backup.source_folder:
+    description: The directory in which we store service backups
+    default: ""
   redis.client_timeout:
     default: 0
     description: Close the connection after a client is idle for N seconds (0 to disable)

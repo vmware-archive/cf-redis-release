@@ -23,6 +23,9 @@ packages:
 - python
 
 properties:
+  service-backup.source_folder:
+    description: The directory in which we store service backups
+    default: ""
   redis.pidfile_directory:
     default: /var/vcap/sys/run/shared-instance-pidfiles
     description: The directory in which we store shared instance pid files
