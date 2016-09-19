@@ -23,10 +23,6 @@ nginx/nginx-1.7.9.tar.gz:
   object_id: 67a972e2-f601-42f2-aff1-19e631d5fbb9
   sha: 44ef4770db281cea26a1b2e66c0e34193e1d1f1f
   size: 827263
-cf-cli/cf-linux-amd64.tgz:
-  object_id: 66de7a9f-6166-45a1-b988-09005429f4ca
-  sha: f845800310e4b702a39a2f1191e3d71862630103
-  size: 4803309
 aws-cli/awscli-bundle.zip:
   object_id: 0221dcb3-3ce0-44e6-8c4f-c5c2abf1b0eb
   sha: db33b4740a670c9fb3bc5515cd7f9861fa1b1b13
@@ -55,10 +51,6 @@ redis/redis-3.0.5.tar.gz:
   object_id: 47795193-538a-4bf1-a229-51c61f74afcc
   sha: ad3ee178c42bfcfd310c72bbddffbbe35db9b4a6
   size: 1366160
-cf-cli/cf-cli_6.13.0_linux_x86-64.tgz:
-  object_id: 1bd6488e-267d-4172-b3e5-16b092a0b59c
-  sha: 82c5774aa44af9d091d3461adfb61bdadd64aad3
-  size: 5486088
 redis/redis-3.0.6.tar.gz:
   object_id: 12fc413f-7eae-409f-93c0-1a6866b8bfdb
   sha: 4b1c7b1201984bca8f7f9c6c58862f6928cf0a25
@@ -67,10 +59,10 @@ redis/redis-3.2.1.tar.gz:
   object_id: 05e93526-7997-4421-83a7-f86c48f575a5
   sha: 26c0fc282369121b4e278523fce122910b65fbbf
   size: 1534696
-cf-cli/cf-cli_6.19.0_linux_x86-64.tgz:
-  object_id: ef96336e-a63f-403f-8bb9-5cd775e1f5c5
-  sha: 625170654ffa4568dae97b4d3915e87557b29261
-  size: 6450885
+cf-cli/cf-cli_6.21.1_linux_x86-64.tgz:
+  object_id: 34b04b35-3928-4264-9a49-33b07af83a7e
+  sha: 7dc397d2a0d93887ef50bc1f852beb686563049e
+  size: 6543090
 go/go1.6.3.linux-amd64.tar.gz:
   object_id: 74cc39df-3f3f-44dd-af2c-9a9f8255c0ac
   sha: 5e916ba4dd8c2fc43beafca4c08b334c4d0686f3
