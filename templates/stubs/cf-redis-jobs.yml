@@ -1,5 +1,7 @@
 ---
-meta: ~
+meta:
+  <<: (( merge ))
+  release_version: (( merge || "latest" ))
 
 # PROPERTIES
 properties:
@@ -41,7 +43,7 @@ networks: ~
 # RELEASES
 base_releases:
 - name: (( .meta.release_name ))
-  version: (( .meta.release_version || latest ))
+  version: (( .meta.release_version ))
 - name: routing
   version: latest
 
