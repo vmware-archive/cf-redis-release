@@ -41,7 +41,7 @@ networks: ~
 # RELEASES
 base_releases:
 - name: (( .meta.release_name ))
-  version: latest
+  version: (( .meta.release_version || latest ))
 - name: routing
   version: latest
 
