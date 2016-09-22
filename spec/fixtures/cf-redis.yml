@@ -95,6 +95,7 @@ jobs:
   - name: smoke-tests
     release: cf-redis
 meta:
+  release_version: latest
   apps_domain: bosh-lite.com
   broker:
     host: redis-broker.bosh-lite.com
