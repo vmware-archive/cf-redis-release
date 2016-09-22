@@ -51,3 +51,4 @@ agent_port: 443
 
 monit_executable_path: /var/vcap/bosh/bin/monit
 redis_server_executable_path: /var/vcap/packages/redis/bin/redis-server
+consistency_check_interval_seconds: <%= p('redis.broker.consistency_check_interval') %>
