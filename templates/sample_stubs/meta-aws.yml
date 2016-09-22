@@ -3,6 +3,7 @@ meta:
   deployment_name: REPLACE_WITH_CF_DEPLOYMENT_NAME
   director_uuid: REPLACE_WITH_DIRECTOR_ID
   release_name: cf-redis
+  release_version: REPLACE_WITH_REDIS_RELEASE_VERSION # Optional, you can delete this property to always get latest
   apps_domain: REPLACE_WITH_APP_DOMAIN
   system_domain: REPLACE_WITH_DOMAIN
   syslog_aggregator:
@@ -18,7 +19,7 @@ meta:
     admin_password: REPLACE_WITH_ADMIN_PASSWORD
     api_url: (( "https://api" "." .meta.system_domain ))
     apps_domain: (( .meta.apps_domain ))
-    skip_ssl_validation: false # Optional, change to `true` in envs with self-signed SSL certs
+    skip_ssl_validation: false # Optional, change to `true` in envs with SSL certs
   nats:
     machines:
       - LIST_OF_NATS_HOSTS
