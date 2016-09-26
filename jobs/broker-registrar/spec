@@ -26,8 +26,11 @@ properties:
   broker.password:
     description: 'Basic Auth password for the service broker'
   redis.broker.enable_service_access:
-    description: 'Enable service access to all'
+    description: 'Enable service access to all orgs specified, default to allow all orgs access'
     default: true
   redis.broker.service_name:
     description: 'Service name'
     default: p-redis
+  redis.broker.service_access_orgs:
+    description: 'Limit your service to only be accessible by the given org.'
+    default: []
