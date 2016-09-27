@@ -11,7 +11,8 @@ PROPERTIES = {
     "broker.username" => "user",
     "broker.password" => "password",
     "cf.skip_ssl_validation" => false,
-    "redis.broker.enable_service_access" => true
+    "redis.broker.enable_service_access" => true,
+    "redis.broker.service_access_orgs" => []
 }
 
 shared_examples 'ssl validation is configurable' do
@@ -54,6 +55,40 @@ describe 'cf-redis-broker broker_registrar errand' do
     expect {
       template_out_script
     }.to_not raise_error
+  end
+
+  context 'when no service orgs are provided' do
+    it 'configures sevice access for all' do
+      expect(template_out_script).to include("cf enable-service-access $BROKER_SERVICE_NAME")
+    end
+  end
+
+  context 'when a single service org is provided' do
+    let(:org_name) { "test-org" }
+    let(:properties) {
+      PROPERTIES.merge({
+        "redis.broker.service_access_orgs" => [org_name]
+      })
+    }
+
+    it 'configures sevice access for specified org' do
+      expect(template_out_script).to include("cf enable-service-access -o #{org_name} $BROKER_SERVICE_NAME")
+    end
+  end
+
+  context 'multiple services orgs are provided' do
+    let(:org_1) { "test-org-1" }
+    let(:org_2) { "test-org-2" }
+    let(:properties) {
+      PROPERTIES.merge({
+        "redis.broker.service_access_orgs" => [org_1, org_2]
+      })
+    }
+
+    it 'configures sevice access for specified orgs' do
+      expect(template_out_script).to include("cf enable-service-access -o #{org_1} $BROKER_SERVICE_NAME")
+      expect(template_out_script).to include("cf enable-service-access -o #{org_2} $BROKER_SERVICE_NAME")
+    end
   end
 end
 
