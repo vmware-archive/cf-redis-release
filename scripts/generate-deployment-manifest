@@ -6,6 +6,7 @@ templates=$BASE_DIR/templates
 
 infrastructure=$1
 additional_properties=$2
+additional_properties_two=$4
 
 if [ ! -z $3 ]; then
   stubs_dir=$3
@@ -35,4 +36,5 @@ spiff merge \
  "$templates/stubs/cf-redis-infrastructure.yml" \
  $additional_properties \
  "$stubs_dir/infrastructure-$infrastructure.yml" \
- "$stubs_dir/meta-$infrastructure.yml"
+ "$stubs_dir/meta-$infrastructure.yml" \
+ $additional_properties_two
