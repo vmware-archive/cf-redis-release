@@ -74,6 +74,21 @@ Increase the `instance_count: 1` to the value you want.
 
 All required properties are listed in the `templates/sample_stubs/sample_*_stub.yml` files. There are a number of other optional properties. Descriptions for all properties can be found in the relevant `spec` files for each job.
 
+### Broker Registrar
+By default, the broker registrar will enable access to your deployed service to
+all orgs. You can specify which orgs you wish to grant access to by adding the
+following configuration to your manifest:
+
+```
+properties:
+  redis:
+    broker:
+      enable_service_access: true
+      service_access_orgs:
+      - dev_org
+      - prod_org
+```
+
 ### AWS
 
 #### Subnet ACL
