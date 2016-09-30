@@ -31,10 +31,16 @@ if [ "$infrastructure" != "aws" ] && \
 fi
 
 spiff merge \
+ "$stubs_dir/infrastructure-$infrastructure.yml" \
+ "$stubs_dir/meta-$infrastructure.yml" \
+ $additional_properties_two \
+  > generated-config.yml
+
+spiff merge \
  "$templates/stubs/cf-redis-deployment.yml" \
  "$templates/stubs/cf-redis-jobs.yml" \
  "$templates/stubs/cf-redis-infrastructure.yml" \
  $additional_properties \
- "$stubs_dir/infrastructure-$infrastructure.yml" \
- "$stubs_dir/meta-$infrastructure.yml" \
- $additional_properties_two
+ "generated-config.yml"
+
+rm generated-config.yml
