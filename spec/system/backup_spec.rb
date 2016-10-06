@@ -114,6 +114,14 @@ describe 'backups', :skip_service_backups => true do
       end
 
       describe 'manual snapshot' do
+        after do
+          with_remote_execution(service_name, service_plan) do |vm_execute|
+            cleanup_result = vm_execute.call(manual_cleanup_command)
+            expect(cleanup_result).to_not be_nil
+            expect(cleanup_result.lines.join).to match('"event":"done","task":"perform-cleanup"')
+          end
+        end
+
         it 'creates an RDB dump file' do
           with_remote_execution(service_name, service_plan) do |vm_execute|
             result = vm_execute.call(manual_snapshot_command)
