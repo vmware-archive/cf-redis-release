@@ -11,7 +11,7 @@ compilation:
     name: (( .meta.deployment_name ))
 
 update:
-  canaries: 5
+  canaries: 1
   canary_watch_time: 30000-180000
   update_watch_time: 30000-180000
   max_in_flight: 6
