@@ -4,6 +4,7 @@ describe 'metrics', :skip_metrics => true do
 
   before(:all) do
     @number_of_nodes = bosh_manifest.job('dedicated-node').static_ips.count
+    @origin_tag = bosh_manifest.property('service_metrics.origin')
     @outFile = Tempfile.new('smetrics')
     @pid = spawn(
       {
@@ -55,7 +56,7 @@ describe 'metrics', :skip_metrics => true do
     metric = find_metric(metric_name, job_name, job_index)
 
     expect(metric).to match(/value:\d/)
-    expect(metric).to include('origin:"p-redis"')
+    expect(metric).to include("origin:\"#{@origin_tag}\"")
     expect(metric).to include('deployment:"cf-redis"')
     expect(metric).to include('eventType:ValueMetric')
     expect(metric).to match(/timestamp:\d/)
