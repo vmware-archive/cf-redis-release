@@ -3,37 +3,23 @@ require 'system_spec_helper'
 require 'aws-sdk'
 
 describe 'backups', :skip_service_backups => true do
+  let(:destinations) { bosh_manifest.property("service-backup.destinations") }
+  let(:s3_config) { destinations[0]["config"] }
+
   let(:source_folder) { bosh_manifest.property("service-backup.source_folder") }
+  let(:cron_schedule) { bosh_manifest.property("service-backup.cron_schedule") }
+  let(:manual_cleanup_command) { bosh_manifest.property("service-backup.cleanup_executable") }
+  let(:manual_snapshot_command) { bosh_manifest.property("service-backup.source_executable") }
+  let(:service_identifier_executable) { bosh_manifest.property("service-backup.service_identifier_executable") }
   let(:service_name) { bosh_manifest.property('redis.broker.service_name') }
-  let(:aws_access_key_id) { bosh_manifest.property('service-backup.destination.s3.access_key_id') }
-  let(:aws_secret_access_key) { bosh_manifest.property('service-backup.destination.s3.secret_access_key') }
-  let(:s3_backup_bucket) { bosh_manifest.property("service-backup.destination.s3.bucket_name") }
-  let(:s3_backup_path) { bosh_manifest.property("service-backup.destination.s3.bucket_path") }
-
-  let(:identifier_command) do
-    '/var/vcap/packages/redis-backups/bin/identifier -config /var/vcap/jobs/redis-backups/config/backup-config.yml'
-  end
-
-  let(:manual_snapshot_command) do
-    '/var/vcap/packages/redis-backups/bin/snapshot -config /var/vcap/jobs/redis-backups/config/backup-config.yml'
-  end
-
-  let(:manual_cleanup_command) do
-    '/var/vcap/packages/redis-backups/bin/cleanup -config /var/vcap/jobs/redis-backups/config/backup-config.yml'
-  end
+  let(:aws_access_key_id) { s3_config["access_key_id"] }
+  let(:aws_secret_access_key) { s3_config["secret_access_key"] }
+  let(:s3_backup_bucket) { s3_config["bucket_name"] }
+  let(:s3_backup_path) { s3_config["bucket_path"] }
+  let(:endpoint_url) { s3_config["endpoint_url"] }
 
   let(:manual_backup_command) do
-    "/var/vcap/packages/service-backup/bin/manual-backup s3 " \
-    "--cron-schedule '0 0 * * *' " \
-    "--backup-creator-cmd '#{manual_snapshot_command}' " \
-    "--source-folder '#{source_folder}' " \
-    "--cleanup-cmd '#{manual_cleanup_command}' " \
-    "--dest-path '#{s3_backup_path}' " \
-    "--aws-access-key-id #{aws_access_key_id} " \
-    "--aws-secret-access-key #{aws_secret_access_key} " \
-    "--endpoint-url 'https://s3.amazonaws.com' " \
-    "--aws-cli-path '/var/vcap/packages/aws-cli/bin/aws' " \
-    "--dest-bucket '#{s3_backup_bucket}'"
+    "/var/vcap/packages/service-backup/bin/manual-backup /var/vcap/jobs/service-backup/config/backup.yml"
   end
 
   let(:dump_file_pattern) { /\d{8}T\d{6}Z-.*_redis_backup.rdb/ }
@@ -43,20 +29,31 @@ describe 'backups', :skip_service_backups => true do
       it 'is configured correctly' do
         with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
           with_redis_under_stress(service_binding) do
-            cmd = vm_execute.call('ps aux | grep service-backup | grep -v grep')
-              .split(' ').drop(10).join(' ').split('--')
-              .map{|line| line.strip.partition(' ')}
-              .each_with_object({}) {|e, hash| hash[e[0]] = e[-1]}
+            ps_aux = vm_execute.call('ps aux | grep service-backu[p]').split(' ')
+            configLocation = ps_aux[(ps_aux.length)-1]
 
-            expect(cmd['/var/vcap/packages/service-backup/bin/service-backup']).to eq('s3')
-            expect(cmd['source-folder']).to eq(source_folder)
-            expect(cmd['backup-creator-cmd']).to eq(manual_snapshot_command)
-            expect(cmd['cron-schedule']).to eq('0 0 * * *')
-            expect(cmd['dest-path']).to eq(s3_backup_path)
-            expect(cmd['dest-bucket']).to eq(s3_backup_bucket)
-            expect(cmd['aws-access-key-id']).to eq(aws_access_key_id)
-            expect(cmd['aws-secret-access-key']).to eq(aws_secret_access_key)
-            expect(cmd['cleanup-cmd']).to eq(manual_cleanup_command)
+            configCmd = "cat #{configLocation}"
+            backup_yaml = YAML.load(vm_execute.call(configCmd).gsub(/"/, ''))
+
+            expected_backup_config = {
+              "destinations" => [{
+                "type" => "s3",
+                "config" => {
+                  "endpoint_url" => endpoint_url,
+                  "access_key_id" => aws_access_key_id,
+                  "secret_access_key" => aws_secret_access_key,
+                  "bucket_name" => s3_backup_bucket,
+                  "bucket_path" => s3_backup_path,
+                },
+              }],
+              "service_identifier_executable" => service_identifier_executable,
+              "source_executable" => manual_snapshot_command,
+              "cron_schedule" => cron_schedule,
+              "cleanup_executable" => manual_cleanup_command,
+              "source_folder" => source_folder,
+            }
+
+            expect(backup_yaml).to include(expected_backup_config)
           end
         end
       end
@@ -88,7 +85,6 @@ describe 'backups', :skip_service_backups => true do
           with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
             client = service_client_builder(service_binding)
             client.write('foo', 'bar')
-
             with_redis_under_stress(service_binding) do
               cmd_result = vm_execute.call(manual_backup_command)
               expect(cmd_result).to_not be_nil
@@ -97,6 +93,7 @@ describe 'backups', :skip_service_backups => true do
               expect(result).to match(/Perform backup completed successfully/)
               expect(result).to match(/Upload backup completed successfully/)
               expect(result).to match(/Cleanup completed successfully/)
+              expect(result).to include("#{service_plan}: #{service_binding.service_instance.id}")
             end
 
             s3_backup_file = find_s3_backup_file
@@ -169,7 +166,7 @@ describe 'backups', :skip_service_backups => true do
 
       it 'returns the correct instance ID' do
         with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
-          id = vm_execute.call(identifier_command)
+          id = vm_execute.call(service_identifier_executable)
           expect(id).to match(service_binding.service_instance.id)
         end
       end
@@ -181,7 +178,7 @@ describe 'backups', :skip_service_backups => true do
       it "returns the correct instance IDs" do
         with_remote_execution(service_name, service_plan) do |_, service_binding1|
           with_remote_execution(service_name, service_plan) do |vm_execute, service_binding2|
-            instance_ids = vm_execute.call(identifier_command)
+            instance_ids = vm_execute.call(service_identifier_executable)
             expect(instance_ids).to match(service_binding1.service_instance.id)
             expect(instance_ids).to match(service_binding2.service_instance.id)
           end

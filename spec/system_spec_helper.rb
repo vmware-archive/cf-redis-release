@@ -83,11 +83,14 @@ RSpec.configure do |config|
     redis_service_broker.deprovision_service_instances!
 
     if ExcludeHelper::service_backups_available?
+      destinations = bosh_manifest.property("service-backup.destinations")
+      aws_access_key_id = destinations[0]["config"]["access_key_id"]
+      secret_access_key = destinations[0]["config"]["secret_access_key"]
       Aws.config.update({
         region: 'us-east-1',
         credentials: Aws::Credentials.new(
-          bosh_manifest.property('service-backup.destination.s3.access_key_id'),
-          bosh_manifest.property('service-backup.destination.s3.secret_access_key')
+          aws_access_key_id,
+          secret_access_key
         )
       })
     end
