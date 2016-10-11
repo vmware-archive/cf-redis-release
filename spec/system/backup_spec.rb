@@ -18,9 +18,8 @@ describe 'backups', :skip_service_backups => true do
   let(:s3_backup_path) { s3_config["bucket_path"] }
   let(:endpoint_url) { s3_config["endpoint_url"] }
 
-  let(:manual_backup_command) do
-    "/var/vcap/packages/service-backup/bin/manual-backup /var/vcap/jobs/service-backup/config/backup.yml"
-  end
+  let(:manual_backup_config) { "/var/vcap/jobs/service-backup/config/backup.yml" }
+  let(:manual_backup_command) { "/var/vcap/packages/service-backup/bin/manual-backup #{manual_backup_config}" }
 
   let(:dump_file_pattern) { /\d{8}T\d{6}Z-.*_redis_backup.rdb/ }
 
@@ -29,10 +28,7 @@ describe 'backups', :skip_service_backups => true do
       it 'is configured correctly' do
         with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
           with_redis_under_stress(service_binding) do
-            ps_aux = vm_execute.call('ps aux | grep service-backu[p]').split(' ')
-            configLocation = ps_aux[(ps_aux.length)-1]
-
-            configCmd = "cat #{configLocation}"
+            configCmd = "cat #{manual_backup_config}"
             backup_yaml = YAML.load(vm_execute.call(configCmd).gsub(/"/, ''))
 
             expected_backup_config = {
