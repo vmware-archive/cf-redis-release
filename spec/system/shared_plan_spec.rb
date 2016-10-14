@@ -92,13 +92,21 @@ describe 'shared plan' do
     it 'preserves data' do
       expect(@service_client.read('test_key')).to eq('test_value')
     end
+  end
+
+  context 'when stopping the broker vm' do
+    before(:all) do
+      @prestop_timestamp = ssh_gateway.execute_on(@service_broker_host, "date +%s")
+      bosh_director.stop(environment.bosh_service_broker_job_name, 0)
+      @vm_log = root_execute_on(@service_broker_host, "cat /var/log/syslog")
+    end
+
+    after(:all) do
+      bosh_director.recreate_all([environment.bosh_service_broker_job_name])
+    end
 
     it 'logs redis broker shutdown' do
-      contains_expected_shutdown_log = drop_log_lines_before(@prestop_timestamp, @vm_log).any? do |line|
-        line.include?('Starting Redis Broker shutdown')
-      end
-
-      expect(contains_expected_shutdown_log).to be true
+      expect(eventually_contains_shutdown_log).to be true
     end
   end
 
@@ -296,4 +304,18 @@ describe 'shared plan' do
     puts "Process #{process_name} did not start within 90 seconds"
     return false
   end
+
+  def eventually_contains_shutdown_log()
+    12.times do
+      contains_expected_shutdown_log = drop_log_lines_before(@prestop_timestamp, @vm_log).any? do |line|
+        line.include?('Starting Redis Broker shutdown')
+      end
+
+      return contains_expected_shutdown_log if contains_expected_shutdown_log
+
+      @vm_log = root_execute_on(@service_broker_host, "cat /var/log/syslog")
+      sleep 5
+    end
+  end
 end
+
