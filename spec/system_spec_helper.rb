@@ -1,5 +1,4 @@
 require 'yaml'
-require 'aws-sdk'
 require 'helpers/environment'
 require 'helpers/utilities'
 require 'prof/external_spec/spec_helper'
