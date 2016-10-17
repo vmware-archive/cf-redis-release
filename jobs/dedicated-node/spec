@@ -19,7 +19,6 @@ packages:
 - redis-common
 - cf-redis-nginx
 - cf-redis-broker
-- python
 
 properties:
   service-backup.source_folder:
