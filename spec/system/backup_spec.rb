@@ -4,7 +4,11 @@ require 'aws-sdk'
 
 describe 'backups', :skip_service_backups => true do
   let(:destinations) { bosh_manifest.property("service-backup.destinations") }
-  let(:s3_config) { destinations[0]["config"] }
+  let(:s3_config) do
+    destinations.select do |destination|
+      destination["type"] == "s3"
+    end.first["config"]
+  end
 
   let(:source_folder) { bosh_manifest.property("service-backup.source_folder") }
   let(:cron_schedule) { bosh_manifest.property("service-backup.cron_schedule") }
@@ -25,31 +29,81 @@ describe 'backups', :skip_service_backups => true do
 
   shared_examples "backups are enabled" do
     describe 'service backups' do
-      it 'is configured correctly' do
-        with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
-          with_redis_under_stress(service_binding) do
+      context 'configuration' do
+        let(:service_backup_config) do
+          with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
             configCmd = "cat #{manual_backup_config}"
-            backup_yaml = YAML.load(vm_execute.call(configCmd).gsub(/"/, ''))
+            YAML.load(vm_execute.call(configCmd).gsub(/"/, ''))
+          end
+        end
 
-            expected_backup_config = {
-              "destinations" => [{
-                "type" => "s3",
-                "config" => {
-                  "endpoint_url" => endpoint_url,
-                  "access_key_id" => aws_access_key_id,
-                  "secret_access_key" => aws_secret_access_key,
-                  "bucket_name" => s3_backup_bucket,
-                  "bucket_path" => s3_backup_path,
-                },
-              }],
-              "service_identifier_executable" => service_identifier_executable,
-              "source_executable" => manual_snapshot_command,
-              "cron_schedule" => cron_schedule,
-              "cleanup_executable" => manual_cleanup_command,
-              "source_folder" => source_folder,
-            }
+        it 'service backups is configured correctly' do
+          with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
+            with_redis_under_stress(service_binding) do
+              expected_backup_config = {
+                "service_identifier_executable" => service_identifier_executable,
+                "source_executable" => manual_snapshot_command,
+                "cron_schedule" => cron_schedule,
+                "cleanup_executable" => manual_cleanup_command,
+                "source_folder" => source_folder
+              }
 
-            expect(backup_yaml).to include(expected_backup_config)
+              expect(service_backup_config).to include(expected_backup_config)
+            end
+          end
+        end
+
+        context 'destinations' do
+          context 's3' do
+            it 'is configured correctly' do
+              with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
+                with_redis_under_stress(service_binding) do
+                  expected_backup_config = {
+                    "type" => "s3",
+                    "config" => {
+                      "endpoint_url" => endpoint_url,
+                      "access_key_id" => aws_access_key_id,
+                      "secret_access_key" => aws_secret_access_key,
+                      "bucket_name" => s3_backup_bucket,
+                      "bucket_path" => s3_backup_path}
+                  }
+
+                  expect(service_backup_config["destinations"]).to include(expected_backup_config)
+                end
+              end
+            end
+          end
+
+          context 'azure' do
+            let(:azure_config) do
+              destinations.select do |destination|
+                destination["type"] == "azure"
+              end.first["config"]
+            end
+            let(:container) { azure_config["container"]}
+            let(:path) { azure_config["path"]}
+            let(:storage_access_key) { azure_config["storage_access_key"]}
+            let(:storage_account) { azure_config["storage_account"]}
+            let(:blob_store_base_url) { azure_config["blob_store_base_url"]}
+
+            it 'is configured correctly' do
+              with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
+                with_redis_under_stress(service_binding) do
+                  expected_backup_config = {
+                    "type" => "azure",
+                    "config" => {
+                      "container" => container,
+                      "path" => path,
+                      "storage_access_key" => storage_access_key,
+                      "storage_account" => storage_account,
+                      "blob_store_base_url" => blob_store_base_url
+                    }
+                  }
+
+                  expect(service_backup_config["destinations"]).to include(expected_backup_config)
+                end
+              end
+            end
           end
         end
       end
