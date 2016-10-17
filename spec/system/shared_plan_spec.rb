@@ -313,9 +313,8 @@ describe 'shared plan' do
 
       return contains_expected_shutdown_log if contains_expected_shutdown_log
 
-      @vm_log = root_execute_on(@service_broker_host, "cat /var/log/syslog")
       sleep 5
+      @vm_log = root_execute_on(@service_broker_host, "cat /var/log/syslog")
     end
   end
 end
-
