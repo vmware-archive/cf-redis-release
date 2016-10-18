@@ -73,38 +73,6 @@ describe 'backups', :skip_service_backups => true do
               end
             end
           end
-
-          context 'azure' do
-            let(:azure_config) do
-              destinations.select do |destination|
-                destination["type"] == "azure"
-              end.first["config"]
-            end
-            let(:container) { azure_config["container"]}
-            let(:path) { azure_config["path"]}
-            let(:storage_access_key) { azure_config["storage_access_key"]}
-            let(:storage_account) { azure_config["storage_account"]}
-            let(:blob_store_base_url) { azure_config["blob_store_base_url"]}
-
-            it 'is configured correctly' do
-              with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
-                with_redis_under_stress(service_binding) do
-                  expected_backup_config = {
-                    "type" => "azure",
-                    "config" => {
-                      "container" => container,
-                      "path" => path,
-                      "storage_access_key" => storage_access_key,
-                      "storage_account" => storage_account,
-                      "blob_store_base_url" => blob_store_base_url
-                    }
-                  }
-
-                  expect(service_backup_config["destinations"]).to include(expected_backup_config)
-                end
-              end
-            end
-          end
         end
       end
 
