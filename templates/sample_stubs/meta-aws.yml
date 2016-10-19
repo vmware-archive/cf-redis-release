@@ -1,6 +1,6 @@
 ---
 meta:
-  deployment_name: REPLACE_WITH_CF_DEPLOYMENT_NAME
+  deployment_name: REPLACE_WITH_REDIS_DEPLOYMENT_NAME
   director_uuid: REPLACE_WITH_DIRECTOR_ID
   release_name: cf-redis
   release_version: REPLACE_WITH_REDIS_RELEASE_VERSION # Optional, you can delete this property to always get latest
