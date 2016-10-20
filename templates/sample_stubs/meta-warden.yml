@@ -20,6 +20,7 @@ meta:
     admin_password: admin
     api_url: https://api.bosh-lite.com
     apps_domain: (( .meta.apps_domain ))
+    system_domain: (( .meta.external_domain ))
     nats:
       host: 10.244.0.6
       password: nats
