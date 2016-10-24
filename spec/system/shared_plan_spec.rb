@@ -223,7 +223,7 @@ describe 'shared plan' do
 
       root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit restart process-watcher')
 
-      expect(wait_for_process_start('process-watcher')).to eq(true)
+      expect(wait_for_process_start('process-watcher', @vm_ip)).to eq(true)
 
       root_execute_on(@vm_ip, drain_command)
       sleep 1
@@ -232,7 +232,7 @@ describe 'shared plan' do
     after(:all) do
       root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit restart process-watcher')
 
-      expect(wait_for_process_start('process-watcher')).to eq(true)
+      expect(wait_for_process_start('process-watcher', @vm_ip)).to eq(true)
 
       service_broker.unbind_instance(@service_binding)
       service_broker.deprovision_instance(@service_instance)
@@ -257,7 +257,7 @@ describe 'shared plan' do
     after do
       root_execute_on(@vm_ip, '/var/vcap/bosh/bin/monit restart process-watcher')
 
-      expect(wait_for_process_start('process-watcher')).to eq(true)
+      expect(wait_for_process_start('process-watcher', @vm_ip)).to eq(true)
 
       service_broker.unbind_instance(@service_binding)
       service_broker.deprovision_instance(@service_instance)
@@ -273,10 +273,6 @@ describe 'shared plan' do
     end
   end
 
-  def process_running?(process_name)
-    monit_output = root_execute_on(@vm_ip, "/var/vcap/bosh/bin/monit summary | grep #{process_name} | grep running")
-    !monit_output.strip.empty?
-  end
 
   def process_not_monitored?(process_name)
     monit_output = root_execute_on(@vm_ip, "/var/vcap/bosh/bin/monit summary | grep #{process_name} | grep 'not monitored'")
@@ -291,17 +287,6 @@ describe 'shared plan' do
     end
 
     puts "Process #{process_name} did not stop within 60 seconds"
-    return false
-  end
-
-  def wait_for_process_start(process_name)
-    for _ in 0..18 do
-      puts "Waiting for #{process_name} to start"
-      sleep 5
-      return true if process_running?(process_name)
-    end
-
-    puts "Process #{process_name} did not start within 90 seconds"
     return false
   end
 
