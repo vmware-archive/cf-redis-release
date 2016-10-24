@@ -11,6 +11,10 @@ source /var/vcap/packages/redis-common/utils.sh
 
 export PATH=/var/vcap/packages/redis/bin:$PATH
 
+checkProcessRunning() {
+  ps_output="$(ps aux | grep processmonitor |  { grep -v grep || true; })"
+}
+
 case $1 in
 
   start)
@@ -22,6 +26,11 @@ case $1 in
     export BROKER_CONFIG_PATH=$JOB_DIR/config/broker.yml
     export HOST=127.0.0.1
     export PORT=<%= p('redis.broker.backend_port') %>
+
+    checkProcessRunning
+    if [ ! -z "${ps_output}" ]; then
+      >&2 echo "processmonitor already running: ${ps_output}"
+    fi
 
     echo $$ > $PIDFILE
 
