@@ -2,6 +2,8 @@ require 'system_spec_helper'
 
 require 'aws-sdk'
 
+require 'json'
+
 describe 'backups', :skip_service_backups => true do
   let(:destinations) { bosh_manifest.property("service-backup.destinations") }
   let(:s3_config) do
@@ -26,6 +28,7 @@ describe 'backups', :skip_service_backups => true do
   let(:manual_backup_command) { "/var/vcap/packages/service-backup/bin/manual-backup #{manual_backup_config}" }
 
   let(:dump_file_pattern) { /\d{8}T\d{6}Z-.*_redis_backup.rdb/ }
+  let(:statefile_pattern) { /\d{8}T\d{6}Z_statefile.json/ }
 
   shared_examples "backups are enabled" do
     describe 'service backups' do
@@ -72,58 +75,6 @@ describe 'backups', :skip_service_backups => true do
                 end
               end
             end
-          end
-        end
-      end
-
-      describe 'end to end' do
-        let(:s3_client) { Aws::S3::Client.new }
-
-        def find_s3_backup_file
-          s3_backup_file_meta = s3_client.list_objects(bucket: s3_backup_bucket).contents.
-            find_all { |object| object.key.include? "backup/#{Time.now.strftime("%Y/%m/%d")}" }.
-            find { |object| object.key =~ dump_file_pattern }
-          return nil if s3_backup_file_meta.nil?
-          s3_client.get_object(bucket: s3_backup_bucket, key: s3_backup_file_meta.key).body
-        end
-
-        def clean_s3_bucket
-          Aws::S3::Bucket.new(name: s3_backup_bucket, client: s3_client).clear!
-        end
-
-        before do
-          clean_s3_bucket
-        end
-
-        after do
-          clean_s3_bucket
-        end
-
-        it 'uploads data to S3 in RDB format and removes local backup files' do
-          with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
-            client = service_client_builder(service_binding)
-            client.write('foo', 'bar')
-            with_redis_under_stress(service_binding) do
-              cmd_result = vm_execute.call(manual_backup_command)
-              expect(cmd_result).to_not be_nil
-
-              result = cmd_result.lines.join
-              expect(result).to match(/Perform backup completed successfully/)
-              expect(result).to match(/Upload backup completed successfully/)
-              expect(result).to match(/Cleanup completed successfully/)
-              expect(result).to include("#{service_plan}: #{service_binding.service_instance.id}")
-            end
-
-            s3_backup_file = find_s3_backup_file
-            expect(s3_backup_file).not_to be_nil
-            expect(s3_backup_file.size).to be > 0
-
-            contents = s3_backup_file.read.encode('UTF-8', 'UTF-8', :invalid => :replace)
-            expect(contents).to match(/^REDIS/)       # check RDB format
-            expect(contents).to_not include('SELECT') # check not AOF format
-
-            ls_result = vm_execute.call("ls #{source_folder}")
-            expect(ls_result).to be_nil
           end
         end
       end
@@ -178,6 +129,73 @@ describe 'backups', :skip_service_backups => true do
     end
   end
 
+  shared_examples "data and broker state is backed up" do
+    describe 'end to end' do
+      let(:s3_client) { Aws::S3::Client.new }
+
+      before do
+        clean_s3_bucket
+      end
+
+      after do
+        clean_s3_bucket
+      end
+
+      it 'uploads data and statefile to S3 in the correct formats and removes local backup files' do
+        with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
+          client = service_client_builder(service_binding)
+          client.write('foo', 'bar')
+          with_redis_under_stress(service_binding) do
+            assert_manual_backup_succeeds(vm_execute, service_binding)
+          end
+
+          assert_rdb_file_is_valid
+
+          s3_statefile = find_s3_statefile
+          s3_statefile_contents = get_file_contents s3_statefile
+          expect{JSON.parse(s3_statefile_contents)}.to_not raise_error
+          statefile_json = JSON.parse(s3_statefile_contents)
+          expect(statefile_json.keys).to contain_exactly('available_instances', 'allocated_instances', 'instance_bindings')
+
+          ls_result = vm_execute.call("ls #{source_folder}")
+          expect(ls_result).to be_nil
+        end
+      end
+    end
+  end
+
+  shared_examples "only data is backed up" do
+    describe 'end to end' do
+      let(:s3_client) { Aws::S3::Client.new }
+
+      before do
+        clean_s3_bucket
+      end
+
+      after do
+        clean_s3_bucket
+      end
+
+      it 'uploads data to S3 in RDB format and removes local backup files' do
+        with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
+          client = service_client_builder(service_binding)
+          client.write('foo', 'bar')
+          with_redis_under_stress(service_binding) do
+            assert_manual_backup_succeeds(vm_execute, service_binding)
+          end
+
+          assert_rdb_file_is_valid
+
+          s3_statefile = find_s3_statefile
+          expect(s3_statefile).to be_nil
+
+          ls_result = vm_execute.call("ls #{source_folder}")
+          expect(ls_result).to be_nil
+        end
+      end
+    end
+  end
+
   describe "instance identifier" do
     context "with a provisioned dedicated-vm plan" do
       let(:service_plan) { 'dedicated-vm' }
@@ -208,11 +226,13 @@ describe 'backups', :skip_service_backups => true do
   context "shared vm plan" do
     let(:service_plan) { 'shared-vm' }
     it_behaves_like 'backups are enabled'
+    it_behaves_like 'data and broker state is backed up'
   end
 
   context "dedicated vm plan" do
     let(:service_plan) { 'dedicated-vm' }
     it_behaves_like 'backups are enabled'
+    it_behaves_like 'only data is backed up'
   end
 
   def with_remote_execution(service_name, service_plan, &block)
@@ -254,5 +274,50 @@ describe 'backups', :skip_service_backups => true do
     with_repeated_action(service_binding, action) { yield }
 
     service_client_builder(service_binding)
+  end
+
+  def find_s3_backup_file
+    find_s3_file dump_file_pattern
+  end
+
+  def find_s3_statefile
+    find_s3_file statefile_pattern
+  end
+
+  def find_s3_file (file_pattern)
+    s3_backup_file_meta = s3_client.list_objects(bucket: s3_backup_bucket).contents.
+      find_all { |object| object.key.include? "backup/#{Time.now.strftime("%Y/%m/%d")}" }.
+      find { |object| object.key =~ file_pattern }
+    return nil if s3_backup_file_meta.nil?
+    s3_client.get_object(bucket: s3_backup_bucket, key: s3_backup_file_meta.key).body
+  end
+
+  def clean_s3_bucket
+    Aws::S3::Bucket.new(name: s3_backup_bucket, client: s3_client).clear!
+  end
+
+  def get_file_contents s3_file
+    expect(s3_file).not_to be_nil
+    expect(s3_file.size).to be > 0
+    s3_file_contents = s3_file.read.encode('UTF-8', 'UTF-8', :invalid => :replace)
+  end
+
+  def assert_manual_backup_succeeds (vm, service_binding)
+    cmd_result = vm.call(manual_backup_command)
+    expect(cmd_result).to_not be_nil
+
+    result = cmd_result.lines.join
+    expect(result).to match(/Perform backup completed successfully/)
+    expect(result).to match(/Upload backup completed successfully/)
+    expect(result).to match(/Cleanup completed successfully/)
+    expect(result).to include("#{service_plan}: #{service_binding.service_instance.id}")
+  end
+
+  def assert_rdb_file_is_valid
+    s3_backup_file = find_s3_backup_file
+    s3_backup_file_contents = get_file_contents s3_backup_file
+
+    expect(s3_backup_file_contents).to match(/^REDIS/)       # check RDB format
+    expect(s3_backup_file_contents).to_not include('SELECT') # check not AOF format
   end
 end
