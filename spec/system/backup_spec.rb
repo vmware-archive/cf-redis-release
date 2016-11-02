@@ -1,7 +1,7 @@
 require 'system_spec_helper'
 
 require 'aws-sdk'
-
+require 'digest'
 require 'json'
 
 describe 'backups', :skip_service_backups => true do
@@ -28,7 +28,10 @@ describe 'backups', :skip_service_backups => true do
   let(:manual_backup_command) { "/var/vcap/packages/service-backup/bin/manual-backup #{manual_backup_config}" }
 
   let(:dump_file_pattern) { /\d{8}T\d{6}Z-.*_redis_backup.rdb/ }
+  let(:dump_file_md5_pattern) { /\d{8}T\d{6}Z-.*_redis_backup.md5/ }
+
   let(:statefile_pattern) { /\d{8}T\d{6}Z_statefile.json/ }
+  let(:statefile_md5_pattern) { /\d{8}T\d{6}Z_statefile.md5/ }
 
   shared_examples "backups are enabled" do
     describe 'service backups' do
@@ -125,6 +128,24 @@ describe 'backups', :skip_service_backups => true do
             expect(ls_result.lines.join).to_not match(filename) unless ls_result.nil?
           end
         end
+
+        it 'deletes the md5 files' do
+          with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
+            instance_id = service_binding.service_instance.id
+            filename = "20100101T010100Z-#{instance_id}_#{service_plan}_redis_backup.md5"
+
+            result = vm_execute.call("touch #{source_folder}/#{filename}; ls #{source_folder}")
+            expect(result).to_not be_nil
+            expect(result.lines.join).to match(filename)
+
+            cleanup_result = vm_execute.call(manual_cleanup_command)
+            expect(cleanup_result).to_not be_nil
+            expect(cleanup_result.lines.join).to match('"event":"done","task":"perform-cleanup"')
+
+            ls_result = vm_execute.call("ls #{source_folder}")
+            expect(ls_result.lines.join).to_not match(filename) unless ls_result.nil?
+          end
+        end
       end
     end
   end
@@ -141,7 +162,7 @@ describe 'backups', :skip_service_backups => true do
         clean_s3_bucket
       end
 
-      it 'uploads data and statefile to S3 in the correct formats and removes local backup files' do
+      it 'uploads backup artifacts to S3 in the correct formats and removes local backup files' do
         with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
           client = service_client_builder(service_binding)
           client.write('foo', 'bar')
@@ -152,10 +173,12 @@ describe 'backups', :skip_service_backups => true do
           assert_rdb_file_is_valid
 
           s3_statefile = find_s3_statefile
-          s3_statefile_contents = get_file_contents s3_statefile
+          s3_statefile_contents = get_raw_file_contents s3_statefile
           expect{JSON.parse(s3_statefile_contents)}.to_not raise_error
           statefile_json = JSON.parse(s3_statefile_contents)
           expect(statefile_json.keys).to contain_exactly('available_instances', 'allocated_instances', 'instance_bindings')
+
+          assert_statefile_is_valid
 
           ls_result = vm_execute.call("ls #{source_folder}")
           expect(ls_result).to be_nil
@@ -284,6 +307,14 @@ describe 'backups', :skip_service_backups => true do
     find_s3_file statefile_pattern
   end
 
+  def find_s3_backup_file_md5
+    find_s3_file dump_file_md5_pattern
+  end
+
+  def find_s3_statefile_md5
+    find_s3_file statefile_md5_pattern
+  end
+
   def find_s3_file (file_pattern)
     s3_backup_file_meta = s3_client.list_objects(bucket: s3_backup_bucket).contents.
       find_all { |object| object.key.include? "backup/#{Time.now.strftime("%Y/%m/%d")}" }.
@@ -296,7 +327,13 @@ describe 'backups', :skip_service_backups => true do
     Aws::S3::Bucket.new(name: s3_backup_bucket, client: s3_client).clear!
   end
 
-  def get_file_contents s3_file
+  def get_raw_file_contents s3_file
+    expect(s3_file).not_to be_nil
+    expect(s3_file.size).to be > 0
+    s3_file_contents = s3_file.string
+  end
+
+  def get_utf8_file_contents s3_file
     expect(s3_file).not_to be_nil
     expect(s3_file.size).to be > 0
     s3_file_contents = s3_file.read.encode('UTF-8', 'UTF-8', :invalid => :replace)
@@ -315,9 +352,25 @@ describe 'backups', :skip_service_backups => true do
 
   def assert_rdb_file_is_valid
     s3_backup_file = find_s3_backup_file
-    s3_backup_file_contents = get_file_contents s3_backup_file
+    s3_backup_file_contents = get_raw_file_contents s3_backup_file
+    s3_backup_file_contents_utf8 = get_utf8_file_contents s3_backup_file
+    s3_backup_file_md5 = find_s3_backup_file_md5
+    s3_backup_file_md5_contents = get_raw_file_contents s3_backup_file_md5
 
-    expect(s3_backup_file_contents).to match(/^REDIS/)       # check RDB format
-    expect(s3_backup_file_contents).to_not include('SELECT') # check not AOF format
+    expect(s3_backup_file_contents_utf8).to match(/^REDIS/)       # check RDB format
+    expect(s3_backup_file_contents_utf8).to_not include('SELECT') # check not AOF format
+
+    file_md5 = Digest::MD5.hexdigest s3_backup_file_contents
+    expect(file_md5).to eq(s3_backup_file_md5_contents)
+  end
+
+  def assert_statefile_is_valid
+    s3_statefile = find_s3_statefile
+    s3_statefile_contents = get_raw_file_contents s3_statefile
+    s3_statefile_md5 = find_s3_statefile_md5
+    s3_statefile_md5_contents = get_raw_file_contents s3_statefile_md5
+
+    state_md5 = Digest::MD5.hexdigest s3_statefile_contents
+    expect(state_md5).to eq(s3_statefile_md5_contents)
   end
 end
