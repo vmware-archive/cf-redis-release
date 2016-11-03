@@ -30,8 +30,8 @@ describe 'backups', :skip_service_backups => true do
   let(:dump_file_pattern) { /\d{8}T\d{6}Z-.*_redis_backup.rdb/ }
   let(:dump_file_md5_pattern) { /\d{8}T\d{6}Z-.*_redis_backup.md5/ }
 
-  let(:statefile_pattern) { /\d{8}T\d{6}Z_statefile.json/ }
-  let(:statefile_md5_pattern) { /\d{8}T\d{6}Z_statefile.md5/ }
+  let(:statefile_pattern) { /\d{8}T\d{6}Z_.+_statefile.json/ }
+  let(:statefile_md5_pattern) { /\d{8}T\d{6}Z_.+_statefile.md5/ }
 
   shared_examples "backups are enabled" do
     describe 'service backups' do
