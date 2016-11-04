@@ -1,30 +1,30 @@
 ---
 meta:
-  deployment_name: cf-redis
-  director_uuid: de55efe0-b372-4840-90a4-888b28789fdf
+  deployment_name: REPLACE_WITH_REDIS_DEPLOYMENT_NAME
+  director_uuid: REPLACE_WITH_DIRECTOR_ID
   release_name: cf-redis
-  apps_domain: bosh-lite.com
-  external_domain: bosh-lite.com
+  apps_domain: REPLACE_WITH_APP_DOMAIN
+  external_domain: REPLACE_WITH_DOMAIN
   syslog_aggregator:
-    address: 127.0.0.1
-    port: 1234
+    address: REPLACE_WITH_SYSLOG_AGGREGATOR_HOST
+    port: REPLACE_WITH_SYSLOG_AGGREGATOR_PORT
   broker:
     name: redis
-    username: admin
-    password: admin
+    username: REPLACE_WITH_BROKER_USERNAME
+    password: REPLACE_WITH_BROKER_PASSWORD
     host: (( "redis-broker" "." .meta.external_domain ))
   cf:
-    admin_username: admin
-    admin_password: admin
+    admin_username: REPLACE_WITH_ADMIN_USERNAME
+    admin_password: REPLACE_WITH_ADMIN_PASSWORD
     api_url: https://api.bosh-lite.com
     system_domain: (( .meta.apps_domain ))
     apps_domain: (( .meta.external_domain ))
   nats:
       machines:
-      - 10.250.0.6
-      password: nats
-      port: 4222
-      user: nats
+      - REPLACE_WITH_NATS_MACHINES_HOST
+      password: REPLACE_WITH_NATS_PASSWORD
+      port: REPLACE_WITH_NATS_PORT
+      user: REPLACE_WITH_NATS_USERNAME
   service_name: redis
   route_name: redis-broker
   redis:
@@ -42,7 +42,7 @@ meta:
     config_command: configalias
     save_command: anotherrandomstring
     bg_save_command: yetanotherrandomstring
-  #----
+
   vm_type: default
   stemcell: trusty
   azs: [z1]
