@@ -67,7 +67,3 @@ cf-cli/cf-cli_6.21.1_linux_x86-64.tgz:
   object_id: 34b04b35-3928-4264-9a49-33b07af83a7e
   sha: 7dc397d2a0d93887ef50bc1f852beb686563049e
   size: 6543090
-go/go1.7.3.linux-amd64.tar.gz:
-  object_id: 1b8236df-5aa5-481c-80c6-165dc579efc9
-  sha: ead40e884ad4d6512bcf7b3c7420dd7fa4a96140
-  size: 82565628
