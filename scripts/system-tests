@@ -18,5 +18,4 @@ check_args() {
 
 check_args
 
-IGNORE="\`initialize\'\: Object\#timeout is deprecated, use Timeout\.timeout instead\."
-(bundle install && bundle exec rake spec 3>&1 1>&2 2>&3 | grep -v -p "$IGNORE") 3>&1 1>&2 2>&3
+bundle install && bundle exec rake spec
