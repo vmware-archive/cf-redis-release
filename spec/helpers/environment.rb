@@ -2,6 +2,7 @@ require 'prof/environment/cloud_foundry'
 
 require 'support/redis_service_broker'
 require 'support/redis_service_client_builder'
+require 'yaml'
 
 module Helpers
   module Environment
@@ -17,7 +18,36 @@ module Helpers
         options[:ssh_gateway_host]     = URI.parse(ENV['BOSH_TARGET']).host if ENV.key?('BOSH_TARGET')
         options[:ssh_gateway_username] = 'vcap'                             if ENV.key?('BOSH_TARGET')
         options[:ssh_gateway_password] = 'c1oudc0w'                         if ENV.key?('BOSH_TARGET')
+
+        prepare_bosh_manifest
         Prof::Environment::CloudFoundry.new(options)
+      end
+    end
+
+    def prepare_bosh_manifest options
+      bosh_manifest_path = ENV.fetch('BOSH_MANIFEST')
+      provided_manifest = YAML.load_file(bosh_manifest_path) { File.join(ROOT, 'manifests/cf-redis-lite.yml') })
+      bosh_director = BoshDirector.new(
+        target_url: options[:bosh_target],
+        username: options[:bosh_username],
+        password: options[:bosh_password],
+        manifest_path: nil,
+        command_runner: CommandRunner.new,
+        logger: nil)
+      downloaded_manifest = bosh_director.downloaded_manifest
+
+      release = provided_manifest["releases"].select do |object|
+        object["name"] == "cf-redis"
+      end.first
+
+      downloaded_release = downloaded_manifest["releases"].select do |key, value|
+        key == "cf-redis"
+      end.first
+
+      release["version"] = downloaded_release["version"]
+
+      File.open(bosh_manifest_path) do |file|
+        file.write(provided_manifest.to_yaml)
       end
     end
 
