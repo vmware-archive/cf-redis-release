@@ -12,7 +12,7 @@ module Helpers
     def environment
       @environment ||= begin
         options = {
-          bosh_manifest_path: ENV.fetch('BOSH_MANIFEST') { File.join(ROOT, 'manifests/cf-redis-lite.yml') },
+          bosh_manifest_path: File.join(ROOT, RSpec.configuration.manifest_path),
           bosh_service_broker_job_name: 'cf-redis-broker'
         }
         options[:bosh_username]        = ENV['BOSH_USERNAME']               if ENV.key?('BOSH_USERNAME')
@@ -22,17 +22,15 @@ module Helpers
         options[:ssh_gateway_username] = 'vcap'                             if ENV.key?('BOSH_TARGET')
         options[:ssh_gateway_password] = 'c1oudc0w'                         if ENV.key?('BOSH_TARGET')
 
+        FileUtils.mkdir_p(File.dirname(options[:bosh_manifest_path]))
         prepare_bosh_manifest options
         Prof::Environment::CloudFoundry.new(options)
       end
     end
 
     def prepare_bosh_manifest options
-      bosh_manifest_path = ENV.fetch('BOSH_MANIFEST')
+      bosh_manifest_path = options[:bosh_manifest_path]
 
-      return if bosh_manifest_path.nil?
-
-      provided_manifest = YAML.load_file(bosh_manifest_path)
       bosh_director = Hula::BoshDirector.new(
         target_url: options[:bosh_target] ||= "https://192.168.50.4:25555",
         username: options[:bosh_username] ||= "admin",
@@ -41,21 +39,17 @@ module Helpers
         command_runner: Hula::CommandRunner.new,
         logger: Logger.new('/dev/null'))
 
-      deployment_name = provided_manifest["name"]
+
+      if ENV.key?('DEPLOYMENT_NAME')
+        deployment_name = ENV['DEPLOYMENT_NAME']
+      else
+        deployment_name = "cf-redis-v346"
+      end
+
       downloaded_manifest = bosh_director.download_manifest deployment_name
 
-      release = provided_manifest["releases"].select do |object|
-        object["name"] == "cf-redis"
-      end.first
-
-      downloaded_release = downloaded_manifest["releases"].select do |object|
-        object["name"] == "cf-redis"
-      end.first
-
-      release["version"] = downloaded_release["version"]
-
       File.open(bosh_manifest_path, "w") do |file|
-        file.write(provided_manifest.to_yaml)
+        file.write(downloaded_manifest.to_yaml)
       end
     end
 
