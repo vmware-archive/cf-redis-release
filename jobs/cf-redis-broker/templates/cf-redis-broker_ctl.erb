@@ -12,15 +12,6 @@ STATEFILE_DIR=`dirname <%= p('redis.statefile_path') %>`
 BACKUP_SOURCE_DIR=<%= p('service-backup.source_folder') %>
 <% end %>
 
-<% if_p('redis-backup.stdout_filename') do %>
-touch <%= p('redis-backup.stdout_filename') %>
-chmod 666 <%= p('redis-backup.stdout_filename') %>
-<% end %>
-
-<% if_p('redis-backup.stderr_filename') do %>
-touch <%= p('redis-backup.stderr_filename') %>
-chmod 666 <%= p('redis-backup.stderr_filename') %>
-<% end %>
 
 PIDFILE=$RUN_DIR/unicorn.pid
 
@@ -35,6 +26,16 @@ case $1 in
 
     mkdir -p $RUN_DIR $LOG_DIR $DATA_DIR $INSTANCE_LOG_DIR $STATEFILE_DIR $BACKUP_LOG_DIR $BACKUP_TMP_DIR $PIDFILE_DIR $BACKUP_SOURCE_DIR
     chown vcap:vcap $RUN_DIR $LOG_DIR $DATA_DIR $INSTANCE_LOG_DIR $STATEFILE_DIR $BACKUP_LOG_DIR $BACKUP_TMP_DIR $PIDFILE_DIR $BACKUP_SOURCE_DIR
+
+    <% if_p('redis-backup.stdout_filename') do %>
+    touch <%= p('redis-backup.stdout_filename') %>
+    chmod 666 <%= p('redis-backup.stdout_filename') %>
+    <% end %>
+    
+    <% if_p('redis-backup.stderr_filename') do %>
+    touch <%= p('redis-backup.stderr_filename') %>
+    chmod 666 <%= p('redis-backup.stderr_filename') %>
+    <% end %>
 
     # Recommended for running redis on a VM in production (https://www.pivotaltracker.com/story/show/74949514)
     sysctl vm.overcommit_memory=1
