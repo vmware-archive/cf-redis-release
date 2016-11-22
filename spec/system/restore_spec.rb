@@ -4,7 +4,7 @@ describe 'restore' do
   let(:service_name)   { bosh_manifest.property('redis.broker.service_name') }
   let(:restore_binary) { '/var/vcap/jobs/redis-backups/bin/restore' }
   let(:backup_dir)     { '/var/vcap/store/redis-backup' }
-  let(:local_dump)     { '/Users/pivotal/workspace/cf-redis-release/spec/fixtures/moaning-dump.rdb' }
+  let(:local_dump)     { 'spec/fixtures/moaning-dump.rdb' }
 
   before do
     @service_instance = service_broker.provision_instance(service_name, 'dedicated-vm')
