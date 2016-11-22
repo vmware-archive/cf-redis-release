@@ -16,7 +16,6 @@ describe 'backups', :skip_service_backups => true do
   let(:cron_schedule) { bosh_manifest.property("service-backup.cron_schedule") }
   let(:manual_cleanup_command) { bosh_manifest.property("service-backup.cleanup_executable") }
   let(:manual_snapshot_command) { bosh_manifest.property("service-backup.source_executable") }
-  let(:manual_snapshot_log_file_path) { "/var/vcap/sys/log/redis/snapshot.stdout.log" }
   let(:service_identifier_executable) { bosh_manifest.property("service-backup.service_identifier_executable") }
   let(:service_name) { bosh_manifest.property('redis.broker.service_name') }
   let(:aws_access_key_id) { s3_config["access_key_id"] }
@@ -84,18 +83,6 @@ describe 'backups', :skip_service_backups => true do
       end
 
       describe 'manual snapshot' do
-        before do
-          with_remote_execution(service_name, service_plan) do |vm_execute|
-            log_file_exists_error = vm_execute.call("if [ ! -f #{manual_snapshot_log_file_path}  ]; then echo \"file does not exist\"; fi")
-            expect(log_file_exists_error).to be_nil
-
-            clear_snapshot_logs_result = vm_execute.call("> #{manual_snapshot_log_file_path}")
-            expect(clear_snapshot_logs_result).to be_nil
-
-            @result = vm_execute.call(manual_snapshot_command)
-          end
-        end
-
         after do
           with_remote_execution(service_name, service_plan) do |vm_execute|
             cleanup_result = vm_execute.call(manual_cleanup_command)
@@ -106,9 +93,10 @@ describe 'backups', :skip_service_backups => true do
 
         it 'creates an RDB dump file' do
           with_remote_execution(service_name, service_plan) do |vm_execute|
-            expect(@result).to_not be_nil
+            result = vm_execute.call(manual_snapshot_command)
+            expect(result).to_not be_nil
 
-            task_line = @result.lines.select { |line|
+            task_line = result.lines.select { |line|
               line.include?('"task":"create-snapshot"') && line.include?('"event":"done"')
             }
 
@@ -118,15 +106,6 @@ describe 'backups', :skip_service_backups => true do
             expect(ls_output).to_not be_nil
             expect(ls_output.lines.size).to eql(1)
             expect(ls_output.lines.first).to match(/#{source_folder}#{dump_file_pattern}/)
-
-            log_output = vm_execute.call("cat #{manual_snapshot_log_file_path}")
-            expect(log_output).to_not be_nil
-
-            expected_log = log_output.lines.select { |line|
-              line.include?('"task":"create-snapshot"') && line.include?('"event":"done"')
-            }
-
-            expect(expected_log.length).to be > 0
           end
         end
       end
