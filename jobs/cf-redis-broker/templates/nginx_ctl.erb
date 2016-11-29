@@ -14,7 +14,7 @@ case $1 in
 
     echo $$ > $PID_FILE
 
-    exec chpst -u vcap:vcap /var/vcap/packages/cf-redis-nginx/sbin/nginx -c $JOB_DIR/config/nginx.conf \
+    exec /var/vcap/packages/cf-redis-nginx/sbin/nginx -c $JOB_DIR/config/nginx.conf \
       > >(tee -a $LOG_DIR/nginx.stdout.log | logger -p local0.info) \
       2> >(tee -a $LOG_DIR/nginx.stderr.log | logger -p local0.err)
     ;;

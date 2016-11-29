@@ -29,7 +29,7 @@ case $1 in
     cd $DATA_DIR
 
     echo $$ > $PIDFILE
-    exec chpst -u vcap:vcap /var/vcap/packages/cf-redis-broker/bin/agent \
+    exec chpst -u root:root /var/vcap/packages/cf-redis-broker/bin/agent \
       -agentConfig=/var/vcap/jobs/dedicated-node/config/agent.yml \
       > >(tee -a $LOG_DIR/redis-agent.stdout.log | logger -p local0.info ) \
       2> >(tee -a $LOG_DIR/redis-agent.stderr.log | logger -p local0.err )
