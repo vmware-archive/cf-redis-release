@@ -156,7 +156,7 @@ properties:
     default: localhost
     description: The port for the broker unicorn process to run on
   redis.broker.nginx.port:
-    default: 80
+    default: 12350
     description: "Port for nginx"
   redis.broker.nginx.bucket_size:
     default: 128

@@ -109,7 +109,7 @@ base_jobs:
       routes:
       - name: "broker_0"
         registration_interval: 10s
-        port: 80
+        port: 12350
         tags:
           component: redis-broker
           env: (( .meta.environment_type || "production" ))

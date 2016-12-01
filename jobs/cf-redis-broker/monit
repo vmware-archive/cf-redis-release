@@ -19,7 +19,7 @@ check process cf-redis-broker
   group vcap
 
 check process broker-nginx
-  with pidfile /var/vcap/sys/run/cf-redis-broker/nginx.pid
+  with pidfile /var/vcap/sys/run/cf-redis-broker/nginx/nginx.pid
   start program "/var/vcap/jobs/cf-redis-broker/bin/nginx_ctl start"
   stop program "/var/vcap/jobs/cf-redis-broker/bin/nginx_ctl stop"
   group vcap
