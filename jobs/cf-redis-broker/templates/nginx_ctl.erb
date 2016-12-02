@@ -7,13 +7,20 @@ PID_FILE=$RUN_DIR/nginx.pid
 
 source /var/vcap/packages/redis-common/utils.sh
 
+function chown_vcap_logs_if_exists() {
+  if [ "$(find $1 -name '*.log' | wc -l)" -gt 0 ]; then
+    chown vcap:vcap $1/*.log
+  fi
+}
+
 case $1 in
 
   start)
     mkdir -p $RUN_DIR $LOG_DIR $STORE_DIR
     echo $$ > $PID_FILE
 
-    chown vcap:vcap $RUN_DIR $LOG_DIR $STORE_DIR $PID_FILE $LOG_DIR/*.log
+    chown vcap:vcap $RUN_DIR $LOG_DIR $STORE_DIR $PID_FILE
+    chown_vcap_logs_if_exists $LOG_DIR
 
     exec chpst -u vcap:vcap /var/vcap/packages/cf-redis-nginx/sbin/nginx -c $JOB_DIR/config/nginx.conf \
       > >(tee -a $LOG_DIR/nginx.stdout.log | logger -p local0.info) \
