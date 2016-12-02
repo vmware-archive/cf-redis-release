@@ -13,7 +13,7 @@ case $1 in
     mkdir -p $RUN_DIR $LOG_DIR $STORE_DIR
     echo $$ > $PID_FILE
 
-    chown vcap:vcap $RUN_DIR $LOG_DIR $STORE_DIR $PID_FILE
+    chown vcap:vcap $RUN_DIR $LOG_DIR $STORE_DIR $PID_FILE $LOG_DIR/*.log
 
     exec chpst -u vcap:vcap /var/vcap/packages/cf-redis-nginx/sbin/nginx -c $JOB_DIR/config/nginx.conf \
       > >(tee -a $LOG_DIR/nginx.stdout.log | logger -p local0.info) \
