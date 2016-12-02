@@ -918,6 +918,4 @@ builds:
     version: 424.34.0
   e1ad77ef-9c24-4743-8bf8-18abee266429:
     version: 424.35.0
-  42340b04-922c-4884-8253-5c13f4edc6a7:
-    version: 424.36.0
 format-version: '2'
