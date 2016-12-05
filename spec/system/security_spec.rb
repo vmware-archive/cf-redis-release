@@ -2,7 +2,6 @@ require 'system_spec_helper'
 
 require 'socket'
 require 'timeout'
-require 'prof/ssl/cipher_set'
 
 describe 'security' do
   describe 'the broker' do
@@ -25,11 +24,8 @@ describe 'security' do
     end
 
     it 'only supports HTTPS with restricted ciphers' do
-      agent_url = "https://#{node_hosts.first}:4443"
       supported_ciphers = ["DHE-RSA-AES128-GCM-SHA256", "DHE-RSA-AES256-GCM-SHA384", "ECDHE-RSA-AES128-GCM-SHA256", "ECDHE-RSA-AES256-GCM-SHA384"]
-      supported_protocols = [:TLSv1_2]
-      cipher_set = Prof::SSL::CipherSet::new(supported_ciphers:supported_ciphers, supported_protocols:supported_protocols)
-    expect(agent_url).to only_support_ssl_with_cipher_set(cipher_set).with_proxy(environment.http_proxy)
+      expect(get_allowed_ciphers).to contain_exactly(*supported_ciphers)
     end
 
     it 'does not listen publicly on the backend_port' do
@@ -38,4 +34,39 @@ describe 'security' do
       expect(netstat_output).to include("localhost:#{agent_backend_port}")
     end
   end
+end
+
+def get_allowed_ciphers
+  command = '
+    #!/bin/bash
+
+    SERVER=localhost:4443
+    ciphers=$(openssl ciphers \'ALL:eNULL\' | sed -e \'s/:/ /g\')
+
+    function test_cipher() {
+      echo -n | openssl s_client -cipher "$1" -connect $SERVER 2>&1
+    }
+
+    function cipher_is_allowed() {
+      result=$(test_cipher $cipher)
+
+      if [[ "$result" =~ "Cipher is ${cipher}" || "$result" =~ "Cipher    :" ]]; then
+        echo true
+      fi
+    }
+
+    function echo_cipher_if_allowed() {
+      if [[ "$(cipher_is_allowed $1)" = true ]]; then
+        echo $1
+      fi
+    }
+
+    for cipher in ${ciphers[@]}; do
+      echo_cipher_if_allowed $cipher
+    done
+  '
+
+  allowed_ciphers = ssh_gateway.execute_on(node_hosts.first, command)
+  expect(allowed_ciphers).not_to be_nil
+  allowed_ciphers.split "\n"
 end
