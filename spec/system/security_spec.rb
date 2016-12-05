@@ -25,7 +25,7 @@ describe 'security' do
     end
 
     it 'only supports HTTPS with restricted ciphers' do
-      agent_url = "https://#{node_hosts.first}"
+      agent_url = "https://#{node_hosts.first}:4443"
       supported_ciphers = ["DHE-RSA-AES128-GCM-SHA256", "DHE-RSA-AES256-GCM-SHA384", "ECDHE-RSA-AES128-GCM-SHA256", "ECDHE-RSA-AES256-GCM-SHA384"]
       supported_protocols = [:TLSv1_2]
       cipher_set = Prof::SSL::CipherSet::new(supported_ciphers:supported_ciphers, supported_protocols:supported_protocols)
