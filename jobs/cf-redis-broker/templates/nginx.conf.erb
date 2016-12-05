@@ -3,8 +3,8 @@ daemon off;
 
 pid /var/vcap/sys/run/cf-redis-broker/nginx/nginx.pid;
 
-# nginx will attempt to create a default log file, this errors due to permissions
-# this can be ignored.
+# nginx will attempt to create a default log file at first, ignoring the below
+# confg. This might fail the first time and the first error can be ignored.
 error_log /var/vcap/sys/log/cf-redis-broker/nginx/error.log;
 
 <% if_p("syslog_aggregator.address", "syslog_aggregator.port") do %>

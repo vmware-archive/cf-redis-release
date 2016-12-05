@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 JOB_DIR=/var/vcap/jobs/dedicated-node
-RUN_DIR=/var/vcap/sys/run/dedicated-node
+RUN_DIR=/var/vcap/sys/run/dedicated-node/nginx
 LOG_DIR=/var/vcap/sys/log/nginx
 STORE_DIR=/var/vcap/store/dedicated-node/nginx
 TEMPLATE_DIR=/var/vcap/jobs/dedicated-node/config/ssl
@@ -26,6 +26,12 @@ generate_self_signed_key_and_cert() {
   -keyout ${STORE_DIR}/${KEY_FILE} -out ${STORE_DIR}/${CERT_FILE}
 }
 
+function chown_vcap_logs_if_exists() {
+  if [ "$(find $1 -name '*.log' | wc -l)" -gt 0 ]; then
+    chown vcap:vcap $1/*.log
+  fi
+}
+
 case $1 in
 
   start)
@@ -41,7 +47,10 @@ case $1 in
 
     echo $$ > $PID_FILE
 
-    exec /var/vcap/packages/cf-redis-nginx/sbin/nginx -c $JOB_DIR/config/nginx.conf \
+    chown vcap:vcap $RUN_DIR $LOG_DIR $STORE_DIR $PID_FILE ${STORE_DIR}/${KEY_FILE} ${STORE_DIR}/${CERT_FILE}
+    chown_vcap_logs_if_exists $LOG_DIR
+
+    exec chpst -u vcap:vcap /var/vcap/packages/cf-redis-nginx/sbin/nginx -c $JOB_DIR/config/nginx.conf \
       > >(tee -a $LOG_DIR/nginx.stdout.log | logger -p local0.info) \
       2> >(tee -a $LOG_DIR/nginx.stderr.log | logger -p local0.err)
     ;;

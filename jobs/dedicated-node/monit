@@ -12,7 +12,7 @@ check process redis
   depends on redis-agent, syslog-configurator
 
 check process nginx
-  with pidfile /var/vcap/sys/run/dedicated-node/nginx.pid
+  with pidfile /var/vcap/sys/run/dedicated-node/nginx/nginx.pid
   start program "/var/vcap/jobs/dedicated-node/bin/nginx_ctl start"
   stop program "/var/vcap/jobs/dedicated-node/bin/nginx_ctl stop"
   group vcap
