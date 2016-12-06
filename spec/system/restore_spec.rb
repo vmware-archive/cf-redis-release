@@ -1,5 +1,5 @@
 require 'system_spec_helper'
-
+require 'httparty'
 
 describe 'dedicated-vm restore' do
   let(:service_name)   { bosh_manifest.property('redis.broker.service_name') }
@@ -56,6 +56,9 @@ describe 'shared-vm restore' do
   end
 
   after do
+    # temporary fix, see #135523595
+    expect(broker_registered?).to be true
+
     service_broker.unbind_instance(@service_binding)
     service_broker.deprovision_instance(@service_instance)
   end
@@ -70,4 +73,26 @@ describe 'shared-vm restore' do
 
     expect(output).to include('"restore.LogRestoreComplete","log_level":1,"data":{"message":"Redis data restore completed successfully"}}')
   end
+end
+
+def broker_registered?
+  uri = URI.parse('https://' + bosh_manifest.property('broker.host') + '/v2/catalog')
+
+  auth = {
+    username: bosh_manifest.property("broker.username"),
+    password: bosh_manifest.property("broker.password")
+  }
+
+  15.times do |n|
+    puts "Checking if broker is responding, Attempt: #{n}"
+    response = HTTParty.get(uri, verify: false, basic_auth: auth)
+
+    if response.code == 200
+      return true
+    end
+
+    sleep 1
+  end
+
+  false
 end

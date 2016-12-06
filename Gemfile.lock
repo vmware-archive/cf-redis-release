@@ -348,6 +348,7 @@ PLATFORMS
 DEPENDENCIES
   aws-sdk
   bosh_cli
+  httparty
   hula (= 0.8.9)
   process_helper
   prof (= 0.31.11)

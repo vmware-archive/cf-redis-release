@@ -9,6 +9,7 @@ gem 'rake'
 gem 'process_helper'
 
 group :test do
+  gem 'httparty'
   gem 'rspec'
   gem 'pry'
   gem 'pry-byebug'
