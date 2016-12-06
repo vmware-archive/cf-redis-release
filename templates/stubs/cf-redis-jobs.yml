@@ -29,6 +29,8 @@ properties:
       name: (( .meta.redis.broker.name ))
       service_instance_limit: (( .meta.redis.shared_plan.instance_limit ))
       dedicated_nodes: (( base_jobs.dedicated-node.networks.redis_z1.static_ips ))
+      shared_min_port: (( .meta.redis.broker.shared_min_port ))
+      shared_max_port: (( .meta.redis.broker.shared_max_port ))
     maxmemory: (( .meta.redis.shared_plan.max_memory ))
     host: (( base_jobs.cf-redis-broker.networks.redis_z1.static_ips.[0] ))
     config_command: (( .meta.redis.config_command ))

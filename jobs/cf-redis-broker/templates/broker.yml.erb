@@ -36,6 +36,8 @@ redis:
   long_description: <%= p('redis.broker.long_description') %>
   description: <%= p('redis.broker.description') %>
   icon_image: <%= p('redis.broker.icon_image') %>
+  shared_min_port: <%= p('redis.broker.shared_min_port') %>
+  shared_max_port: <%= p('redis.broker.shared_max_port') %>
   dedicated:
     nodes: <%= p('redis.broker.dedicated_nodes') %>
     port: <%= p('redis.broker.dedicated_port') %>

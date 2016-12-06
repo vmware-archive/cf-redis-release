@@ -35,6 +35,8 @@ meta:
       service_id: 7aba7e52-f61b-4263-9de1-14e9d11fb67d
       shared_vm_plan_id: 78bf886c-bc50-4f31-a03c-cb786a158286
       dedicated_vm_plan_id: 48b35349-d3de-4e19-bc4a-66996ae07766
+      shared_min_port: 1024
+      shared_max_port: 65535
     dedicated_plan:
       instance_count: 3
     shared_plan:

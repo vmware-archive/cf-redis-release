@@ -143,6 +143,12 @@ properties:
   redis.broker.start_redis_timeout:
     description: Maximum wait time in seconds for Redis to start up
     default: 600
+  redis.broker.shared_min_port:
+    description: The preferred lower port range to allocate for shared instances (e.g. "30000"). If no free port is available within this range, the service instance creation request will fail.
+    default: 1024
+  redis.broker.shared_max_port:
+    description: The preferred upper port range to allocate for shared instances (e.g. "40000"). If no free port is available within the preferred range, the service instance creation request will fail.
+    default: 65535
   redis.broker.service_instance_limit:
     description: The maximum number of instances allowed
   redis.broker.auth.username:
