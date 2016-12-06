@@ -12,7 +12,7 @@ case $1 in
     ;;
 
   stop)
-    pkill redis-server
+    pkill redis-server || true
     kill_and_wait $PIDFILE 55
     ;;
 
