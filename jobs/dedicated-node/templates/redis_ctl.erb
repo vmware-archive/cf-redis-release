@@ -15,7 +15,7 @@ case $1 in
   start)
 
     mkdir -p $LOG_DIR $RUN_DIR $DATA_DIR $BACKUP_LOG_DIR $BACKUP_TMP_DIR
-    chown vcap:vcap $LOG_DIR $RUN_DIR $DATA_DIR $BACKUP_LOG_DIR $BACKUP_TMP_DIR
+    chown vcap:vcap $LOG_DIR $RUN_DIR $DATA_DIR $BACKUP_LOG_DIR $BACKUP_TMP_DIR $CONFIG_PATH
     [ -e $LOG_DIR/redis.log ] && chown vcap:vcap $LOG_DIR/redis.log
 
     # Remove temp backup files that might be left over because of a previously
