@@ -15,7 +15,7 @@ describe 'dedicated-vm restore' do
     ssh_gateway.scp_to(@vm_ip, local_dump, '/tmp/moaning-dump.rdb')
     root_execute_on(@vm_ip, "mv /tmp/moaning-dump.rdb #{backup_dir}/dump.rdb")
     expect(@client.read("moaning")).to_not eq("myrtle")
-    root_execute_on(@vm_ip, "#{restore_binary} -sourceRDB #{backup_dir}/dump.rdb")
+    root_execute_on(@vm_ip, "#{restore_binary} --sourceRDB #{backup_dir}/dump.rdb")
   end
 
   after do
@@ -49,10 +49,8 @@ describe 'shared-vm restore' do
     ssh_gateway.scp_to(@vm_ip, local_dump, '/tmp/moaning-dump.rdb')
     root_execute_on(@vm_ip, "mv /tmp/moaning-dump.rdb #{backup_dir}/dump.rdb")
     expect(@client.read("moaning")).to_not eq("myrtle")
-    redisConfDir = "/var/vcap/store/cf-redis-broker/redis-data/#{@service_instance.id}"
-    redisDbDir = "/var/vcap/store/cf-redis-broker/redis-data/#{@service_instance.id}/db"
-
-    root_execute_on(@vm_ip, "#{restore_binary} -redisConfDir #{redisConfDir} -redisDbDir #{redisDbDir} -sourceRDB #{backup_dir}/dump.rdb")
+    instance_id = @service_instance.id
+    root_execute_on(@vm_ip, "#{restore_binary} --sharedVmGuid #{instance_id} --sourceRDB #{backup_dir}/dump.rdb")
   end
 
   after do
