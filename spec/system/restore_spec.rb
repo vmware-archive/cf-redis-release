@@ -1,30 +1,32 @@
 require 'system_spec_helper'
 require 'httparty'
 
-restore_binary = '/var/vcap/jobs/redis-backups/bin/restore'
-backup_dir = '/var/vcap/store/redis-backup'
-local_dump = 'spec/fixtures/moaning-dump.rdb'
+RESTORE_BINARY = '/var/vcap/jobs/redis-backups/bin/restore'
+BACKUP_PATH = '/var/vcap/store/redis-backup/dump.rdb'
 
-describe 'dedicated-vm restore' do
+shared_examples 'it can restore Redis' do |plan|
   before(:all) do
-    service_name = bosh_manifest.property('redis.broker.service_name')
-    @service_instance = service_broker.provision_instance(service_name, 'dedicated-vm')
-    @service_binding  = service_broker.bind_instance(@service_instance)
-    @vm_ip            = @service_binding.credentials[:host]
+    @service_instance, @service_binding = provision_and_bind plan
+
+    @vm_ip = @service_binding.credentials[:host]
     @preprovision_timestamp = root_execute_on(@vm_ip, "date +%s")
-    @client           = service_client_builder(@service_binding)
-    ssh_gateway.scp_to(@vm_ip, local_dump, '/tmp/moaning-dump.rdb')
-    root_execute_on(@vm_ip, "mv /tmp/moaning-dump.rdb #{backup_dir}/dump.rdb")
+    @client = service_client_builder(@service_binding)
+
+    stage_dump_file @vm_ip
     expect(@client.read("moaning")).to_not eq("myrtle")
-    root_execute_on(@vm_ip, "#{restore_binary} --sourceRDB #{backup_dir}/dump.rdb")
+
+    restore_args = get_restore_args plan, @service_instance.id
+    root_execute_on(@vm_ip, "#{RESTORE_BINARY} #{restore_args}")
   end
 
   after(:all) do
+    expect(broker_registered?).to be true
+
     service_broker.unbind_instance(@service_binding)
     service_broker.deprovision_instance(@service_instance)
   end
 
-  it 'restores data to a dedicated-vm instance' do
+  it 'restores data to the instance' do
     expect(@client.read("moaning")).to eq("myrtle")
   end
 
@@ -36,38 +38,13 @@ describe 'dedicated-vm restore' do
   end
 end
 
-describe 'shared-vm restore' do
-  before(:all) do
-    service_name = bosh_manifest.property('redis.broker.service_name')
-    @service_instance = service_broker.provision_instance(service_name, 'shared-vm')
-    @service_binding  = service_broker.bind_instance(@service_instance)
-    @vm_ip            = @service_binding.credentials[:host]
-    @preprovision_timestamp = root_execute_on(@vm_ip, "date +%s")
-    @client           = service_client_builder(@service_binding)
-    ssh_gateway.scp_to(@vm_ip, local_dump, '/tmp/moaning-dump.rdb')
-    root_execute_on(@vm_ip, "mv /tmp/moaning-dump.rdb #{backup_dir}/dump.rdb")
-    expect(@client.read("moaning")).to_not eq("myrtle")
-    instance_id = @service_instance.id
-    root_execute_on(@vm_ip, "#{restore_binary} --sharedVmGuid #{instance_id} --sourceRDB #{backup_dir}/dump.rdb")
+describe 'restore' do
+  context 'shared-vm' do
+    it_behaves_like 'it can restore Redis', 'shared-vm'
   end
 
-  after(:all) do
-    # temporary fix, see #135523595
-    expect(broker_registered?).to be true
-
-    service_broker.unbind_instance(@service_binding)
-    service_broker.deprovision_instance(@service_instance)
-  end
-
-  it 'restores data to a shared-vm instance' do
-    expect(@client.read("moaning")).to eq("myrtle")
-  end
-
-  it 'logs successful completion of restore' do
-    vm_log = root_execute_on(@vm_ip, "cat /var/vcap/sys/log/redis-backups/redis-backups.log")
-    contains_expected_log = drop_log_lines_before(@preprovision_timestamp, vm_log).any? do |line|
-      line.include?('"restore.LogRestoreComplete","log_level":1,"data":{"message":"Redis data restore completed successfully"}}')
-    end
+  context 'dedicated-vm' do
+    it_behaves_like 'it can restore Redis', 'dedicated-vm'
   end
 end
 
@@ -91,4 +68,25 @@ def broker_registered?
   end
 
   false
+end
+
+def stage_dump_file vm_ip
+  local_dump = 'spec/fixtures/moaning-dump.rdb'
+  ssh_gateway.scp_to(vm_ip, local_dump, '/tmp/moaning-dump.rdb')
+  root_execute_on(vm_ip, "mv /tmp/moaning-dump.rdb #{BACKUP_PATH}")
+end
+
+def get_restore_args plan, instance_id
+  restore_args = "--sourceRDB #{BACKUP_PATH}"
+
+  if plan == 'shared-vm' then
+    restore_args = "#{restore_args} --sharedVmGuid #{instance_id}"
+  end
+end
+
+def provision_and_bind plan
+  service_name = bosh_manifest.property('redis.broker.service_name')
+  service_instance = service_broker.provision_instance(service_name, plan)
+  service_binding  = service_broker.bind_instance(service_instance)
+  return service_instance, service_binding
 end
