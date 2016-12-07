@@ -70,6 +70,17 @@ module Helpers
           $stderr = original_stderr
         end
       end
+
+      def gateway.scp_to(*args, &block)
+        begin
+          original_stderr = $stderr
+          $stderr = FilteredStderr.new
+          super
+        ensure
+          $stderr = original_stderr
+        end
+      end
+
       gateway
     end
 
