@@ -1,16 +1,17 @@
 require 'system_spec_helper'
 require 'httparty'
 
-describe 'dedicated-vm restore' do
-  let(:service_name)   { bosh_manifest.property('redis.broker.service_name') }
-  let(:restore_binary) { '/var/vcap/jobs/redis-backups/bin/restore' }
-  let(:backup_dir)     { '/var/vcap/store/redis-backup' }
-  let(:local_dump)     { 'spec/fixtures/moaning-dump.rdb' }
+restore_binary = '/var/vcap/jobs/redis-backups/bin/restore'
+backup_dir = '/var/vcap/store/redis-backup'
+local_dump = 'spec/fixtures/moaning-dump.rdb'
 
-  before do
+describe 'dedicated-vm restore' do
+  before(:all) do
+    service_name = bosh_manifest.property('redis.broker.service_name')
     @service_instance = service_broker.provision_instance(service_name, 'dedicated-vm')
     @service_binding  = service_broker.bind_instance(@service_instance)
     @vm_ip            = @service_binding.credentials[:host]
+    @preprovision_timestamp = root_execute_on(@vm_ip, "date +%s")
     @client           = service_client_builder(@service_binding)
     ssh_gateway.scp_to(@vm_ip, local_dump, '/tmp/moaning-dump.rdb')
     root_execute_on(@vm_ip, "mv /tmp/moaning-dump.rdb #{backup_dir}/dump.rdb")
@@ -18,7 +19,7 @@ describe 'dedicated-vm restore' do
     root_execute_on(@vm_ip, "#{restore_binary} --sourceRDB #{backup_dir}/dump.rdb")
   end
 
-  after do
+  after(:all) do
     service_broker.unbind_instance(@service_binding)
     service_broker.deprovision_instance(@service_instance)
   end
@@ -28,23 +29,20 @@ describe 'dedicated-vm restore' do
   end
 
   it 'logs successful completion of restore' do
-
-    output = root_execute_on(@vm_ip, "cat /var/vcap/sys/log/redis-backups/redis-backups.log")
-
-    expect(output).to include('"restore.LogRestoreComplete","log_level":1,"data":{"message":"Redis data restore completed successfully"}}')
+    vm_log = root_execute_on(@vm_ip, "cat /var/vcap/sys/log/redis-backups/redis-backups.log")
+    contains_expected_log = drop_log_lines_before(@preprovision_timestamp, vm_log).any? do |line|
+      line.include?('"restore.LogRestoreComplete","log_level":1,"data":{"message":"Redis data restore completed successfully"}}')
+    end
   end
 end
 
 describe 'shared-vm restore' do
-  let(:service_name)   { bosh_manifest.property('redis.broker.service_name') }
-  let(:restore_binary) { '/var/vcap/jobs/redis-backups/bin/restore' }
-  let(:backup_dir)     { '/var/vcap/store/redis-backup' }
-  let(:local_dump)     { 'spec/fixtures/moaning-dump.rdb' }
-
-  before do
+  before(:all) do
+    service_name = bosh_manifest.property('redis.broker.service_name')
     @service_instance = service_broker.provision_instance(service_name, 'shared-vm')
     @service_binding  = service_broker.bind_instance(@service_instance)
     @vm_ip            = @service_binding.credentials[:host]
+    @preprovision_timestamp = root_execute_on(@vm_ip, "date +%s")
     @client           = service_client_builder(@service_binding)
     ssh_gateway.scp_to(@vm_ip, local_dump, '/tmp/moaning-dump.rdb')
     root_execute_on(@vm_ip, "mv /tmp/moaning-dump.rdb #{backup_dir}/dump.rdb")
@@ -53,7 +51,7 @@ describe 'shared-vm restore' do
     root_execute_on(@vm_ip, "#{restore_binary} --sharedVmGuid #{instance_id} --sourceRDB #{backup_dir}/dump.rdb")
   end
 
-  after do
+  after(:all) do
     # temporary fix, see #135523595
     expect(broker_registered?).to be true
 
@@ -66,10 +64,10 @@ describe 'shared-vm restore' do
   end
 
   it 'logs successful completion of restore' do
-
-    output = root_execute_on(@vm_ip, "cat /var/vcap/sys/log/redis-backups/redis-backups.log")
-
-    expect(output).to include('"restore.LogRestoreComplete","log_level":1,"data":{"message":"Redis data restore completed successfully"}}')
+    vm_log = root_execute_on(@vm_ip, "cat /var/vcap/sys/log/redis-backups/redis-backups.log")
+    contains_expected_log = drop_log_lines_before(@preprovision_timestamp, vm_log).any? do |line|
+      line.include?('"restore.LogRestoreComplete","log_level":1,"data":{"message":"Redis data restore completed successfully"}}')
+    end
   end
 end
 
