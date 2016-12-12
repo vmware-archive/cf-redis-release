@@ -8,11 +8,13 @@ BACKUP_SOURCE_DIR=<%= p('service-backup.source_folder') %>
 <% end %>
 
 <% if_p('redis-backup.stdout_filename') do %>
+mkdir -p $( dirname <%= p('redis-backup.stdout_filename') %> )
 touch <%= p('redis-backup.stdout_filename') %>
 chmod 666 <%= p('redis-backup.stdout_filename') %>
 <% end %>
 
 <% if_p('redis-backup.stderr_filename') do %>
+mkdir -p $( dirname <%= p('redis-backup.stderr_filename') %> )
 touch <%= p('redis-backup.stderr_filename') %>
 chmod 666 <%= p('redis-backup.stderr_filename') %>
 <% end %>

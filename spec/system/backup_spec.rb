@@ -16,7 +16,7 @@ describe 'backups', :skip_service_backups => true do
   let(:cron_schedule) { bosh_manifest.property("service-backup.cron_schedule") }
   let(:manual_cleanup_command) { bosh_manifest.property("service-backup.cleanup_executable") }
   let(:manual_snapshot_command) { bosh_manifest.property("service-backup.source_executable") }
-  let(:manual_snapshot_log_file_path) { "/var/vcap/sys/log/redis/snapshot.stdout.log" }
+  let(:manual_snapshot_log_file_path) { "/var/vcap/sys/log/redis-backups/backup.out.log" }
   let(:service_identifier_executable) { bosh_manifest.property("service-backup.service_identifier_executable") }
   let(:service_name) { bosh_manifest.property('redis.broker.service_name') }
   let(:aws_access_key_id) { s3_config["access_key_id"] }

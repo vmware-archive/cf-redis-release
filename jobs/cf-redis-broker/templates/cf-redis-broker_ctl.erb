@@ -11,7 +11,7 @@ STATEFILE_DIR=`dirname <%= p('redis.statefile_path') %>`
 <% if_p('service-backup.source_folder') do %>
 BACKUP_SOURCE_DIR=<%= p('service-backup.source_folder') %>
 <% end %>
-
+BACKUP_LOG_DIR=$( dirname <%= p('redis-backup.stdout_filename') %> )
 
 PIDFILE=$RUN_DIR/unicorn.pid
 
@@ -31,7 +31,7 @@ case $1 in
     touch <%= p('redis-backup.stdout_filename') %>
     chmod 666 <%= p('redis-backup.stdout_filename') %>
     <% end %>
-    
+
     <% if_p('redis-backup.stderr_filename') do %>
     touch <%= p('redis-backup.stderr_filename') %>
     chmod 666 <%= p('redis-backup.stderr_filename') %>

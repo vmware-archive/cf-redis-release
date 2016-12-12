@@ -23,10 +23,10 @@ packages:
 properties:
   redis-backup.stdout_filename:
     description: The file where we store redis backup logs
-    default: ""
+    default: /var/vcap/sys/log/redis-backups/backup.out.log
   redis-backup.stderr_filename:
     description: The file where we store redis backup error logs
-    default: ""
+    default: /var/vcap/sys/log/redis-backups/backup.err.log
   service-backup.source_folder:
     description: The directory in which we store service backups
     default: ""
