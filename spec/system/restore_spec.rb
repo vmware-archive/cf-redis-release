@@ -6,24 +6,17 @@ BACKUP_PATH = '/var/vcap/store/dump.rdb'
 
 shared_examples 'it can restore Redis' do |plan|
   before(:all) do
-    @service_instance, @service_binding = provision_and_bind plan
-
-    @vm_ip = @service_binding.credentials[:host]
-    @preprovision_timestamp = root_execute_on(@vm_ip, "date +%s")
-    @client = service_client_builder(@service_binding)
-
+    @service_instance, @service_binding, @vm_ip, @client = provision_and_build_service_client plan
+    preprovision_timestamp = root_execute_on(@vm_ip, "date +%s")
     stage_dump_file @vm_ip
     expect(@client.read("moaning")).to_not eq("myrtle")
 
-    restore_args = get_restore_args plan, @service_instance.id, BACKUP_PATH
-    root_execute_on(@vm_ip, "#{RESTORE_BINARY} #{restore_args}")
+    execute_restore_as_root (get_restore_args plan, @service_instance.id, BACKUP_PATH), @vm_ip
   end
 
   after(:all) do
     expect(broker_registered?).to be true
-
-    service_broker.unbind_instance(@service_binding)
-    service_broker.deprovision_instance(@service_instance)
+    unbind_and_deprovision(@service_binding, @service_instance)
   end
 
   it 'restores data to the instance' do
@@ -31,12 +24,8 @@ shared_examples 'it can restore Redis' do |plan|
   end
 
   it 'logs successful completion of restore' do
-    vm_log = root_execute_on(@vm_ip, "cat /var/vcap/sys/log/service-backup/restore.log")
-    contains_expected_log = drop_log_lines_before(@preprovision_timestamp, vm_log).any? do |line|
-      line.include?('"restore.LogRestoreComplete","log_level":1,"data":{"message":"Redis data restore completed successfully"}}')
-    end
-
-    expect(contains_expected_log).to be true
+    msg = '"restore.LogRestoreComplete","log_level":1,"data":{"message":"Redis data restore completed successfully"}}'
+    expect(contains_log_message(@vm_ip, @preprovision_timestamp, msg)).to be true
   end
 end
 
@@ -48,91 +37,64 @@ shared_examples 'it errors because of non-root user' do |plan|
     @preprovision_timestamp = root_execute_on(@vm_ip, "date +%s")
     @client = service_client_builder(@service_binding)
     expect(@client.read("moaning")).to_not eq("myrtle")
-    restore_args = get_restore_args plan, @service_instance.id, BACKUP_PATH
-    ssh_gateway.execute_on(@vm_ip, "#{RESTORE_BINARY} #{restore_args}")
+    execute_restore_as_vcap (get_restore_args plan, @service_instance.id, BACKUP_PATH), @vm_ip
   end
 
   after(:all) do
     expect(broker_registered?).to be true
-
-    service_broker.unbind_instance(@service_binding)
-    service_broker.deprovision_instance(@service_instance)
+    unbind_and_deprovision(@service_binding, @service_instance)
   end
 
   it 'logs that restore should be run as root' do
-    vm_log = root_execute_on(@vm_ip, "cat /var/vcap/sys/log/service-backup/restore.log")
-    contains_expected_log = drop_log_lines_before(@preprovision_timestamp, vm_log).any? do |line|
-      line.include?('"restore.CheckPreconditions","log_level":2,"data":{"error":"expected the script to be running as user `root`, got `vcap`","username":"vcap"}}')
-    end
-
-    expect(contains_expected_log).to be true
+    msg = '"restore.CheckPreconditions","log_level":2,"data":{"error":"expected the script to be running as user `root`, got `vcap`","username":"vcap"}}'
+    expect(contains_log_message(@vm_ip, @preprovision_timestamp, msg)).to be true
   end
 end
 
 shared_examples 'it errors because of file on wrong device' do |plan|
   before(:all) do
-    @service_instance, @service_binding = provision_and_bind plan
-
-    @vm_ip = @service_binding.credentials[:host]
+    @service_instance, @service_binding, @vm_ip, @client = provision_and_build_service_client plan
     @preprovision_timestamp = root_execute_on(@vm_ip, "date +%s")
-    @client = service_client_builder(@service_binding)
 
     stage_dump_file_incorrectly @vm_ip
     expect(@client.read("moaning")).to_not eq("myrtle")
 
     tmp_backup_path = '/tmp/moaning-dump.rdb'
-    restore_args = get_restore_args plan, @service_instance.id, tmp_backup_path
-    root_execute_on(@vm_ip, "#{RESTORE_BINARY} #{restore_args}")
+    execute_restore_as_root (get_restore_args plan, @service_instance.id, tmp_backup_path), @vm_ip
   end
 
   after(:all) do
     root_execute_on(@vm_ip, 'rm /tmp/moaning-dump.rdb')
     expect(broker_registered?).to be true
-
-    service_broker.unbind_instance(@service_binding)
-    service_broker.deprovision_instance(@service_instance)
+    unbind_and_deprovision(@service_binding, @service_instance)
   end
 
   it 'logs that the file should be in /var/vcap/store' do
-
-    vm_log = root_execute_on(@vm_ip, "cat /var/vcap/sys/log/service-backup/restore.log")
-    contains_expected_log = drop_log_lines_before(@preprovision_timestamp, vm_log).any? do |line|
-      line.include?('restore.CheckPreconditions","log_level":2,"data":{"error":"Please move your rdb file to inside /var/vcap/store","path":"/tmp/moaning-dump.rdb"}')
-    end
-    expect(contains_expected_log).to be true
+    msg = 'restore.CheckPreconditions","log_level":2,"data":{"error":"Please move your rdb file to inside /var/vcap/store","path":"/tmp/moaning-dump.rdb"}'
+    expect(contains_log_message(@vm_ip, @preprovision_timestamp, msg)).to be true
   end
 end
 
 shared_examples 'it errors because of an incorrect guid' do |plan|
   before(:all) do
-    @service_instance, @service_binding = provision_and_bind plan
-
-    @vm_ip = @service_binding.credentials[:host]
+    @service_instance, @service_binding, @vm_ip, @client = provision_and_build_service_client plan
     @preprovision_timestamp = root_execute_on(@vm_ip, "date +%s")
-    @client = service_client_builder(@service_binding)
 
     stage_dump_file @vm_ip
     expect(@client.read("moaning")).to_not eq("myrtle")
 
-    restore_args = "--sourceRDB #{BACKUP_PATH} --sharedVmGuid imafakeguid"
-    root_execute_on(@vm_ip, "#{RESTORE_BINARY} #{restore_args}")
+    execute_restore_as_root "--sourceRDB #{BACKUP_PATH} --sharedVmGuid imafakeguid", @vm_ip
   end
 
   after(:all) do
     root_execute_on(@vm_ip, 'rm /tmp/moaning-dump.rdb')
     expect(broker_registered?).to be true
-
-    service_broker.unbind_instance(@service_binding)
-    service_broker.deprovision_instance(@service_instance)
+    unbind_and_deprovision(@service_binding, @service_instance)
   end
 
   it 'logs that the file should be in /var/vcap/store' do
-
-    vm_log = root_execute_on(@vm_ip, "cat /var/vcap/sys/log/service-backup/restore.log")
-    contains_expected_log = drop_log_lines_before(@preprovision_timestamp, vm_log).any? do |line|
-      line.include?('restore.CheckPreconditions","log_level":2,"data":{"error":"service-instance provided does not exist, please check you are on the correct VM and the instance guid is correct')
-    end
-    expect(contains_expected_log).to be true
+    msg = 'restore.CheckPreconditions","log_level":2,"data":{"error":"service-instance provided does not exist, please check you are on the correct VM and the instance guid is correct'
+    expect(contains_log_message(@vm_ip, @preprovision_timestamp, msg)).to be true
   end
 end
 
@@ -159,6 +121,27 @@ describe 'restore' do
     it_behaves_like 'it errors because of an incorrect guid', 'shared-vm'
     it_behaves_like 'it errors because of an incorrect guid', 'dedicated-vm'
   end
+end
+
+def provision_and_build_service_client plan
+  service_instance, service_binding = provision_and_bind plan
+
+  vm_ip = service_binding.credentials[:host]
+  client = service_client_builder(service_binding)
+  return service_instance, service_binding, vm_ip, client
+end
+
+def contains_log_message vm_ip, preprovision_timestamp,log_message
+  vm_log = root_execute_on(vm_ip, "cat /var/vcap/sys/log/service-backup/restore.log")
+  contains_expected_log = drop_log_lines_before(preprovision_timestamp, vm_log).any? do |line|
+    line.include?(log_message)
+  end
+  contains_expected_log
+end
+
+def unbind_and_deprovision service_binding, service_instance
+    service_broker.unbind_instance(service_binding)
+    service_broker.deprovision_instance(service_instance)
 end
 
 def broker_registered?
@@ -209,4 +192,12 @@ def provision_and_bind plan
   service_instance = service_broker.provision_instance(service_name, plan)
   service_binding  = service_broker.bind_instance(service_instance)
   return service_instance, service_binding
+end
+
+def execute_restore_as_vcap args, vm_ip
+  ssh_gateway.execute_on(vm_ip, "#{RESTORE_BINARY} #{args}")
+end
+
+def execute_restore_as_root args, vm_ip
+  root_execute_on(vm_ip, "#{RESTORE_BINARY} #{args}")
 end
