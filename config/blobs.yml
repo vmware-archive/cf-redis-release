@@ -59,15 +59,11 @@ redis/redis-3.2.1.tar.gz:
   object_id: 05e93526-7997-4421-83a7-f86c48f575a5
   sha: 26c0fc282369121b4e278523fce122910b65fbbf
   size: 1534696
-go/go1.6.3.linux-amd64.tar.gz:
-  object_id: 74cc39df-3f3f-44dd-af2c-9a9f8255c0ac
-  sha: 5e916ba4dd8c2fc43beafca4c08b334c4d0686f3
-  size: 84856920
 cf-cli/cf-cli_6.21.1_linux_x86-64.tgz:
   object_id: 34b04b35-3928-4264-9a49-33b07af83a7e
   sha: 7dc397d2a0d93887ef50bc1f852beb686563049e
   size: 6543090
-go/go1.7.3.linux-amd64.tar.gz:
-  object_id: 386d19e4-aa89-4599-8991-9bcaa4253af1
-  sha: ead40e884ad4d6512bcf7b3c7420dd7fa4a96140
-  size: 82565628
+go/go1.7.4.linux-amd64.tar.gz:
+  object_id: f36f1e93-ac40-46bf-a77c-c354cc3af86a
+  sha: 2e5baf03d1590e048c84d1d5b4b6f2540efaaea1
+  size: 84021919
