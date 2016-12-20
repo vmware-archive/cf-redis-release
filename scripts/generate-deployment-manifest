@@ -14,7 +14,7 @@ else
   stubs_dir=$templates/sample_stubs
 fi
 
-if ! which spiff; then
+if ! which spiff > /dev/null; then
   echo "Please install spiff (https://github.com/cloudfoundry-incubator/spiff#installation)"
   echo "before running this script"
   exit 1
