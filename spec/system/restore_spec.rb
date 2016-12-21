@@ -29,7 +29,7 @@ shared_examples 'it can restore Redis' do |plan|
   end
 end
 
-shared_examples 'it errors because of non-root user' do |plan|
+shared_examples 'it errors when run as non-root user' do |plan|
   before(:all) do
     @service_instance, @service_binding = provision_and_bind plan
 
@@ -51,7 +51,7 @@ shared_examples 'it errors because of non-root user' do |plan|
   end
 end
 
-shared_examples 'it errors because of file on wrong device' do |plan|
+shared_examples 'it errors when file is on wrong device' do |plan|
   before(:all) do
     @service_instance, @service_binding, @vm_ip, @client = provision_and_build_service_client plan
     @preprovision_timestamp = root_execute_on(@vm_ip, "date +%s")
@@ -75,7 +75,7 @@ shared_examples 'it errors because of file on wrong device' do |plan|
   end
 end
 
-shared_examples 'it errors because of an incorrect guid' do |plan|
+shared_examples 'it errors when passed an incorrect guid' do |plan|
   before(:all) do
     @service_instance, @service_binding, @vm_ip, @client = provision_and_build_service_client plan
     @preprovision_timestamp = root_execute_on(@vm_ip, "date +%s")
@@ -101,25 +101,16 @@ end
 describe 'restore' do
   context 'shared-vm' do
     it_behaves_like 'it can restore Redis', 'shared-vm'
+    it_behaves_like 'it errors when run as non-root user', 'shared-vm'
+    it_behaves_like 'it errors when file is on wrong device', 'shared-vm'
+    it_behaves_like 'it errors when passed an incorrect guid', 'shared-vm'
   end
 
   context 'dedicated-vm' do
     it_behaves_like 'it can restore Redis', 'dedicated-vm'
-  end
-
-  context 'not running as root' do
-    it_behaves_like 'it errors because of non-root user', 'shared-vm'
-    it_behaves_like 'it errors because of non-root user', 'dedicated-vm'
-  end
-
-  context 'source RDB not under /var/vcap/store' do
-    it_behaves_like 'it errors because of file on wrong device', 'shared-vm'
-    it_behaves_like 'it errors because of file on wrong device', 'dedicated-vm'
-  end
-
-  context 'source RDB not under /var/vcap/store' do
-    it_behaves_like 'it errors because of an incorrect guid', 'shared-vm'
-    it_behaves_like 'it errors because of an incorrect guid', 'dedicated-vm'
+    it_behaves_like 'it errors when run as non-root user', 'dedicated-vm'
+    it_behaves_like 'it errors when file is on wrong device', 'dedicated-vm'
+    it_behaves_like 'it errors when passed an incorrect guid', 'dedicated-vm'
   end
 end
 
