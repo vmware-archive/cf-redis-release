@@ -19,9 +19,6 @@ describe 'dedicated plan' do
 
   let(:redis_config_command) { bosh_manifest.property('redis.config_command') }
 
-  # TODO do not manually run drain once bosh bug fixed
-  let(:manually_drain) { '/var/vcap/jobs/cf-redis-broker/bin/drain' }
-
   it_behaves_like 'a persistent cloud foundry service'
 
   it 'preserves data when recreating vms' do
@@ -30,10 +27,8 @@ describe 'dedicated plan' do
       service_client.write('test_key', 'test_value')
       expect(service_client.read('test_key')).to eq('test_value')
 
-      # TODO do not manually run drain once bosh bug fixed
       bosh_director.stop(environment.bosh_service_broker_job_name, 0)
       host = bosh_director.ips_for_job(environment.bosh_service_broker_job_name, bosh_manifest.deployment_name).first
-      ssh_gateway.execute_on(host, manually_drain, root: true)
 
       bosh_director.recreate_all([environment.bosh_service_broker_job_name])
 
