@@ -144,7 +144,6 @@ def broker_registered?
   }
 
   15.times do |n|
-    puts "Checking if broker is responding, Attempt: #{n}"
     response = HTTParty.get(uri, verify: false, basic_auth: auth)
 
     if response.code == 200
@@ -154,6 +153,7 @@ def broker_registered?
     sleep 1
   end
 
+  puts "Timed out waiting for broker to respond"
   false
 end
 
