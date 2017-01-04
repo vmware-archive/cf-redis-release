@@ -12,7 +12,6 @@ templates:
 
   redis-agent.pem.erb: config/ssl/redis-agent.pem
   redis-agent.key.erb: config/ssl/redis-agent.key
-  drain-redis.sh: bin/drain
 
 packages:
 - redis
