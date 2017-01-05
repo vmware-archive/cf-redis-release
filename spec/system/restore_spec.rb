@@ -24,7 +24,7 @@ shared_examples 'it can restore Redis' do |plan|
   end
 
   it 'logs successful completion of restore' do
-    msg = '"restore.LogRestoreComplete","log_level":1,"data":{"message":"Redis data restore completed successfully"}}'
+    msg = 'Redis data restore completed successfully'
     expect(contains_log_message(@vm_ip, @preprovision_timestamp, msg)).to be true
   end
 end
@@ -46,7 +46,7 @@ shared_examples 'it errors when run as non-root user' do |plan|
   end
 
   it 'logs that restore should be run as root' do
-    msg = '"restore.CheckPreconditions","log_level":2,"data":{"error":"expected the script to be running as user `root`, got `vcap`","username":"vcap"}}'
+    msg = 'expected the script to be running as user `root`'
     expect(contains_log_message(@vm_ip, @preprovision_timestamp, msg)).to be true
   end
 end
@@ -70,7 +70,7 @@ shared_examples 'it errors when file is on wrong device' do |plan|
   end
 
   it 'logs that the file should be in /var/vcap/store' do
-    msg = 'restore.CheckPreconditions","log_level":2,"data":{"error":"Please move your rdb file to inside /var/vcap/store","path":"/tmp/moaning-dump.rdb"}'
+    msg = 'Please move your rdb file to inside /var/vcap/store'
     expect(contains_log_message(@vm_ip, @preprovision_timestamp, msg)).to be true
   end
 end
@@ -93,7 +93,7 @@ shared_examples 'it errors when passed an incorrect guid' do |plan|
   end
 
   it 'logs that the file should be in /var/vcap/store' do
-    msg = 'restore.CheckPreconditions","log_level":2,"data":{"error":"service-instance provided does not exist, please check you are on the correct VM and the instance guid is correct'
+    msg = 'service-instance provided does not exist, please check you are on the correct VM and the instance guid is correct'
     expect(contains_log_message(@vm_ip, @preprovision_timestamp, msg)).to be true
   end
 end
