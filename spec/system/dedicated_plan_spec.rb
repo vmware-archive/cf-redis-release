@@ -19,6 +19,8 @@ describe 'dedicated plan' do
 
   let(:redis_config_command) { bosh_manifest.property('redis.config_command') }
 
+  # defining manually_drain skips duplicate shared_example within prof
+  let(:manually_drain) { '' }
   it_behaves_like 'a persistent cloud foundry service'
 
   it 'preserves data when recreating vms' do
