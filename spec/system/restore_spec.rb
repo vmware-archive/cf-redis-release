@@ -32,12 +32,10 @@ end
 shared_examples 'it errors when run as non-root user' do |plan|
   before(:all) do
     @service_instance, @service_binding = provision_and_bind plan
-
     @vm_ip = @service_binding.credentials[:host]
-    @preprovision_timestamp = root_execute_on(@vm_ip, "date +%s")
     @client = service_client_builder(@service_binding)
     expect(@client.read("moaning")).to_not eq("myrtle")
-    execute_restore_as_vcap (get_restore_args plan, @service_instance.id, BACKUP_PATH), @vm_ip
+    @output = execute_restore_as_vcap (get_restore_args plan, @service_instance.id, BACKUP_PATH), @vm_ip
   end
 
   after(:all) do
@@ -47,20 +45,18 @@ shared_examples 'it errors when run as non-root user' do |plan|
 
   it 'logs that restore should be run as root' do
     msg = 'expected the script to be running as user `root`'
-    expect(contains_log_message(@vm_ip, @preprovision_timestamp, msg)).to be true
+    expect(@output).to include msg
   end
 end
 
 shared_examples 'it errors when file is on wrong device' do |plan|
   before(:all) do
     @service_instance, @service_binding, @vm_ip, @client = provision_and_build_service_client plan
-    @preprovision_timestamp = root_execute_on(@vm_ip, "date +%s")
-
     stage_dump_file_incorrectly @vm_ip
     expect(@client.read("moaning")).to_not eq("myrtle")
 
     tmp_backup_path = '/tmp/moaning-dump.rdb'
-    execute_restore_as_root (get_restore_args plan, @service_instance.id, tmp_backup_path), @vm_ip
+    @output = execute_restore_as_root (get_restore_args plan, @service_instance.id, tmp_backup_path), @vm_ip
   end
 
   after(:all) do
@@ -71,19 +67,17 @@ shared_examples 'it errors when file is on wrong device' do |plan|
 
   it 'logs that the file should be in /var/vcap/store' do
     msg = 'Please move your rdb file to inside /var/vcap/store'
-    expect(contains_log_message(@vm_ip, @preprovision_timestamp, msg)).to be true
+    expect(@output).to include msg
   end
 end
 
 shared_examples 'it errors when passed an incorrect guid' do |plan|
   before(:all) do
     @service_instance, @service_binding, @vm_ip, @client = provision_and_build_service_client plan
-    @preprovision_timestamp = root_execute_on(@vm_ip, "date +%s")
-
     stage_dump_file @vm_ip
     expect(@client.read("moaning")).to_not eq("myrtle")
 
-    execute_restore_as_root "--sourceRDB #{BACKUP_PATH} --sharedVmGuid imafakeguid", @vm_ip
+    @output = execute_restore_as_root "--sourceRDB #{BACKUP_PATH} --sharedVmGuid imafakeguid", @vm_ip
   end
 
   after(:all) do
@@ -94,7 +88,7 @@ shared_examples 'it errors when passed an incorrect guid' do |plan|
 
   it 'logs that the file should be in /var/vcap/store' do
     msg = 'service-instance provided does not exist, please check you are on the correct VM and the instance guid is correct'
-    expect(contains_log_message(@vm_ip, @preprovision_timestamp, msg)).to be true
+    expect(@output).to include msg
   end
 end
 
