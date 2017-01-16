@@ -327,7 +327,7 @@ releases:
 - name: cf-redis
   version: latest
 - name: routing
-  version: 0.141.0
+  version: 0.143.0
 resource_pools:
 - cloud_properties:
     name: bosh-lite-redis
