@@ -102,7 +102,7 @@ describe 'shared plan' do
     end
 
     after(:all) do
-      bosh_director.recreate_all([environment.bosh_service_broker_job_name])
+      bosh_director.start(environment.bosh_service_broker_job_name, 0)
     end
 
     it 'logs redis broker shutdown' do
