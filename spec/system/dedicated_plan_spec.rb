@@ -155,6 +155,9 @@ describe 'dedicated plan' do
         expect(@old_client.read('test_key')).to eq('test_value')
         expect(@old_client.aof_contents).to include('test_value')
 
+        @script_sha = @old_client.script_load('return 1')
+        expect(@old_client.script_exists(@script_sha)).to be true
+
         @original_config_maxmem = @old_client.config.fetch('maxmemory-policy')
         @old_client.write_config('maxmemory-policy', 'allkeys-lru')
         expect(@old_client.config.fetch('maxmemory-policy')).to eql('allkeys-lru')
@@ -202,6 +205,13 @@ describe 'dedicated plan' do
         new_password = service_binding.credentials.fetch(:password)
 
         expect(new_password).to_not eq(original_password)
+      end
+    end
+
+    it 'flushes the script cache' do
+      service_broker.provision_and_bind(service.name, service.plan) do |service_binding|
+        new_client = service_client_builder(service_binding)
+        expect(new_client.script_exists(@script_sha)).to be false
       end
     end
   end

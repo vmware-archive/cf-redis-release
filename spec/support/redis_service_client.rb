@@ -47,6 +47,18 @@ module Support
       end
     end
 
+    def script_load(script)
+      client do |redis|
+        redis.script(:load, script)
+      end
+    end
+
+    def script_exists(sha)
+      client do |redis|
+        redis.script(:exists, sha)
+      end
+    end
+
     attr_reader :save_command, :config_command
 
     private
