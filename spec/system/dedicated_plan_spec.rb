@@ -165,34 +165,34 @@ describe 'dedicated plan' do
       end
 
       service_broker.deprovision_instance(service_instance)
+
+      @service_instance = service_broker.provision_instance(service.name, service.plan)
+      @service_binding  = service_broker.bind_instance(@service_instance)
     end
 
     after(:all) do
+      service_broker.unbind_instance(@service_binding)
+      service_broker.deprovision_instance(@service_instance)
+
       @service_instances.each do |service_instance|
         service_broker.deprovision_instance(service_instance)
       end
     end
 
     it 'cleans the aof file' do
-      service_broker.provision_and_bind(service.name, service.plan) do |service_binding|
-        new_client = service_client_builder(service_binding)
-        expect(new_client.aof_contents).to_not include('test_value')
-      end
+      new_client = service_client_builder(@service_binding)
+      expect(new_client.aof_contents).to_not include('test_value')
     end
 
     it 'cleans the data' do
-      service_broker.provision_and_bind(service.name, service.plan) do |service_binding|
-        new_client = service_client_builder(service_binding)
-        expect(new_client.read('test_key')).to_not eq('test_value')
-      end
+      new_client = service_client_builder(@service_binding)
+      expect(new_client.read('test_key')).to_not eq('test_value')
     end
 
     it 'resets the configuration' do
-      service_broker.provision_and_bind(service.name, service.plan) do |service_binding|
-        new_client = service_client_builder(service_binding)
-        expect(new_client.config.fetch('maxmemory-policy')).to eq(@original_config_maxmem)
-        expect(new_client.config.fetch('maxmemory-policy')).to_not eq('allkeys-lru')
-      end
+      new_client = service_client_builder(@service_binding)
+      expect(new_client.config.fetch('maxmemory-policy')).to eq(@original_config_maxmem)
+      expect(new_client.config.fetch('maxmemory-policy')).to_not eq('allkeys-lru')
     end
 
     it 'invalidates the old credentials' do
@@ -200,19 +200,15 @@ describe 'dedicated plan' do
     end
 
     it 'changes the credentials' do
-      service_broker.provision_and_bind(service.name, service.plan) do |service_binding|
-        original_password = @old_credentials.fetch(:password)
-        new_password = service_binding.credentials.fetch(:password)
+      original_password = @old_credentials.fetch(:password)
+      new_password = @service_binding.credentials.fetch(:password)
 
-        expect(new_password).to_not eq(original_password)
-      end
+      expect(new_password).to_not eq(original_password)
     end
 
     it 'flushes the script cache' do
-      service_broker.provision_and_bind(service.name, service.plan) do |service_binding|
-        new_client = service_client_builder(service_binding)
-        expect(new_client.script_exists(@script_sha)).to be false
-      end
+      new_client = service_client_builder(@service_binding)
+      expect(new_client.script_exists(@script_sha)).to be false
     end
   end
 end
