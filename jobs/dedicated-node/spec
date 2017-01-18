@@ -1,6 +1,12 @@
 ---
 name: dedicated-node
 
+provides:
+- name: dedicated_node_conn
+  type: conn
+  properties:
+  - redis.broker.dedicated_port
+
 templates:
   agent.yml.erb: config/agent.yml
   redis.conf.erb: config/redis.conf

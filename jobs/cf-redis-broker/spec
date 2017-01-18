@@ -1,6 +1,10 @@
 ---
 name: cf-redis-broker
 
+consumes:
+  - name: dedicated_node_conn
+    type: conn
+
 templates:
   pre-start.erb: bin/pre-start
   cf-redis-broker_ctl.erb: bin/cf-redis-broker_ctl
