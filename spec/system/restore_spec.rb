@@ -15,7 +15,6 @@ shared_examples 'it can restore Redis' do |plan|
   end
 
   after(:all) do
-    expect(broker_registered?).to be true
     unbind_and_deprovision(@service_binding, @service_instance)
   end
 
@@ -39,13 +38,13 @@ shared_examples 'it errors when run as non-root user' do |plan|
   end
 
   after(:all) do
-    expect(broker_registered?).to be true
     unbind_and_deprovision(@service_binding, @service_instance)
   end
 
   it 'logs that restore should be run as root' do
     msg = 'expected the script to be running as user `root`'
     expect(@output).to include msg
+    expect(broker_registered?).to be true
   end
 end
 
@@ -61,13 +60,13 @@ shared_examples 'it errors when file is on wrong device' do |plan|
 
   after(:all) do
     root_execute_on(@vm_ip, 'rm /tmp/moaning-dump.rdb')
-    expect(broker_registered?).to be true
     unbind_and_deprovision(@service_binding, @service_instance)
   end
 
   it 'logs that the file should be in /var/vcap/store' do
     msg = 'Please move your rdb file to inside /var/vcap/store'
     expect(@output).to include msg
+    expect(broker_registered?).to be true
   end
 end
 
@@ -82,13 +81,13 @@ shared_examples 'it errors when passed an incorrect guid' do |plan|
 
   after(:all) do
     root_execute_on(@vm_ip, 'rm /tmp/moaning-dump.rdb')
-    expect(broker_registered?).to be true
     unbind_and_deprovision(@service_binding, @service_instance)
   end
 
   it 'logs that the file should be in /var/vcap/store' do
     msg = 'service-instance provided does not exist, please check you are on the correct VM and the instance guid is correct'
     expect(@output).to include msg
+    expect(broker_registered?).to be true
   end
 end
 
@@ -116,7 +115,6 @@ describe 'restore' do
         expect(@client.read("moaning")).to_not eq("myrtle")
 
         Thread.new { server_is_continually_alive?(@client1, @vm_ip1, "test_key", "test_value") }
-        sleep 1
         execute_restore_as_root (get_restore_args "shared-vm", @service_instance.id, BACKUP_PATH), @vm_ip
       end
 
@@ -126,10 +124,9 @@ describe 'restore' do
       end
 
       after do
-          sleep 5
-          unbind_and_deprovision(@service_binding, @service_instance)
-          unbind_and_deprovision(@service_binding1, @service_instance1)
-          unbind_and_deprovision(@service_binding2, @service_instance2)
+        unbind_and_deprovision(@service_binding, @service_instance)
+        unbind_and_deprovision(@service_binding1, @service_instance1)
+        unbind_and_deprovision(@service_binding2, @service_instance2)
 
       end
     end
