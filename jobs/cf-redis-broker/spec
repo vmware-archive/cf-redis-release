@@ -1,9 +1,15 @@
 ---
 name: cf-redis-broker
 
+provides:
+  - name: cf-redis-broker
+    type: cf-redis-broker
+
 consumes:
-  - name: dedicated_node_conn
-    type: conn
+  - name: cf-redis-broker
+    type: cf-redis-broker
+  - name: dedicated-node
+    type: dedicated-node
 
 templates:
   pre-start.erb: bin/pre-start

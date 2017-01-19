@@ -1,6 +1,6 @@
 <%
   shared_vm_plan_enabled = p('redis.broker.service_instance_limit').to_i > 0
-  dedicated_vm_plan_enabled = p('redis.broker.dedicated_nodes').count > 0
+  dedicated_vm_plan_enabled = link('dedicated-node').instances.count > 0
 %>
 {
   "api":            "<%= p('cf.api_url') %>",
@@ -19,17 +19,17 @@
   "skip_ssl_validation": <%= p("cf.skip_ssl_validation") %>,
   "create_permissive_security_group": false,
   "security_groups": [
-  <% p("redis.broker.dedicated_nodes").each do |node| %>
+  <% link('dedicated-node').instances.each do |instance| %>
     {
       "protocol": "tcp",
       "ports": "6379",
-      "destination": "<%= node %>"
+      "destination": "<%= instance.address %>"
     },
   <% end %>
     {
       "protocol": "tcp",
       "ports": "32768-61000",
-      "destination": "<%= p("redis.broker.host") %>"
+      "destination": "<%= link('cf-redis-broker').instances[0].address %>"
     }
   ]
 }

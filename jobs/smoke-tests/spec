@@ -1,5 +1,12 @@
 ---
 name: smoke-tests
+
+consumes:
+- name: cf-redis-broker
+  type: cf-redis-broker
+- name: dedicated-node
+  type: dedicated-node
+
 packages:
 - go
 - cf-redis-smoke-tests
@@ -26,8 +33,3 @@ properties:
     default: p-redis
   redis.broker.service_instance_limit:
     description: The maximum number of instances allowed
-  redis.broker.dedicated_nodes:
-    description: List of node IPs for the dedicated plan
-    default: []
-  redis.broker.host:
-    description: IP of the broker node

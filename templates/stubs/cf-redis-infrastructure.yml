@@ -1,15 +1,4 @@
 ---
-meta: ~
-
-compilation:
-  <<: (( merge ))
-  workers: 2
-  network: redis_z1
-  reuse_compilation_vms: true
-  cloud_properties:
-    <<: (( merge ))
-    name: (( .meta.deployment_name ))
-
 update:
   canaries: 1
   canary_watch_time: 30000-180000

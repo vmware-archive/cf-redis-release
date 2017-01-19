@@ -40,6 +40,7 @@ meta:
     shared_plan:
       instance_limit: 5
       max_memory: 262144000
+      persistent_disk_type: REPLACE_WITH_PERSISTENT_DISK_TYPE_FROM_CLOUD_CONFIG
     config_command: configalias
     save_command: anotherrandomstring
     bg_save_command: yetanotherrandomstring

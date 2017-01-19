@@ -2,8 +2,8 @@
 name: dedicated-node
 
 provides:
-- name: dedicated_node_conn
-  type: conn
+- name: dedicated-node
+  type: dedicated-node
   properties:
   - redis.broker.dedicated_port
 

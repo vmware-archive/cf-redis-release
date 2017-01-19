@@ -5,9 +5,8 @@ name: (( .meta.deployment_name ))
 director_uuid: (( .meta.director_uuid ))
 
 releases: ~
-compilation: ~
 update: ~
-networks: ~
-resource_pools: ~
-jobs: ~
+instance_groups: ~
 properties: ~
+stemcells:
+- (( .meta.stemcell ))
