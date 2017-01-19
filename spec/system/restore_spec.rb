@@ -92,12 +92,48 @@ shared_examples 'it errors when passed an incorrect guid' do |plan|
   end
 end
 
+
 describe 'restore' do
+  @broker_has_stopped_responding=false
+  @restore_has_finished = false
+
   context 'shared-vm' do
-    it_behaves_like 'it can restore Redis', 'shared-vm'
     it_behaves_like 'it errors when run as non-root user', 'shared-vm'
     it_behaves_like 'it errors when file is on wrong device', 'shared-vm'
     it_behaves_like 'it errors when passed an incorrect guid', 'shared-vm'
+
+    context 'with multiple redis servers running' do
+
+      before do
+        @service_instance1, @service_binding1, @vm_ip1, @client1 = provision_and_build_service_client "shared-vm"
+        check_server_responding?(@client1)
+        @service_instance2, @service_binding2, @vm_ip2, @client2 = provision_and_build_service_client "shared-vm"
+        check_server_responding?(@client2)
+
+
+        @service_instance, @service_binding, @vm_ip, @client = provision_and_build_service_client "shared-vm"
+        stage_dump_file @vm_ip
+        expect(@client.read("moaning")).to_not eq("myrtle")
+
+        Thread.new { server_is_continually_alive?(@client1, @vm_ip1, "test_key", "test_value") }
+        sleep 1
+        execute_restore_as_root (get_restore_args "shared-vm", @service_instance.id, BACKUP_PATH), @vm_ip
+      end
+
+      it 'keeps the broker and other redis servers alive while performing a restore' do
+        expect(@client.read("moaning")).to eq("myrtle")
+        expect(@broker_has_stopped_responding).to be false
+      end
+
+      after do
+          sleep 5
+          unbind_and_deprovision(@service_binding, @service_instance)
+          unbind_and_deprovision(@service_binding1, @service_instance1)
+          unbind_and_deprovision(@service_binding2, @service_instance2)
+
+      end
+    end
+
   end
 
   context 'dedicated-vm' do
@@ -130,6 +166,17 @@ def unbind_and_deprovision service_binding, service_instance
 end
 
 def broker_registered?
+  15.times do |n|
+    return true if broker_available?
+
+    sleep 1
+  end
+
+  puts "Timed out waiting for broker to respond"
+  false
+end
+
+def broker_available?
   uri = URI.parse('https://' + bosh_manifest.property('broker.host') + '/v2/catalog')
 
   auth = {
@@ -137,18 +184,9 @@ def broker_registered?
     password: bosh_manifest.property("broker.password")
   }
 
-  15.times do |n|
-    response = HTTParty.get(uri, verify: false, basic_auth: auth)
+  response = HTTParty.get(uri, verify: false, basic_auth: auth)
 
-    if response.code == 200
-      return true
-    end
-
-    sleep 1
-  end
-
-  puts "Timed out waiting for broker to respond"
-  false
+  response.code == 200
 end
 
 def stage_dump_file vm_ip
@@ -185,4 +223,27 @@ end
 
 def execute_restore_as_root args, vm_ip
   root_execute_on(vm_ip, "#{RESTORE_BINARY} #{args}")
+end
+
+def server_is_continually_alive? client, vm_ip, key, value
+  while !@restore_has_finished do
+    @broker_has_stopped_responding = !other_redis_servers_alive?(vm_ip) || !broker_available?
+    if @broker_has_stopped_responding
+      return
+    end
+
+    sleep 0.5
+  end
+  return true
+end
+
+def check_server_responding? client
+  client.write('test_key', 'test_value')
+  expect(client.read('test_key')).to eq('test_value')
+end
+
+def other_redis_servers_alive? vm_ip
+  response = root_execute_on(vm_ip, "ps aux | grep redis-serve[r] | wc -l")
+  response.strip!
+  response.to_i >= 2
 end
