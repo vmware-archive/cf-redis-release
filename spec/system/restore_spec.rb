@@ -39,7 +39,6 @@ shared_examples 'it errors when run as non-root user' do |plan|
   end
 
   after(:all) do
-    expect(broker_registered?).to be true
     unbind_and_deprovision(@service_binding, @service_instance)
   end
 
@@ -116,7 +115,6 @@ describe 'restore' do
         expect(@client.read("moaning")).to_not eq("myrtle")
 
         Thread.new { server_is_continually_alive?(@client1, @vm_ip1, "test_key", "test_value") }
-        sleep 1
         execute_restore_as_root (get_restore_args "shared-vm", @service_instance.id, BACKUP_PATH), @vm_ip
       end
 
@@ -126,11 +124,9 @@ describe 'restore' do
       end
 
       after do
-          sleep 5
-          unbind_and_deprovision(@service_binding, @service_instance)
-          unbind_and_deprovision(@service_binding1, @service_instance1)
-          unbind_and_deprovision(@service_binding2, @service_instance2)
-
+        unbind_and_deprovision(@service_binding, @service_instance)
+        unbind_and_deprovision(@service_binding1, @service_instance1)
+        unbind_and_deprovision(@service_binding2, @service_instance2)
       end
     end
 
