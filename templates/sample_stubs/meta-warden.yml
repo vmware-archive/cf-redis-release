@@ -1,11 +1,19 @@
 ---
 meta:
-  deployment_name: bosh-lite-redis
+  deployment_name: cf-redis
   director_uuid: REPLACE_ME
+  stemcell:
+    alias: default_stemcell
+    name: bosh-warden-boshlite-ubuntu-trusty-go_agent
+    version: "3312.15"
+  vm_type: REPLACE_WITH_SELECTED_VM_TYPE_FROM_CLOUD_CONFIG
   release_name: cf-redis
   apps_domain: bosh-lite.com
   environment: bosh-lite
   external_domain: bosh-lite.com
+  network:
+    name: REPLACE_WITH_NETWORK_FROM_CLOUD_CONFIG
+    az: REPLACE_WITH_AZ_FROM_CLOUD_CONFIG
   syslog_aggregator:
     address: 127.0.0.1
     port: 1234
@@ -13,13 +21,13 @@ meta:
     name: redis
     username: admin
     password: admin
-    host: (( "redis-broker" "." .meta.external_domain ))
+    host: redis-broker.bosh-lite.com
   cf:
     admin_username: admin
     admin_password: admin
     api_url: https://api.bosh-lite.com
-    apps_domain: (( .meta.apps_domain ))
-    system_domain: (( .meta.external_domain ))
+    apps_domain: bosh-lite.com
+    system_domain: bosh-lite.com
   nats:
     machines:
     - 10.244.0.6
@@ -30,11 +38,10 @@ meta:
   route_name: redis-broker
   redis:
     broker:
-      name: redis
-      subdomain: redis-broker
       service_id: 7aba7e52-f61b-4263-9de1-14e9d11fb67d
       shared_vm_plan_id: 78bf886c-bc50-4f31-a03c-cb786a158286
       dedicated_vm_plan_id: 48b35349-d3de-4e19-bc4a-66996ae07766
+      name: redis
     dedicated_plan:
       instance_count: 2
       persistent_disk_type: REPLACE_WITH_PERSISTENT_DISK_TYPE_FROM_CLOUD_CONFIG
@@ -45,3 +52,11 @@ meta:
     config_command: configalias
     save_command: anotherrandomstring
     bg_save_command: yetanotherrandomstring
+  metron_endpoint:
+    shared_secret: fake-loggregator-secret
+  loggregator_endpoint:
+    shared_secret: fake-loggregator-secret
+  loggregator:
+    etcd:
+      machines:
+        - 10.244.0.42
