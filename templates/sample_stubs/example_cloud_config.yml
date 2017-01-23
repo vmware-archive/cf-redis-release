@@ -1,0 +1,157 @@
+resource_pools:
+- cloud_properties:
+    name: bosh-lite-redis
+    ram: 1024
+  name: redis_z1
+  network: redis_z1
+  stemcell:
+    name: bosh-warden-boshlite-ubuntu-trusty-go_agent
+    version: latest
+
+compilation:
+  cloud_properties:
+    name: bosh-lite-redis
+  network: redis_z1
+  reuse_compilation_vms: true
+  workers: 2
+
+networks:
+- name: redis_z1
+  subnets:
+  - cloud_properties:
+      name: bosh-lite-redis
+    range: 10.244.3.0/30
+    reserved:
+    - 10.244.3.1
+    static:
+    - 10.244.3.2
+  - cloud_properties:
+      name: bosh-lite-redis
+    range: 10.244.3.4/30
+    reserved:
+    - 10.244.3.5
+    static:
+    - 10.244.3.6
+  - cloud_properties:
+      name: bosh-lite-redis
+    range: 10.244.3.8/30
+    reserved:
+    - 10.244.3.9
+    static:
+    - 10.244.3.10
+  - cloud_properties:
+      name: bosh-lite-redis
+    range: 10.244.3.12/30
+    reserved:
+    - 10.244.3.13
+    static:
+    - 10.244.3.14
+  - cloud_properties:
+      name: bosh-lite-redis
+    range: 10.244.3.16/30
+    reserved:
+    - 10.244.3.17
+    static:
+    - 10.244.3.18
+  - cloud_properties:
+      name: bosh-lite-redis
+    range: 10.244.3.20/30
+    reserved:
+    - 10.244.3.21
+    static:
+    - 10.244.3.22
+  - cloud_properties:
+      name: bosh-lite-redis
+    range: 10.244.3.24/30
+    reserved:
+    - 10.244.3.25
+    static:
+    - 10.244.3.26
+  - cloud_properties:
+      name: bosh-lite-redis
+    range: 10.244.3.28/30
+    reserved:
+    - 10.244.3.29
+    static:
+    - 10.244.3.30
+  - cloud_properties:
+      name: bosh-lite-redis
+    range: 10.244.3.32/30
+    reserved:
+    - 10.244.3.33
+    static:
+    - 10.244.3.34
+  - cloud_properties:
+      name: bosh-lite-redis
+    range: 10.244.3.36/30
+    reserved:
+    - 10.244.3.37
+    static:
+    - 10.244.3.38
+  - cloud_properties:
+      name: bosh-lite-redis
+    range: 10.244.3.40/30
+    reserved:
+    - 10.244.3.41
+    static:
+    - 10.244.3.42
+  - cloud_properties:
+      name: bosh-lite-redis
+    range: 10.244.3.44/30
+    reserved:
+    - 10.244.3.45
+    static: []
+  - cloud_properties:
+      name: bosh-lite-redis
+    range: 10.244.3.48/30
+    reserved:
+    - 10.244.3.49
+    static: []
+  - cloud_properties:
+      name: bosh-lite-redis
+    range: 10.244.3.52/30
+    reserved:
+    - 10.244.3.53
+    static: []
+  - cloud_properties:
+      name: bosh-lite-redis
+    range: 10.244.3.56/30
+    reserved:
+    - 10.244.3.57
+    static: []
+  - cloud_properties:
+      name: bosh-lite-redis
+    range: 10.244.3.60/30
+    reserved:
+    - 10.244.3.61
+    static: []
+  - cloud_properties:
+      name: bosh-lite-redis
+    range: 10.244.3.64/30
+    reserved:
+    - 10.244.3.65
+    static: []
+  - cloud_properties:
+      name: bosh-lite-redis
+    range: 10.244.3.68/30
+    reserved:
+    - 10.244.3.69
+    static: []
+  - cloud_properties:
+      name: bosh-lite-redis
+    range: 10.244.3.72/30
+    reserved:
+    - 10.244.3.73
+    static: []
+  - cloud_properties:
+      name: bosh-lite-redis
+    range: 10.244.3.76/30
+    reserved:
+    - 10.244.3.77
+    static: []
+  - cloud_properties:
+      name: bosh-lite-redis
+    range: 10.244.3.80/30
+    reserved:
+    - 10.244.3.81
+    static: []
