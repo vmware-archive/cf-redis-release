@@ -16,6 +16,6 @@ group :test do
   gem 'rspec-shell-expectations'
   gem 'rspec-instafail'
 
-  gem 'hula', '0.8.9'
-  gem 'prof', '0.31.11'
+  gem 'hula', '0.8.11'
+  gem 'prof', '0.31.17'
 end
