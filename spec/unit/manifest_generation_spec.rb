@@ -22,7 +22,7 @@ describe 'manifest generator' do
   context 'with a bosh-lite' do
     let(:infrastructure) { 'warden' }
     let(:example_manifest) { Tempfile.new("example-manifest.yml") }
-    let(:custom_jobs_file) { Tempfile.new("custom-jobs.yml") }
+    let(:custom_instance_groups_file) { Tempfile.new("custom-instance-groups.yml") }
     let(:actual_yaml) { YAML.load(File.read(example_manifest.path)) }
 
     it 'should generate manifest' do
@@ -36,12 +36,12 @@ describe 'manifest generator' do
 
     it 'should merge additional properties from a stub' do
       sample_properties = { 'sample' => 'property' }
-      custom_jobs_file.write({
+      custom_instance_groups_file.write({
         'properties' => sample_properties
       }.to_yaml)
-      custom_jobs_file.close
+      custom_instance_groups_file.close
 
-      stubbed_env.execute("scripts/generate-deployment-manifest #{infrastructure} #{custom_jobs_file.path} > #{example_manifest.path}")
+      stubbed_env.execute("scripts/generate-deployment-manifest #{infrastructure} #{custom_instance_groups_file.path} > #{example_manifest.path}")
 
       expect(actual_yaml['properties']).to include(sample_properties)
     end
@@ -50,21 +50,21 @@ describe 'manifest generator' do
       additional_releases = []
       additional_releases << {'name' => 'another-redis-release', 'version' => 'latest'}
       additional_releases << {'name' => 'my-custom-release', 'version' => 'latest'}
-      custom_jobs_file.write({
+      custom_instance_groups_file.write({
         'additional_releases' => additional_releases
       }.to_yaml)
-      custom_jobs_file.close
+      custom_instance_groups_file.close
 
-      stubbed_env.execute("scripts/generate-deployment-manifest #{infrastructure} #{custom_jobs_file.path} > #{example_manifest.path}")
+      stubbed_env.execute("scripts/generate-deployment-manifest #{infrastructure} #{custom_instance_groups_file.path} > #{example_manifest.path}")
 
       expect(actual_yaml['releases'].size).to be > additional_releases.size
       expect(actual_yaml['releases']).to include(additional_releases[0])
       expect(actual_yaml['releases']).to include(additional_releases[1])
     end
 
-    it 'should merge additional job properties from a stub' do
-      custom_jobs_file.write({
-        'jobs' => [
+    it 'should merge additional instance group properties from a stub' do
+      custom_instance_groups_file.write({
+        'instance_groups' => [
             {
               'name' => 'cf-redis-broker',
               'properties' => {
@@ -73,27 +73,27 @@ describe 'manifest generator' do
             }
         ]
       }.to_yaml)
-      custom_jobs_file.close
+      custom_instance_groups_file.close
 
-      stubbed_env.execute("scripts/generate-deployment-manifest #{infrastructure} #{custom_jobs_file.path} > #{example_manifest.path}")
+      stubbed_env.execute("scripts/generate-deployment-manifest #{infrastructure} #{custom_instance_groups_file.path} > #{example_manifest.path}")
 
-      redis_broker_job = actual_yaml['jobs'].select{|i| i['name'] == 'cf-redis-broker' }.first
-      expect(redis_broker_job['properties']).to include({'closed'=>'source'})
+      redis_broker_instance_group = actual_yaml['instance_groups'].select{|i| i['name'] == 'cf-redis-broker' }.first
+      expect(redis_broker_instance_group['properties']).to include({'closed'=>'source'})
     end
 
     it 'should merge additional job templates from a stub' do
-      job_template = { 'name' => 'backup-example', 'release' => 'colocated-release' }
-      custom_jobs_file.write({
-        'additional_job_templates' => {
-          'cf_redis_broker' => [job_template]
+      job = { 'name' => 'backup-example', 'release' => 'colocated-release' }
+      custom_instance_groups_file.write({
+        'additional_instance_group_templates' => {
+          'cf_redis_broker' => [job]
         },
       }.to_yaml)
-      custom_jobs_file.close
+      custom_instance_groups_file.close
 
-      stubbed_env.execute("scripts/generate-deployment-manifest #{infrastructure} #{custom_jobs_file.path} > #{example_manifest.path}")
+      stubbed_env.execute("scripts/generate-deployment-manifest #{infrastructure} #{custom_instance_groups_file.path} > #{example_manifest.path}")
 
-      redis_broker_job = actual_yaml['jobs'].select{|i| i['name'] == 'cf-redis-broker' }.first
-      expect(redis_broker_job['templates']).to include(job_template)
+      redis_broker_instance_group = actual_yaml['instance_groups'].select{|i| i['name'] == 'cf-redis-broker' }.first
+      expect(redis_broker_instance_group['jobs']).to include(job)
     end
   end
 end

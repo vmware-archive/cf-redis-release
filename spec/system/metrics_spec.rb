@@ -3,7 +3,7 @@ require 'system_spec_helper'
 describe 'metrics', :skip_metrics => true do
 
   before(:all) do
-    @number_of_nodes = bosh_manifest.job('dedicated-node').static_ips.count
+    @number_of_nodes = bosh_manifest.as_json.dig("manifest_hash", "instance_groups").find { |instance| instance["name"]=="dedicated-node" }["instances"]
     @origin_tag = bosh_manifest.property('service_metrics.origin')
     @outFile = Tempfile.new('smetrics')
     @pid = spawn(
@@ -80,7 +80,7 @@ describe 'metrics', :skip_metrics => true do
   end
 
   def metron_id_from_job_index(job_name, job_index)
-    ip = bosh_manifest.job(job_name).static_ips[job_index]
+    ip = bosh_director.ips_for_job(job_name, bosh_manifest.deployment_name)[job_index]
 
     metron_agent_config = ssh_gateway.execute_on(ip, 'cat /var/vcap/jobs/metron_agent/config/metron_agent.json').to_s
     JSON.parse(metron_agent_config)["Index"]

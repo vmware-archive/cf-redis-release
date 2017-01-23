@@ -85,11 +85,11 @@ module Helpers
     end
 
     def broker_host
-      bosh_manifest.job('cf-redis-broker').static_ips.first
+      bosh_director.ips_for_job('cf-redis-broker', bosh_manifest.deployment_name).first
     end
 
     def node_hosts
-      bosh_manifest.job('dedicated-node').static_ips
+      bosh_director.ips_for_job('dedicated-node', bosh_manifest.deployment_name)
     end
 
     def broker_backend_port
