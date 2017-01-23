@@ -5,6 +5,8 @@ require 'prof/external_spec/shared_examples/service'
 require 'prof/marketplace_service'
 require 'prof/service_instance'
 
+LUA_INFINITE_LOOP = 'while true do end'
+
 describe 'dedicated plan' do
   def service
     Prof::MarketplaceService.new(
@@ -209,6 +211,24 @@ describe 'dedicated plan' do
     it 'flushes the script cache' do
       new_client = service_client_builder(@service_binding)
       expect(new_client.script_exists(@script_sha)).to be false
+    end
+  end
+
+  describe 'scripts running' do
+    before(:all) do
+      @service_instance = service_broker.provision_instance(service.name, service.plan)
+      @service_binding  = service_broker.bind_instance(@service_instance)
+
+      new_client = service_client_builder(@service_binding)
+      @infinite_loop_sha = new_client.script_load(LUA_INFINITE_LOOP)
+      expect(new_client.script_exists(@infinite_loop_sha)).to be true
+
+      Thread.new { @new_client.evalsha @infinite_loop_sha, 0 }
+    end
+
+    it 'successfully deprovisions' do
+      service_broker.unbind_instance(@service_binding)
+      service_broker.deprovision_instance(@service_instance)
     end
   end
 end
