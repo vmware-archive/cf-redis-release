@@ -53,6 +53,12 @@ module Support
       end
     end
 
+    def evalsha(*args)
+      client do |redis|
+        redis.evalsha(args)
+      end
+    end
+
     def script_exists(sha)
       client do |redis|
         redis.script(:exists, sha)
