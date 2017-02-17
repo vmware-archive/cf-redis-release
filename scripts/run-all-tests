@@ -18,4 +18,4 @@ check_args() {
 
 check_args
 
-bundle install && bundle exec rake spec:system
+bundle install && bundle exec rake spec
