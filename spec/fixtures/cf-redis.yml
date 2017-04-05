@@ -94,6 +94,11 @@ jobs:
   templates:
   - name: smoke-tests
     release: cf-redis
+  properties:
+    retry:
+      backoff: linear
+      baseline_interval_milliseconds: 1000
+      max_attempts: 10
 meta:
   apps_domain: bosh-lite.com
   broker:
