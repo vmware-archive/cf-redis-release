@@ -163,6 +163,11 @@ base_jobs:
   - name: redis_z1
   resource_pool: (( .meta.smoke-tests.resource_pool || .resource_pools.[0].name ))
   templates: (( job_templates.smoke_tests additional_job_templates.smoke_tests ))
+  properties:
+    retry:
+      max_attempts: 10
+      backoff: linear
+      baseline_interval_milliseconds: 1000
   <<: (( merge ))
 
 jobs: (( base_jobs additional_jobs ))
