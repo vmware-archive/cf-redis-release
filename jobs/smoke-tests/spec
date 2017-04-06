@@ -2,6 +2,7 @@
 name: smoke-tests
 packages:
 - go
+- ginkgo
 - cf-redis-smoke-tests
 - cf-cli
 templates:
