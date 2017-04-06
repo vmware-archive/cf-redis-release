@@ -35,3 +35,7 @@ go/go1.7.4.linux-amd64.tar.gz:
   object_id: a7ff4215-f3ce-45f6-ad46-241e05f43731
   sha: 2e5baf03d1590e048c84d1d5b4b6f2540efaaea1
   size: 84021919
+ginkgo/ginkgo:
+  object_id: e31291e6-190a-4d3a-82d5-931d41a4f00c
+  sha: 377b5e10bcddabe5b5d667cdea5b4f474f972aae
+  size: 9580871
