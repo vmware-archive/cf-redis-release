@@ -22,7 +22,7 @@ packages:
 - redis
 
 provides:
-- name: redis-broker
+- name: redis_broker
   type: redis
   properties:
   - redis.config_command

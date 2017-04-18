@@ -20,7 +20,7 @@ packages:
 - cf-redis-broker
 
 provides:
-- name: dedicated-node
+- name: dedicated_node
   type: redis
   properties:
   - redis.config_command

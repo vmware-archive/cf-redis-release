@@ -10,7 +10,7 @@ describe 'bosh specs' do
 
     it 'is configured expose redis.config_command as a bosh link' do
       expected_link = {
-        'name' => 'redis-broker',
+        'name' => 'redis_broker',
         'type' => 'redis',
         'properties' => ['redis.config_command'],
       }
@@ -24,7 +24,7 @@ describe 'bosh specs' do
 
     it 'is configured expose redis.config_command as a bosh link' do
       expected_link = {
-        'name' => 'dedicated-node',
+        'name' => 'dedicated_node',
         'type' => 'redis',
         'properties' => ['redis.config_command'],
       }
