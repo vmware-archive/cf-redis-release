@@ -19,6 +19,12 @@ packages:
 - cf-redis-nginx
 - cf-redis-broker
 
+provides:
+- name: dedicated-node
+  type: redis
+  properties:
+  - redis.config_command
+
 properties:
   service-backup.source_folder:
     description: The directory in which we store service backups
