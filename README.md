@@ -110,6 +110,21 @@ Allow the following:
  1. register service broker by runing `bosh run errand broker-registrar`
  1. optionally, run smoke tests to verify your deployment, i.e. `bosh run errand smoke-tests`
 
+## BOSH Links
+
+BOSH supports sharing of information between deployments via
+[BOSH Links](https://bosh.io/docs/links.html). This release exposes the redis
+`CONFIG` command alias for both dedicated and shared instances. They are
+consumed by:
+
+```yaml
+consumes:
+- name: redis_broker
+  type: redis
+- name: dedicated_node
+  type: redis
+```
+
 ## Testing
 
 To test first deploy locally using the Bosh-lite instructions above.
