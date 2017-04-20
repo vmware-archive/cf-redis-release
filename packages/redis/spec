@@ -1,4 +1,4 @@
 ---
 name: redis
 files:
-  - redis/redis-3.2.8.tar.gz
+  - redis/redis-3.2.1.tar.gz
