@@ -23,10 +23,10 @@ ruby/ruby-2.1.5.tar.gz:
   object_id: 698d02c7-61f9-4d14-893a-f4a8f085fc92
   sha: 9c0a238bd7839a4b51871641945a3da90997b8c2
   size: 15127433
-redis/redis-3.2.1.tar.gz:
-  object_id: 05e93526-7997-4421-83a7-f86c48f575a5
-  sha: 26c0fc282369121b4e278523fce122910b65fbbf
-  size: 1534696
+redis/redis-3.2.8.tar.gz:
+  object_id: 1d49ca62-4d96-4770-9263-b4eff654b60e
+  sha: 6780d1abb66f33a97aad0edbe020403d0a15b67f
+  size: 1547237
 cf-cli/cf-cli_6.21.1_linux_x86-64.tgz:
   object_id: 34b04b35-3928-4264-9a49-33b07af83a7e
   sha: 7dc397d2a0d93887ef50bc1f852beb686563049e
