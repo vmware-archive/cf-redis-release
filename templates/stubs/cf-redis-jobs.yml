@@ -1,5 +1,7 @@
 ---
-meta: ~
+meta:
+  <<: (( merge ))
+  release_version: (( merge || "latest" ))
 
 # PROPERTIES
 properties:
@@ -19,16 +21,16 @@ properties:
       shared_vm_plan_id: (( .meta.redis.broker.shared_vm_plan_id ))
       dedicated_vm_plan_id: (( .meta.redis.broker.dedicated_vm_plan_id ))
       route_name: (( .meta.route_name ))
-      network: redis_z1
-      backend_host: (( base_jobs.cf-redis-broker.networks.redis_z1.static_ips.[0] ))
-      host: (( base_jobs.cf-redis-broker.networks.redis_z1.static_ips.[0] ))
+      network: (( .networks.[0].name ))
+      backend_host: (( base_jobs.cf-redis-broker.networks.[0].static_ips.[0] )) 
+      host: (( base_jobs.cf-redis-broker.networks.[0].static_ips.[0] )) 
       backend_port: 12345
       subdomain: (( .meta.redis.broker.subdomain || "redis-broker" ))
       name: (( .meta.redis.broker.name ))
       service_instance_limit: (( .meta.redis.shared_plan.instance_limit ))
-      dedicated_nodes: (( base_jobs.dedicated-node.networks.redis_z1.static_ips ))
+      dedicated_nodes: (( base_jobs.dedicated-node.networks.[0].static_ips ))
     maxmemory: (( .meta.redis.shared_plan.max_memory ))
-    host: (( base_jobs.cf-redis-broker.networks.redis_z1.static_ips.[0] ))
+    host: (( base_jobs.cf-redis-broker.networks.[0].static_ips.[0] )) 
     config_command: (( .meta.redis.config_command ))
     save_command: (( .meta.redis.save_command ))
     bg_save_command: (( .meta.redis.bg_save_command ))
@@ -41,7 +43,7 @@ networks: ~
 # RELEASES
 base_releases:
 - name: (( .meta.release_name ))
-  version: (( .meta.release_version || "latest"))
+  version: (( .meta.release_version ))
 - name: routing
   version: 0.143.0
 
@@ -94,10 +96,12 @@ base_jobs:
 - instances: 1
   name: cf-redis-broker
   networks:
-  - name: redis_z1
+  - name: (( .networks.[0].name ))  
     static_ips: (( merge || static_ips(0) ))
+  vm_type: (( .meta.vm_type || default  ))
+  stemcell: (( .meta.stemcell || trusty  )) 
+  azs: [z1]
   persistent_disk: (( .meta.redis.shared_plan.persistent_disk_size || 4096 ))
-  resource_pool: (( .meta.redis.broker.resource_pool || .resource_pools.[0].name ))
   templates: (( job_templates.cf_redis_broker additional_job_templates.cf_redis_broker ))
   properties:
     nats:
@@ -122,46 +126,54 @@ base_jobs:
 - instances: (( .meta.redis.dedicated_plan.instance_count ))
   name: dedicated-node
   networks:
-  - name: redis_z1
+  - name: (( .networks.[0].name )) 
     static_ips: (( merge || static_ips(1,2,3,4,5,6,7,8,9,10) ))
+  vm_type: (( .meta.vm_type || default  ))
+  stemcell: (( .meta.stemcell || trusty  ))
+  azs: [z1]
   persistent_disk: (( .meta.redis.dedicated_plan.persistent_disk_size || 4096 ))
-  resource_pool: (( .meta.redis.dedicated_plan.resource_pool || .resource_pools.[0].name ))
   templates: (( job_templates.dedicated_node additional_job_templates.dedicated_node ))
   <<: (( merge ))
 - instances: 1
   lifecycle: errand
   name: broker-registrar
   networks:
-  - name: redis_z1
+  - name: (( .networks.[0].name )) 
   properties:
     broker:
       name: (( .properties.redis.broker.name || "redis" ))
       host: (( .properties.redis.broker.route_name "." .meta.apps_domain ))
       username: (( .properties.redis.broker.auth.username ))
       password: (( .properties.redis.broker.auth.password ))
-  resource_pool: (( .meta.broker_registrar.resource_pool || .resource_pools.[0].name ))
+  vm_type: (( .meta.vm_type || default  ))
+  stemcell: (( .meta.stemcell || trusty  ))
+  azs: [z1]
   templates: (( job_templates.broker_registrar additional_job_templates.broker_registrar ))
   <<: (( merge ))
 - instances: 1
   lifecycle: errand
   name: broker-deregistrar
   networks:
-  - name: redis_z1
+  - name: (( .networks.[0].name )) 
   properties:
     broker:
       name: (( .properties.redis.broker.name || "redis" ))
       host: (( .properties.redis.broker.route_name "." .meta.apps_domain ))
       username: (( .properties.redis.broker.auth.username ))
       password: (( .properties.redis.broker.auth.password ))
-  resource_pool: (( .meta.broker-deregistrar.resource_pool || .resource_pools.[0].name ))
+  vm_type: (( .meta.vm_type || default  ))
+  stemcell: (( .meta.stemcell || trusty  ))
+  azs: [z1]
   templates: (( job_templates.broker_deregistrar additional_job_templates.broker_deregistrar ))
   <<: (( merge ))
 - instances: 1
   lifecycle: errand
   name: smoke-tests
   networks:
-  - name: redis_z1
-  resource_pool: (( .meta.smoke-tests.resource_pool || .resource_pools.[0].name ))
+  - name: (( .networks.[0].name )) 
+  vm_type: (( .meta.vm_type || default  ))
+  stemcell: (( .meta.stemcell || trusty  ))
+  azs: [z1]
   templates: (( job_templates.smoke_tests additional_job_templates.smoke_tests ))
   properties:
     retry:
