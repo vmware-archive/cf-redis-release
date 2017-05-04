@@ -21,11 +21,8 @@ packages:
 - cf-redis-nginx
 - redis
 
-provides:
-- name: redis_broker
-  type: redis
-  properties:
-  - redis.config_command
+consumes:
+- {name: dedicated_node, type: redis}
 
 properties:
   service-backup.source_folder:
@@ -169,13 +166,6 @@ properties:
     description: server_names_hash_bucket_size for nginx
   redis.broker.host:
     description: "Host (DNS) or IP address used by the broker and bound applications to reach the service"
-
-  redis.broker.dedicated_nodes:
-    description: List of node IPs for the dedicated plan
-    default: []
-  redis.broker.dedicated_port:
-    description: The port used by the redis instances
-    default: 6379
 
   redis.broker.name:
     default: redis
