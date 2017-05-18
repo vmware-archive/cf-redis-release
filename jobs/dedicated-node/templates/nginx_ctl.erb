@@ -16,8 +16,13 @@ file_has_content() {
   [[ $(du -b $_file | awk '{ print $1 }') > 1 ]]
 }
 
+file_missing() {
+  local _file=$1
+  [[ ! -f $1 ]]
+}
+
 generate_self_signed_key_and_cert() {
-  openssl req -nodes -x509 -days 3650 -newkey rsa:2048 -subj '/O=Pivotal/CN=*' \
+  openssl req -nodes -x509 -days 3650 -newkey rsa:1024 -subj '/O=Pivotal/CN=*' \
   -keyout ${STORE_DIR}/${KEY_FILE} -out ${STORE_DIR}/${CERT_FILE}
 }
 
@@ -35,7 +40,8 @@ case $1 in
     if file_has_content ${TEMPLATE_DIR}/${KEY_FILE} && file_has_content ${TEMPLATE_DIR}/${CERT_FILE}
     then
       cp ${TEMPLATE_DIR}/* $STORE_DIR
-    else
+    elif file_missing ${STORE_DIR}/${KEY_FILE} || file_missing ${STORE_DIR}/${CERT_FILE}
+    then
       generate_self_signed_key_and_cert
     fi
 
