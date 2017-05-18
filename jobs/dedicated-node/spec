@@ -23,7 +23,7 @@ provides:
 - name: dedicated_node
   type: redis
   properties:
-  - redis.broker.dedicated_port
+  - redis.config_command
 
 properties:
   service-backup.source_folder:
