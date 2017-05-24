@@ -31,10 +31,6 @@ python/Python-2.7.8.tgz:
   object_id: 449aacb5-8758-4fcc-8b0a-9ce7af700d64
   sha: 511960dd78451a06c9df76509635aeec05b2051a
   size: 14846119
-redis/redis-2.8.21.tar.gz:
-  object_id: 611cbde4-6516-4ddc-93bf-f02788888ff5
-  sha: 6798200d007451a960a0a72041699e12adf14ee3
-  size: 1272195
 nginx/nginx-1.8.0.tar.gz:
   object_id: 77904c0d-6bb2-4e3e-b981-16828770f7a2
   sha: 12bad312764feae50246685ab2e74512d1aa9b2f
@@ -47,14 +43,6 @@ ruby/ruby-2.1.5.tar.gz:
   object_id: 698d02c7-61f9-4d14-893a-f4a8f085fc92
   sha: 9c0a238bd7839a4b51871641945a3da90997b8c2
   size: 15127433
-redis/redis-3.0.5.tar.gz:
-  object_id: 47795193-538a-4bf1-a229-51c61f74afcc
-  sha: ad3ee178c42bfcfd310c72bbddffbbe35db9b4a6
-  size: 1366160
-redis/redis-3.0.6.tar.gz:
-  object_id: 12fc413f-7eae-409f-93c0-1a6866b8bfdb
-  sha: 4b1c7b1201984bca8f7f9c6c58862f6928cf0a25
-  size: 1372648
 redis/redis-3.2.1.tar.gz:
   object_id: 05e93526-7997-4421-83a7-f86c48f575a5
   sha: 26c0fc282369121b4e278523fce122910b65fbbf
