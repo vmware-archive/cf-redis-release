@@ -169,7 +169,7 @@ describe 'backups', :run_backup_spec => true do
           restore_command = "RESTORE_CONFIG_PATH=/var/vcap/jobs/dedicated-node/config/restore.yml /var/vcap/packages/cf-redis-broker/bin/restore #{service_instance.id} #{remote_path}; echo $?"
           restore_output = ssh_gateway.execute_on(dedicated_node_vm_ip, restore_command, root: true)
           expect(restore_output).not_to be_nil
-          expect(restore_output.lines.last.strip).to(eql('0'), 'restore command failed with non zero exit status')
+          expect(restore_output.lines.last.strip).to(eql('0'), "restore command failed with non zero exit status, output was:\n#{restore_output}")
 
           wait_until_redis_is_up(dedicated_node_vm_ip)
 
