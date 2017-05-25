@@ -16,5 +16,5 @@ group :test do
   gem 'rspec-shell-expectations'
   gem 'rspec-instafail'
 
-  gem 'prof', '0.34.4'
+  gem 'prof', '0.35.0'
 end
