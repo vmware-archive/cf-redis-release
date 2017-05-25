@@ -1,0 +1,24 @@
+# System tests
+
+export BOSH_MANIFEST=
+
+# URL for bosh director (optional)
+# export BOSH_TARGET=
+
+# Authentication for bosh (basic auth)
+# export BOSH_USERNAME=
+# export BOSH_PASSWORD=
+#
+# (or UAA client)
+# export BOSH_ENV_LOGIN=true
+# export BOSH_CLIENT=
+# export BOSH_CLIENT_SECRET=
+
+# CA certificate for bosh (optional)
+# export BOSH_CA_CERT=/path/to/cert
+
+# Jumpbox with password or private key (optional)
+# export JUMPBOX_HOST=example.com
+# export JUMPBOX_USERNAME=
+# export JUMPBOX_PASSWORD=
+# export JUMPBOX_PRIVATE_KEY=/path/to/key

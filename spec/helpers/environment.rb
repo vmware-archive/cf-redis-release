@@ -27,14 +27,26 @@ module Helpers
           bosh_manifest_path: ENV.fetch('BOSH_MANIFEST'),
           bosh_service_broker_job_name: 'cf-redis-broker'
         }
-        options[:bosh_target]          = ENV['BOSH_TARGET']                 if ENV.key?('BOSH_TARGET')
-        options[:bosh_username]        = ENV['BOSH_USERNAME']               if ENV.key?('BOSH_USERNAME')
-        options[:bosh_password]        = ENV['BOSH_PASSWORD']               if ENV.key?('BOSH_PASSWORD')
-        options[:ssh_gateway_host]     = URI.parse(ENV['BOSH_TARGET']).host if ENV.key?('BOSH_TARGET')
-        options[:ssh_gateway_username] = 'vcap'                             if ENV.key?('BOSH_TARGET')
-        options[:ssh_gateway_password] = 'c1oudc0w'                         if ENV.key?('BOSH_TARGET')
+        options[:bosh_target]       = ENV['BOSH_TARGET']              if ENV.key?('BOSH_TARGET')
+        options[:bosh_username]     = ENV['BOSH_USERNAME']            if ENV.key?('BOSH_USERNAME')
+        options[:bosh_password]     = ENV['BOSH_PASSWORD']            if ENV.key?('BOSH_PASSWORD')
+        options[:bosh_ca_cert_path] = ENV['BOSH_CA_CERT']             if ENV.key?('BOSH_CA_CERT')
+        options[:bosh_env_login]    = ENV['BOSH_ENV_LOGIN'] == 'true'
 
-        options[:use_proxy]            = ENV['USE_PROXY'] == 'true'
+        if ENV.key?('BOSH_TARGET')
+          options[:ssh_gateway_host]     = URI.parse(ENV['BOSH_TARGET']).host
+          options[:ssh_gateway_username] = 'vcap'
+          options[:ssh_gateway_password] = 'c1oudc0w'
+        end
+
+        if ENV.key?('JUMPBOX_HOST')
+          options[:ssh_gateway_host]        = parse_host(ENV['JUMPBOX_HOST'])
+          options[:ssh_gateway_username]    = ENV.fetch('JUMPBOX_USERNAME')
+          options[:ssh_gateway_password]    = ENV['JUMPBOX_PASSWORD']         if ENV.key?('JUMPBOX_PASSWORD')
+          options[:ssh_gateway_private_key] = ENV['JUMPBOX_PRIVATE_KEY']      if ENV.key?('JUMPBOX_PRIVATE_KEY')
+        end
+
+        options[:use_proxy] = ENV['USE_PROXY'] == 'true'
         Prof::Environment::CloudFoundry.new(options)
       end
     end
@@ -106,6 +118,14 @@ module Helpers
         save_command:   bosh_manifest.property('redis.save_command'),
         config_command: bosh_manifest.property('redis.config_command')
       ).build(binding)
+    end
+
+    private
+
+    def parse_host(raw_host)
+      host = raw_host
+      host = 'http://' + host unless host.start_with? 'http'
+      URI.parse(host).host
     end
   end
 end

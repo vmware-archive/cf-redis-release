@@ -10,3 +10,4 @@ rspec.xml
 /releases/**/*.tgz
 /releases/*.tgz
 vendor/*
+.envrc
