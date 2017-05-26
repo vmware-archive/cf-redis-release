@@ -135,9 +135,9 @@ describe 'dedicated plan' do
       expect(client.read('test_key')).to eql('test_value')
 
       # Restart dedicated node
-      dedicated_node_index = bosh_director.ips_for_job('dedicated-node', bosh_manifest.deployment_name).index(service_instance_host)
+      dedicated_node_index = bosh_director.ips_for_job(DEDICATED_NODE_JOB_NAME, bosh_manifest.deployment_name).index(service_instance_host)
       expect(dedicated_node_index).to_not be_nil
-      bosh_director.recreate_instance('dedicated-node', dedicated_node_index)
+      bosh_director.recreate_instance(DEDICATED_NODE_JOB_NAME, dedicated_node_index)
 
       # Ensure data is intact
       expect(client.read('test_key')).to eq('test_value')

@@ -3,7 +3,7 @@ require 'system_spec_helper'
 describe 'metrics', :skip_metrics => true do
 
   before(:all) do
-    @number_of_nodes = bosh_manifest.job('dedicated-node').static_ips.count
+    @number_of_nodes = bosh_manifest.job(DEDICATED_NODE_JOB_NAME).static_ips.count
     @origin_tag = bosh_manifest.property('service_metrics.origin')
     @outFile = Tempfile.new('smetrics')
     @pid = spawn(
@@ -46,7 +46,7 @@ describe 'metrics', :skip_metrics => true do
     ].each do |metric_name|
       it "contains #{metric_name} metric for all dedicated nodes" do
         @number_of_nodes.times do |idx|
-          assert_metric(metric_name, 'dedicated-node', idx)
+          assert_metric(metric_name, DEDICATED_NODE_JOB_NAME, idx)
         end
       end
     end

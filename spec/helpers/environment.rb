@@ -22,6 +22,7 @@ module Helpers
     fail "Must specify BOSH_MANIFEST environment variable" unless ENV.key?('BOSH_MANIFEST')
 
     BROKER_JOB_NAME = 'cf-redis-broker'
+    DEDICATED_NODE_JOB_NAME = 'dedicated-node'
 
     def environment
       @environment ||= begin
@@ -103,7 +104,7 @@ module Helpers
     end
 
     def node_hosts
-      bosh_manifest.job('dedicated-node').static_ips
+      bosh_manifest.job(DEDICATED_NODE_JOB_NAME).static_ips
     end
 
     def broker_backend_port
