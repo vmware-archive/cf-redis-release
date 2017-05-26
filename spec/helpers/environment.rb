@@ -21,11 +21,13 @@ module Helpers
   module Environment
     fail "Must specify BOSH_MANIFEST environment variable" unless ENV.key?('BOSH_MANIFEST')
 
+    BROKER_JOB_NAME = 'cf-redis-broker'
+
     def environment
       @environment ||= begin
         options = {
           bosh_manifest_path: ENV.fetch('BOSH_MANIFEST'),
-          bosh_service_broker_job_name: 'cf-redis-broker'
+          bosh_service_broker_job_name: BROKER_JOB_NAME
         }
         options[:bosh_target]       = ENV['BOSH_TARGET']              if ENV.key?('BOSH_TARGET')
         options[:bosh_username]     = ENV['BOSH_USERNAME']            if ENV.key?('BOSH_USERNAME')
@@ -97,7 +99,7 @@ module Helpers
     end
 
     def broker_host
-      bosh_manifest.job('cf-redis-broker').static_ips.first
+      bosh_manifest.job(BROKER_JOB_NAME).static_ips.first
     end
 
     def node_hosts

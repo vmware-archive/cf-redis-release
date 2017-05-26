@@ -28,7 +28,7 @@ describe 'metrics', :skip_metrics => true do
      "/p-redis/service-broker/shared_vm_plan/total_instances",
     ].each do |metric_name|
       it "contains #{metric_name} metric for redis broker" do
-        assert_metric(metric_name, 'cf-redis-broker', 0)
+        assert_metric(metric_name, BROKER_JOB_NAME, 0)
       end
     end
   end

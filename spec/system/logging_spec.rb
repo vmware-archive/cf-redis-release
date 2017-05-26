@@ -9,7 +9,7 @@ describe 'logging' do
 
   let(:log_files_by_job) {
     {
-      'cf-redis-broker' => [
+      BROKER_JOB_NAME => [
         'access.log',
         'cf-redis-broker.stderr.log',
         'cf-redis-broker.stdout.log',
