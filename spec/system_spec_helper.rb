@@ -1,6 +1,7 @@
 require 'yaml'
 require 'helpers/environment'
 require 'helpers/utilities'
+require 'helpers/bosh_cli_wrapper'
 require 'prof/external_spec/spec_helper'
 require 'prof/matchers/only_support_ssl_with_cipher_set'
 require 'aws-sdk'
@@ -72,6 +73,7 @@ puts ExcludeHelper::warnings
 
 RSpec.configure do |config|
   config.include Helpers::Environment
+  config.include Helpers::SSHTargets
   config.include Prof::Matchers
   config.filter_run :focus
   config.run_all_when_everything_filtered = true
