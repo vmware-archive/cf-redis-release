@@ -8,6 +8,10 @@ module Helpers
     def broker_ssh
       BOSHCLIWrapper.new(bosh_manifest.deployment_name, BROKER_JOB_NAME)
     end
+
+    def dedicated_node_ssh
+      BOSHCLIWrapper.new(bosh_manifest.deployment_name, DEDICATED_NODE_JOB_NAME)
+    end
   end
 
   class BOSHCLIWrapper
@@ -40,7 +44,11 @@ module Helpers
         "#{@instance_group}/0"
       ].join(' ')
 
-      stdout, _, _ = Open3.capture3(cmd)
+      stdout, stderr, status = Open3.capture3(cmd)
+      unless status.success?
+        raise "bosh ssh command failed. stdout: #{stdout}, stderr: #{stderr}, status: #{status}."
+      end
+
       extract_stdout(stdout)
     end
 
