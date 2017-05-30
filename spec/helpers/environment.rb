@@ -2,6 +2,7 @@ require 'prof/environment/cloud_foundry'
 
 require 'support/redis_service_broker'
 require 'support/redis_service_client_builder'
+require 'helpers/bosh_cli_wrapper'
 
 class FilteredStderr < StringIO
   def write value
@@ -70,6 +71,18 @@ module Helpers
       environment.bosh_director
     end
 
+    def broker_ssh
+      BOSHCLIWrapper.new(bosh_manifest.deployment_name, BROKER_JOB_NAME)
+    end
+
+    def dedicated_node_ssh
+      BOSHCLIWrapper.new(bosh_manifest.deployment_name, DEDICATED_NODE_JOB_NAME)
+    end
+
+    def service_instance_ssh(host)
+      BOSHCLIWrapper.new(bosh_manifest.deployment_name, DEDICATED_NODE_JOB_NAME)
+    end
+
     # net-ssh makes a deprecated call to `timeout`. We ignore these messages
     # because they pollute logs.
     # After using the filtered stderr we ensure to reassign the original stderr
@@ -121,6 +134,16 @@ module Helpers
         save_command:   bosh_manifest.property('redis.save_command'),
         config_command: bosh_manifest.property('redis.config_command')
       ).build(binding)
+    end
+
+    def root_execute_on(ip, command)
+      root_prompt = '[sudo] password for vcap: '
+      root_prompt_length = root_prompt.length
+
+      output = ssh_gateway.execute_on(ip, command, root: true)
+      expect(output).not_to be_nil
+      expect(output).to start_with(root_prompt)
+      return output.slice(root_prompt_length, output.length - root_prompt_length)
     end
 
     private
