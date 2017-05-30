@@ -1,11 +1,17 @@
 # System tests
 
-export BOSH_MANIFEST=
+export CF_USERNAME=admin
+export CF_PASSWORD=
+export CF_API="https://api.$CF_SYS_DOMAIN"
+export DOPPLER_ADDR="wss://doppler.$CF_SYS_DOMAIN"
+
+export BOSH_MANIFEST=/path/to/bosh/manifest
 
 # URL for bosh director (optional)
 # export BOSH_TARGET=
 
-# Authentication for bosh (basic auth)
+# Authentication for bosh
+# (basic auth)
 # export BOSH_USERNAME=
 # export BOSH_PASSWORD=
 #

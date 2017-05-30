@@ -6,7 +6,7 @@ module Helpers
   class BOSHCLIWrapper
     include Utilities
 
-    def initialize(deployment_name, instance_group_name)
+    def initialize(deployment_name, instance_group_name, instance_id)
       @environment = ENV.fetch('BOSH_TARGET')
       @ca_cert = ENV.fetch('BOSH_CA_CERT')
       @client = ENV.fetch('BOSH_CLIENT')
@@ -16,6 +16,7 @@ module Helpers
       @gw_host = ENV.fetch('JUMPBOX_HOST')
       @gw_private_key = ENV.fetch('JUMPBOX_PRIVATE_KEY')
       @instance_group = instance_group_name
+      @instance_id = instance_id
     end
 
     def execute(command)
@@ -32,7 +33,7 @@ module Helpers
         "--gw-user #{@gw_user}",
         "--gw-host #{@gw_host}",
         "--gw-private-key #{@gw_private_key}",
-        "#{@instance_group}/0"
+        "#{@instance_group}/#{@instance_id}"
       ].join(' ')
 
       stdout, _, _ = Open3.capture3(cmd)
