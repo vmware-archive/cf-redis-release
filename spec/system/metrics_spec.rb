@@ -2,7 +2,7 @@ require 'system_spec_helper'
 
 describe 'metrics', :skip_metrics => true do
 
-  before(:all) do
+  before do
     @number_of_nodes = bosh_manifest.job('dedicated-node').static_ips.count
     @origin_tag = bosh_manifest.property('service_metrics.origin')
     @outFile = Tempfile.new('smetrics')
@@ -16,7 +16,7 @@ describe 'metrics', :skip_metrics => true do
     )
   end
 
-  after(:all) do
+  after do
     Process.kill("INT", @pid)
     @outFile.unlink
   end
