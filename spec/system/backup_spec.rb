@@ -72,9 +72,7 @@ describe 'backups', :skip_service_backups => true do
                       "access_key_id" => aws_access_key_id,
                       "secret_access_key" => aws_secret_access_key,
                       "bucket_name" => s3_backup_bucket,
-                      "bucket_path" => s3_backup_path,
-                      "region" => "",
-                    }
+                      "bucket_path" => s3_backup_path}
                   }
 
                   expect(service_backup_config["destinations"]).to include(expected_backup_config)
