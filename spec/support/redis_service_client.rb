@@ -27,10 +27,6 @@ module Support
       end
     end
 
-    def aof_contents
-      ssh_gateway.execute_on(host, 'cat /var/vcap/store/redis/appendonly.aof').to_s
-    end
-
     def config
       Hash[client { |redis| redis.config('get', '*').each_slice(2).to_a }]
     end

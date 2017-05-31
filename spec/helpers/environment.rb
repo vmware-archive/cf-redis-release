@@ -72,11 +72,11 @@ module Helpers
     end
 
     def broker_ssh
-      BOSHCLIWrapper.new(bosh_manifest.deployment_name, BROKER_JOB_NAME, 0)
+      BOSH::SSH.new(bosh_manifest.deployment_name, BROKER_JOB_NAME, 0)
     end
 
     def dedicated_node_ssh
-      BOSHCLIWrapper.new(bosh_manifest.deployment_name, DEDICATED_NODE_JOB_NAME, 0)
+      BOSH::SSH.new(bosh_manifest.deployment_name, DEDICATED_NODE_JOB_NAME, 0)
     end
 
     # net-ssh makes a deprecated call to `timeout`. We ignore these messages

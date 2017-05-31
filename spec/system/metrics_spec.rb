@@ -79,7 +79,7 @@ describe 'metrics', :skip_metrics => true do
   end
 
   def metron_id_from_job_index(job_name, job_index)
-    job_ssh = Helpers::BOSHCLIWrapper.new(bosh_manifest.deployment_name, job_name, job_index)
+    job_ssh = Helpers::BOSH::SSH.new(bosh_manifest.deployment_name, job_name, job_index)
 
     metron_agent_config = job_ssh.execute('sudo cat /var/vcap/jobs/metron_agent/config/metron_agent.json')
     JSON.parse(metron_agent_config).fetch("Index")
