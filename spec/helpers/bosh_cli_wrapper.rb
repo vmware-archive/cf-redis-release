@@ -56,24 +56,39 @@ module Helpers
         @deployment = deployment_name
         @instance_group = instance_group_name
         @instance_id = instance_id
+        @gw_user = ENV.fetch('JUMPBOX_USERNAME')
+        @gw_host = ENV.fetch('JUMPBOX_HOST')
+        @gw_private_key = ENV.fetch('JUMPBOX_PRIVATE_KEY')
       end
 
       def execute(command)
-        gw_user = ENV.fetch('JUMPBOX_USERNAME')
-        gw_host = ENV.fetch('JUMPBOX_HOST')
-        gw_private_key = ENV.fetch('JUMPBOX_PRIVATE_KEY')
-
         cmd = base_cmd(@deployment).concat([
           "ssh",
           "--command '#{command}'",
-          "--gw-user #{gw_user}",
-          "--gw-host #{gw_host}",
-          "--gw-private-key #{gw_private_key}",
+          "--gw-user #{@gw_user}",
+          "--gw-host #{@gw_host}",
+          "--gw-private-key #{@gw_private_key}",
           "#{@instance_group}/#{@instance_id}"
         ]).join(' ')
 
         stdout, _, _ = Open3.capture3(cmd)
         return extract_stdout(stdout)
+      end
+
+      def copy(local_path, remote_path)
+        cmd = base_cmd(@deployment).concat([
+          "scp",
+          "--gw-user #{@gw_user}",
+          "--gw-host #{@gw_host}",
+          "--gw-private-key #{@gw_private_key}",
+          local_path,
+          "#{@instance_group}/#{@instance_id}:#{remote_path}"
+        ]).join(' ')
+
+        stdout, _, process = Open3.capture3(cmd)
+        unless process.success?
+          raise "SCP command failed, exit status #{process.exitstatus}: #{stdout}"
+        end
       end
 
       def wait_for_process_start(process_name)
