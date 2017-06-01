@@ -32,7 +32,7 @@ module Helpers
         @deployment = deployment
       end
 
-      def instance_id(host)
+      def instance(host)
         cmd = base_cmd(@deployment).push("instances").join(' ')
 
         stdout, _, _ = Open3.capture3(cmd)
@@ -43,7 +43,8 @@ module Helpers
         match = rows.find { |row| row.last == host }
         return nil if match.nil?
 
-        match[0].split("/")[1]
+        instance_group, instance_id = match[0].split("/")
+        return instance_group, instance_id
       end
     end
 
@@ -120,7 +121,7 @@ module Helpers
         blocks = result.fetch('Blocks')
         blocks.each_with_index do |line, index|
           if line.include? 'stdout |'
-            stdout << blocks[index+1].strip
+            stdout << blocks[index+1].rstrip
           end
         end
 

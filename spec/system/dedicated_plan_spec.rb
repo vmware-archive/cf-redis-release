@@ -153,7 +153,7 @@ describe 'dedicated plan' do
         expect(@old_client.read('test_key')).to eq('test_value')
 
         host = service_binding.credentials[:host]
-        instance_id = Helpers::BOSH::Instances.new(bosh_manifest.deployment_name).instance_id(host)
+        _, instance_id = Helpers::BOSH::Instances.new(bosh_manifest.deployment_name).instance(host)
         @node_ssh = Helpers::BOSH::SSH.new(bosh_manifest.deployment_name, Helpers::Environment::DEDICATED_NODE_JOB_NAME, instance_id)
 
         aof_contents = @node_ssh.execute('sudo cat /var/vcap/store/redis/appendonly.aof')
