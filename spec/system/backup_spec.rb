@@ -246,8 +246,7 @@ describe 'backups', :skip_service_backups => true do
   def with_remote_execution(service_name, service_plan, &block)
     service_broker.provision_and_bind(service_name, service_plan) do |service_binding|
       host = service_binding.credentials[:host]
-      instance_group, instance_id = Helpers::BOSH::Instances.new(bosh_manifest.deployment_name).instance(host)
-      instance_ssh = Helpers::BOSH::SSH.new(bosh_manifest.deployment_name, instance_group, instance_id)
+      instance_ssh = instance_ssh(host)
 
       vm_execute = Proc.new do |command|
         instance_ssh.execute(command)

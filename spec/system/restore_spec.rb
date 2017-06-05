@@ -9,8 +9,8 @@ TEMP_COPY_PATH = '/tmp/moaning-dump.rdb'
 shared_examples 'it errors when run as non-root user' do |plan|
   before(:all) do
     @service_instance, @service_binding, vm_ip, client = provision_and_build_service_client(plan)
-    instance_group, instance_id = Helpers::BOSH::Instances.new(bosh_manifest.deployment_name).instance(vm_ip)
-    @instance_ssh = Helpers::BOSH::SSH.new(bosh_manifest.deployment_name, instance_group, instance_id)
+    @instance_ssh = instance_ssh(vm_ip)
+
     expect(client.read("moaning")).to_not eq("myrtle")
   end
 
@@ -28,8 +28,7 @@ end
 shared_examples 'it errors when file is on wrong device' do |plan|
   before(:all) do
     @service_instance, @service_binding, vm_ip, client = provision_and_build_service_client(plan)
-    instance_group, instance_id = Helpers::BOSH::Instances.new(bosh_manifest.deployment_name).instance(vm_ip)
-    @instance_ssh = Helpers::BOSH::SSH.new(bosh_manifest.deployment_name, instance_group, instance_id)
+    @instance_ssh = instance_ssh(vm_ip)
 
     @instance_ssh.copy(DUMP_FIXTURE_PATH, TEMP_COPY_PATH)
     expect(client.read("moaning")).to_not eq("myrtle")
@@ -50,8 +49,7 @@ end
 shared_examples 'it errors when passed an incorrect guid' do |plan|
   before(:all) do
     @service_instance, @service_binding, vm_ip, client = provision_and_build_service_client(plan)
-    instance_group, instance_id = Helpers::BOSH::Instances.new(bosh_manifest.deployment_name).instance(vm_ip)
-    @instance_ssh = Helpers::BOSH::SSH.new(bosh_manifest.deployment_name, instance_group, instance_id)
+    @instance_ssh = instance_ssh(vm_ip)
 
     @instance_ssh.copy(DUMP_FIXTURE_PATH, TEMP_COPY_PATH)
     @instance_ssh.execute("sudo mv #{TEMP_COPY_PATH} #{BACKUP_PATH}")
@@ -136,8 +134,7 @@ describe 'restore' do
         plan = 'dedicated-vm'
         @service_instance, @service_binding, vm_ip, @client = provision_and_build_service_client(plan)
 
-        _, instance_id = Helpers::BOSH::Instances.new(bosh_manifest.deployment_name).instance(vm_ip)
-        @node_ssh = Helpers::BOSH::SSH.new(bosh_manifest.deployment_name, Helpers::Environment::DEDICATED_NODE_JOB_NAME, instance_id)
+        @node_ssh = instance_ssh(vm_ip)
 
         @node_ssh.copy(DUMP_FIXTURE_PATH, TEMP_COPY_PATH)
         @node_ssh.execute("sudo mv #{TEMP_COPY_PATH} #{BACKUP_PATH}")

@@ -79,6 +79,11 @@ module Helpers
       BOSH::SSH.new(bosh_manifest.deployment_name, DEDICATED_NODE_JOB_NAME, 0)
     end
 
+    def instance_ssh(host_ip)
+      instance_group, instance_id = BOSH::Instances.new(bosh_manifest.deployment_name).instance(host_ip)
+      BOSH::SSH.new(bosh_manifest.deployment_name, instance_group, instance_id)
+    end
+
     # net-ssh makes a deprecated call to `timeout`. We ignore these messages
     # because they pollute logs.
     # After using the filtered stderr we ensure to reassign the original stderr
