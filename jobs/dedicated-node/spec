@@ -20,10 +20,7 @@ packages:
 - cf-redis-broker
 
 provides:
-- name: dedicated_node
-  type: redis
-  properties:
-  - redis.config_command
+- {name: dedicated_node, type: redis}
 
 properties:
   service-backup.source_folder:

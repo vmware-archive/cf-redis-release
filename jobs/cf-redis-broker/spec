@@ -22,14 +22,10 @@ packages:
 - redis
 
 provides:
-- name: redis_broker
-  type: redis
-  properties:
-  - redis.config_command
+- {name: redis_broker, type: redis_broker}
 
 consumes:
-- name: redis_broker
-  type: redis
+- {name: redis_broker, type: redis_broker}
 
 properties:
   service-backup.source_folder:
