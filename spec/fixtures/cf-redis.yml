@@ -304,7 +304,6 @@ properties:
       auth:
         password: admin
         username: admin
-      backend_host: 10.244.3.2
       backend_port: 12345
       dedicated_nodes:
       - 10.244.3.6
