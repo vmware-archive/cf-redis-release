@@ -27,6 +27,10 @@ provides:
   properties:
   - redis.config_command
 
+consumes:
+- name: redis_broker
+  type: redis
+
 properties:
   service-backup.source_folder:
     description: The directory in which we store service backups
