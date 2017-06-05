@@ -11,8 +11,7 @@ describe 'bosh specs' do
     it 'is configured expose redis.config_command as a bosh link' do
       expected_link = {
         'name' => 'redis_broker',
-        'type' => 'redis',
-        'properties' => ['redis.config_command'],
+        'type' => 'redis_broker',
       }
 
       expect(subject['provides']).to include(expected_link)
@@ -26,7 +25,6 @@ describe 'bosh specs' do
       expected_link = {
         'name' => 'dedicated_node',
         'type' => 'redis',
-        'properties' => ['redis.config_command'],
       }
 
       expect(subject['provides']).to include(expected_link)
