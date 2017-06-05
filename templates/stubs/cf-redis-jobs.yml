@@ -20,7 +20,6 @@ properties:
       dedicated_vm_plan_id: (( .meta.redis.broker.dedicated_vm_plan_id ))
       route_name: (( .meta.route_name ))
       network: redis_z1
-      backend_host: (( base_jobs.cf-redis-broker.networks.redis_z1.static_ips.[0] ))
       host: (( base_jobs.cf-redis-broker.networks.redis_z1.static_ips.[0] ))
       backend_port: 12345
       subdomain: (( .meta.redis.broker.subdomain || "redis-broker" ))

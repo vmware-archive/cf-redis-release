@@ -158,17 +158,12 @@ properties:
   redis.broker.backend_port:
     default: 10005
     description: The port for the broker unicorn process to run on
-  redis.broker.backend_host:
-    default: localhost
-    description: The port for the broker unicorn process to run on
   redis.broker.nginx.port:
     default: 12350
     description: "Port for nginx"
   redis.broker.nginx.bucket_size:
     default: 128
     description: server_names_hash_bucket_size for nginx
-  redis.broker.host:
-    description: "Host (DNS) or IP address used by the broker and bound applications to reach the service"
 
   redis.broker.dedicated_nodes:
     description: List of node IPs for the dedicated plan
