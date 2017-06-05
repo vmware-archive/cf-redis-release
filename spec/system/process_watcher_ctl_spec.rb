@@ -31,7 +31,7 @@ def clear_log_and_restart_process_watcher
 end
 
 def clear_process_watcher_logs
-  broker_ssh.execute("sudo echo '' > #{PROCESS_WATCHER_PATH}")
+  broker_ssh.execute("sudo truncate -s 0 #{PROCESS_WATCHER_PATH}")
 end
 
 def start_fake_process_monitor

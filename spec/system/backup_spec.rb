@@ -76,7 +76,7 @@ describe 'backups', :skip_service_backups => true do
       describe 'manual snapshot' do
         before do
           with_remote_execution(service_name, service_plan) do |vm_execute|
-            clear_snapshot_logs_result = vm_execute.call("sudo echo '' > #{manual_snapshot_log_file_path}")
+            clear_snapshot_logs_result = vm_execute.call("sudo truncate -s 0 #{manual_snapshot_log_file_path}")
             expect(clear_snapshot_logs_result).to be_empty
           end
         end
