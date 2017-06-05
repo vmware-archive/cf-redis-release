@@ -24,9 +24,6 @@ packages:
 provides:
 - {name: redis_broker, type: redis_broker}
 
-consumes:
-- {name: redis_broker, type: redis_broker}
-
 properties:
   service-backup.source_folder:
     description: The directory in which we store service backups
