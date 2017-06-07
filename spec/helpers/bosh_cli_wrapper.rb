@@ -9,7 +9,7 @@ module Helpers
 
       def base_cmd(deployment)
         environment = ENV.fetch('BOSH_TARGET')
-        ca_cert = ENV.fetch('BOSH_CA_CERT')
+        ca_cert = ENV.fetch('BOSH_CA_CERT_PATH')
         client = ENV.fetch('BOSH_CLIENT')
         client_secret = ENV.fetch('BOSH_CLIENT_SECRET')
 
@@ -58,7 +58,7 @@ module Helpers
         @instance_id = instance_id
         @gw_user = ENV.fetch('JUMPBOX_USERNAME')
         @gw_host = ENV.fetch('JUMPBOX_HOST')
-        @gw_private_key = ENV.fetch('JUMPBOX_PRIVATE_KEY')
+        @gw_private_key = ENV.fetch('JUMPBOX_PRIVATE_KEY_PATH')
       end
 
       def execute(command)

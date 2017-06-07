@@ -34,7 +34,7 @@ module Helpers
         options[:bosh_target]       = ENV['BOSH_TARGET']              if ENV.key?('BOSH_TARGET')
         options[:bosh_username]     = ENV['BOSH_USERNAME']            if ENV.key?('BOSH_USERNAME')
         options[:bosh_password]     = ENV['BOSH_PASSWORD']            if ENV.key?('BOSH_PASSWORD')
-        options[:bosh_ca_cert_path] = ENV['BOSH_CA_CERT']             if ENV.key?('BOSH_CA_CERT')
+        options[:bosh_ca_cert_path] = ENV['BOSH_CA_CERT_PATH']        if ENV.key?('BOSH_CA_CERT_PATH')
         options[:bosh_env_login]    = ENV['BOSH_ENV_LOGIN'] == 'true'
 
         if ENV.key?('BOSH_TARGET')
@@ -47,7 +47,7 @@ module Helpers
           options[:ssh_gateway_host]        = parse_host(ENV['JUMPBOX_HOST'])
           options[:ssh_gateway_username]    = ENV.fetch('JUMPBOX_USERNAME')
           options[:ssh_gateway_password]    = ENV['JUMPBOX_PASSWORD']         if ENV.key?('JUMPBOX_PASSWORD')
-          options[:ssh_gateway_private_key] = ENV['JUMPBOX_PRIVATE_KEY']      if ENV.key?('JUMPBOX_PRIVATE_KEY')
+          options[:ssh_gateway_private_key] = ENV['JUMPBOX_PRIVATE_KEY_PATH'] if ENV.key?('JUMPBOX_PRIVATE_KEY_PATH')
         end
 
         options[:use_proxy] = ENV['USE_PROXY'] == 'true'
