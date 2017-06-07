@@ -1,0 +1,95 @@
+---
+name: (( meta.environment "-redis" ))
+director_uuid: (( merge ))
+
+releases:
+- name: cf-redis
+  version: latest
+
+compilation:
+  workers: 2
+  network: services1
+  reuse_compilation_vms: true
+  cloud_properties: (( merge ))
+
+update:
+  canaries: 1
+  canary_watch_time: 30000-600000
+  update_watch_time: 30000-600000
+  max_in_flight: 4
+
+networks: (( merge ))
+
+resource_pools:
+  - name: services-small
+    network: services1
+    stemcell: (( merge ))
+    cloud_properties: (( merge ))
+
+jobs:
+  - name: cf-redis-broker
+    templates:
+    - name: cf-redis-broker
+      release: cf-redis
+    - name: syslog-configurator
+      release: cf-redis
+    instances: 1
+    resource_pool: services-small
+    persistent_disk: 4096
+    networks:
+    - name: services1
+      static_ips: (( static_ips(0) ))
+
+  - name: dedicated-node
+    templates:
+    - name: dedicated-node
+      release: cf-redis
+    - name: syslog-configurator
+      release: cf-redis
+    instances: 5
+    resource_pool: services-small
+    persistent_disk: 4096
+    networks:
+    - name: services1
+      static_ips: (( static_ips(1, 2, 3, 4, 5) ))
+
+  - name: broker-registrar
+    instances: 1
+    lifecycle: errand
+    networks:
+    - name: services1
+    resource_pool: services-small
+    templates:
+    - name: broker-registrar
+      release: cf-redis
+
+  - name: broker-deregistrar
+    instances: 1
+    lifecycle: errand
+    networks:
+    - name: services1
+    resource_pool: services-small
+    templates:
+    - name: broker-deregistrar
+      release: cf-redis
+
+properties:
+  broker:
+    name: redis
+    host: (( jobs.cf-redis-broker.networks.services1.static_ips.[0] ))
+    username: admin
+    password: (( merge ))
+  syslog_aggregator: ~
+  cf:
+    api_url: (( merge ))
+    admin_username: (( merge ))
+    admin_password: (( merge ))
+  redis:
+    host: (( properties.broker.host ))
+    config_command: (( merge ))
+    broker:
+      service_instance_limit: 5
+      dedicated_nodes: (( jobs.dedicated-node.networks.services1.static_ips ))
+      auth:
+        username: (( merge ))
+        password: (( merge ))
