@@ -31,14 +31,14 @@ module Helpers
           bosh_manifest_path: ENV.fetch('BOSH_MANIFEST'),
           bosh_service_broker_job_name: BROKER_JOB_NAME
         }
-        options[:bosh_target]       = ENV['BOSH_TARGET']              if ENV.key?('BOSH_TARGET')
+        options[:bosh_target]       = ENV['BOSH_ENVIRONMENT']         if ENV.key?('BOSH_ENVIRONMENT')
         options[:bosh_username]     = ENV['BOSH_USERNAME']            if ENV.key?('BOSH_USERNAME')
         options[:bosh_password]     = ENV['BOSH_PASSWORD']            if ENV.key?('BOSH_PASSWORD')
         options[:bosh_ca_cert_path] = ENV['BOSH_CA_CERT_PATH']        if ENV.key?('BOSH_CA_CERT_PATH')
         options[:bosh_env_login]    = ENV['BOSH_ENV_LOGIN'] == 'true'
 
-        if ENV.key?('BOSH_TARGET')
-          options[:ssh_gateway_host]     = URI.parse(ENV['BOSH_TARGET']).host
+        if ENV.key?('BOSH_ENVIRONMENT')
+          options[:ssh_gateway_host]     = URI.parse(ENV['BOSH_ENVIRONMENT']).host
           options[:ssh_gateway_username] = 'vcap'
           options[:ssh_gateway_password] = 'c1oudc0w'
         end

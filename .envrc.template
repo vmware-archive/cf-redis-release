@@ -8,7 +8,7 @@ export DOPPLER_ADDR="wss://doppler.$CF_SYS_DOMAIN"
 export BOSH_MANIFEST=/path/to/bosh/manifest
 
 # URL for bosh director (optional)
-# export BOSH_TARGET=
+# export BOSH_ENVIRONMENT=
 
 # Authentication for bosh
 # (basic auth)

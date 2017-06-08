@@ -8,7 +8,7 @@ module Helpers
       private
 
       def base_cmd(deployment)
-        environment = ENV.fetch('BOSH_TARGET')
+        environment = ENV.fetch('BOSH_ENVIRONMENT')
         ca_cert = ENV.fetch('BOSH_CA_CERT_PATH')
         client = ENV.fetch('BOSH_CLIENT')
         client_secret = ENV.fetch('BOSH_CLIENT_SECRET')
