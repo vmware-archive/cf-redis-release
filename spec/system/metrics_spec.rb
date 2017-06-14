@@ -3,7 +3,7 @@ require 'system_spec_helper'
 describe 'metrics', :skip_metrics => true do
 
   before do
-    @number_of_nodes = bosh_manifest.job('dedicated-node').static_ips.count
+    @number_of_nodes = bosh_manifest.job(Helpers::Environment::DEDICATED_NODE_JOB_NAME).static_ips.count
     @origin_tag = bosh_manifest.property('service_metrics.origin')
     @outFile = Tempfile.new('smetrics')
     @pid = spawn(
@@ -28,7 +28,7 @@ describe 'metrics', :skip_metrics => true do
      "/p-redis/service-broker/shared_vm_plan/total_instances",
     ].each do |metric_name|
       it "contains #{metric_name} metric for redis broker" do
-        assert_metric(metric_name, 'cf-redis-broker', 0)
+        assert_metric(metric_name, Helpers::Environment::BROKER_JOB_NAME, 0)
       end
     end
   end
@@ -46,7 +46,7 @@ describe 'metrics', :skip_metrics => true do
     ].each do |metric_name|
       it "contains #{metric_name} metric for all dedicated nodes" do
         @number_of_nodes.times do |idx|
-          assert_metric(metric_name, 'dedicated-node', idx)
+          assert_metric(metric_name, Helpers::Environment::DEDICATED_NODE_JOB_NAME, idx)
         end
       end
     end
@@ -80,10 +80,10 @@ describe 'metrics', :skip_metrics => true do
   end
 
   def metron_id_from_job_index(job_name, job_index)
-    ip = bosh_manifest.job(job_name).static_ips[job_index]
+    job_ssh = Helpers::BOSH::SSH.new(bosh_manifest.deployment_name, job_name, job_index)
 
-    metron_agent_config = ssh_gateway.execute_on(ip, 'cat /var/vcap/jobs/metron_agent/config/metron_agent.json').to_s
-    JSON.parse(metron_agent_config)["Index"]
+    metron_agent_config = job_ssh.execute('sudo cat /var/vcap/jobs/metron_agent/config/metron_agent.json')
+    JSON.parse(metron_agent_config).fetch("Index")
   end
 
   def firehose_out_file

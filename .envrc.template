@@ -1,11 +1,17 @@
 # System tests
 
-export BOSH_MANIFEST=
+export CF_USERNAME=admin
+export CF_PASSWORD=
+export CF_API="https://api.$CF_SYS_DOMAIN"
+export DOPPLER_ADDR="wss://doppler.$CF_SYS_DOMAIN"
+
+export BOSH_MANIFEST=/path/to/bosh/manifest
 
 # URL for bosh director (optional)
-# export BOSH_TARGET=
+# export BOSH_ENVIRONMENT=
 
-# Authentication for bosh (basic auth)
+# Authentication for bosh
+# (basic auth)
 # export BOSH_USERNAME=
 # export BOSH_PASSWORD=
 #
@@ -15,10 +21,10 @@ export BOSH_MANIFEST=
 # export BOSH_CLIENT_SECRET=
 
 # CA certificate for bosh (optional)
-# export BOSH_CA_CERT=/path/to/cert
+# export BOSH_CA_CERT_PATH=/path/to/cert
 
 # Jumpbox with password or private key (optional)
 # export JUMPBOX_HOST=example.com
 # export JUMPBOX_USERNAME=
 # export JUMPBOX_PASSWORD=
-# export JUMPBOX_PRIVATE_KEY=/path/to/key
+# export JUMPBOX_PRIVATE_KEY_PATH=/path/to/key
