@@ -1,0 +1,206 @@
+---
+director_uuid: ((director_uuid))
+name: ((deployment_name))
+
+instance_groups:
+- instances: 1
+  name: cf-redis-broker
+  azs: [((default_az))]
+  networks:
+  - name: ((default_network))
+    static_ips:
+    - ((broker_ip))
+  vm_type: ((default_vm_type))
+  stemcell: default
+  persistent_disk_type: ((default_persistent_disk_type))
+  properties:
+    nats:
+      machines: ((nats_machines_ips))
+      password: ((nats_password))
+      port: 4222
+      user: nats
+    route_registrar:
+      routes:
+      - health_check:
+          name: ((broker_name))
+          script_path: /var/vcap/jobs/cf-redis-broker/bin/health_check.sh
+        name: broker_0
+        port: 12350
+        registration_interval: 10s
+        tags:
+          component: redis-broker
+          env: production
+        uris:
+        - ((broker_name)).((system_domain))
+  jobs:
+  - name: cf-redis-broker
+    release: cf-redis
+  - name: route_registrar
+    release: routing
+  - name: syslog-configurator
+    release: cf-redis
+  - name: metron_agent
+    release: loggregator
+    properties:
+      metron_agent:
+        deployment: ((deployment_name))
+      loggregator:
+        tls:
+          ca_cert: ((loggregator_root_cert))
+          metron:
+            cert: ((loggregator_client_cert))
+            key: ((loggregator_client_private_key))
+  - name: consul_agent
+    release: consul
+    consumes:
+      consul_common: {from: consul_common_link, deployment: "((cf_deployment_name))"}
+      consul_client: {from: consul_client_link, deployment: "((cf_deployment_name))"}
+      consul_server: nil
+    provides: {}
+- instances: 3
+  name: dedicated-node
+  azs: [((default_az))]
+  vm_type: ((default_vm_type))
+  networks:
+  - name: ((default_network))
+    static_ips: ((dedicated_nodes_ips))
+  persistent_disk_type: ((default_persistent_disk_type))
+  stemcell: default
+  jobs:
+  - name: dedicated-node
+    release: cf-redis
+  - name: syslog-configurator
+    release: cf-redis
+  - name: metron_agent
+    release: loggregator
+    properties:
+      metron_agent:
+        deployment: ((deployment_name))
+      loggregator:
+        tls:
+          ca_cert: ((loggregator_root_cert))
+          metron:
+            cert: ((loggregator_client_cert))
+            key: ((loggregator_client_private_key))
+  - name: consul_agent
+    release: consul
+    consumes:
+      consul_common: {from: consul_common_link, deployment: "((cf_deployment_name))"}
+      consul_client: {from: consul_client_link, deployment: "((cf_deployment_name))"}
+      consul_server: nil
+    provides: {}
+- instances: 1
+  name: broker-registrar
+  azs: [((default_az))]
+  vm_type: ((default_vm_type))
+  stemcell: default
+  lifecycle: errand
+  networks:
+  - name: ((default_network))
+  properties:
+    broker:
+      host: ((broker_name)).((system_domain))
+      name: redis
+      username: ((broker_username))
+      password: ((broker_password))
+  jobs:
+  - name: broker-registrar
+    release: cf-redis
+- instances: 1
+  lifecycle: errand
+  name: broker-deregistrar
+  azs: [((default_az))]
+  vm_type: ((default_vm_type))
+  stemcell: default
+  networks:
+  - name: ((default_network))
+  properties:
+    broker:
+      host: ((broker_name)).((system_domain))
+      name: redis
+      password: ((broker_password))
+      username: ((broker_username))
+  jobs:
+  - name: broker-deregistrar
+    release: cf-redis
+- instances: 1
+  lifecycle: errand
+  name: smoke-tests
+  azs: [((default_az))]
+  vm_type: ((default_vm_type))
+  stemcell: default
+  networks:
+  - name: ((default_network))
+  properties:
+    retry:
+      backoff: linear
+      baseline_interval_milliseconds: 1000
+      max_attempts: 10
+  jobs:
+  - name: smoke-tests
+    release: cf-redis
+
+properties:
+  broker:
+    host: ((broker_name)).((system_domain))
+    name: redis
+    password: ((broker_password))
+    username: ((broker_username))
+  cf:
+    admin_username: ((cf_username))
+    admin_password: ((cf_password))
+    api_url: https://api.((system_domain))
+    apps_domain: ((apps_domain))
+    system_domain: ((system_domain))
+  loggregator:
+    etcd:
+      machines: ((etcd_machines_ips))
+  redis:
+    agent:
+      backend_port: 54321
+    bg_save_command: yetanotherrandomstring
+    broker:
+      auth:
+        password: ((broker_password))
+        username: ((broker_username))
+      backend_port: 12345
+      dedicated_nodes: ((dedicated_nodes_ips))
+      dedicated_vm_plan_id: ((dedicated_vm_plan_id))
+      enable_service_access: true
+      host: ((broker_ip))
+      name: redis
+      network: ((default_network))
+      route_name: ((broker_name))
+      service_id: ((service_id))
+      service_instance_limit: 5
+      service_name: p-redis
+      shared_vm_plan_id: ((shared_vm_plan_id))
+      subdomain: ((broker_name))
+    config_command: configalias
+    host: ((broker_ip))
+    maxmemory: 262144000
+    save_command: anotherrandomstring
+  syslog_aggregator:
+    address: 127.0.0.1
+    port: 1234
+
+releases:
+- name: cf-redis
+  version: latest
+- name: routing
+  version: 0.143.0
+- name: loggregator
+  version: 89
+- name: consul
+  version: '170'
+
+stemcells:
+- alias: default
+  os: ((stemcell_os))
+  version: "((stemcell_version))"
+
+update:
+  canaries: 1
+  canary_watch_time: 30000-180000
+  max_in_flight: 6
+  update_watch_time: 30000-180000
