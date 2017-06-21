@@ -17,10 +17,10 @@ check_args() {
 }
 
 export_bosh_ca_cert_path() {
-  if [ -n "$BOSH_CA_CERT" ]
+  if [ -n "$BOSH_CERT" ]
   then
     local path="$(mktemp -d)/bosh.crt"
-    echo -e "$BOSH_CA_CERT" > $path
+    echo -e "$BOSH_CERT" > $path
     chmod 400 $path
     export BOSH_CA_CERT_PATH=$path
   fi
