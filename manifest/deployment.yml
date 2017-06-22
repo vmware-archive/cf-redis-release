@@ -186,10 +186,6 @@ releases:
   version: latest
 - name: routing
   version: 0.157.0
-- name: loggregator
-  version: 89
-- name: consul
-  version: '170'
 
 stemcells:
 - alias: default
