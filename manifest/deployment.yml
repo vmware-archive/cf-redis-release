@@ -14,11 +14,6 @@ instance_groups:
   stemcell: default
   persistent_disk_type: ((default_persistent_disk_type))
   properties:
-    nats:
-      machines: ((nats_machines_ips))
-      password: ((nats_password))
-      port: 4222
-      user: nats
     route_registrar:
       routes:
       - health_check:
@@ -37,6 +32,8 @@ instance_groups:
     release: cf-redis
   - name: route_registrar
     release: routing
+    consumes:
+      nats: {from: nats, deployment: "((cf_deployment_name))"}
   - name: syslog-configurator
     release: cf-redis
   - name: metron_agent
@@ -188,7 +185,7 @@ releases:
 - name: cf-redis
   version: latest
 - name: routing
-  version: 0.143.0
+  version: 0.157.0
 - name: loggregator
   version: 89
 - name: consul
