@@ -22,7 +22,13 @@ packages:
 - redis
 
 provides:
-- {name: redis_broker, type: redis_broker}
+- name: redis_broker
+  type: redis_broker
+  properties:
+  - redis.broker.name
+  - redis.broker.nginx.port
+  - redis.broker.auth.username
+  - redis.broker.auth.password
 
 properties:
   service-backup.source_folder:
