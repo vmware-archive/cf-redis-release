@@ -6,3 +6,4 @@ blobstore:
   options:
     bucket_name: redis-broker-bosh-release-blobs
     region: us-east-1
+    credentials_source: env_or_profile
