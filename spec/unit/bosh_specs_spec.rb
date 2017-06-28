@@ -12,6 +12,12 @@ describe 'bosh specs' do
       expected_link = {
         'name' => 'redis_broker',
         'type' => 'redis_broker',
+        'properties' => [
+          'redis.broker.name',
+          'redis.broker.nginx.port',
+          'redis.broker.auth.username',
+          'redis.broker.auth.password'
+        ]
       }
 
       expect(subject['provides']).to include(expected_link)
