@@ -8,8 +8,6 @@ instance_groups:
   azs: [((default_az))]
   networks:
   - name: ((default_network))
-    static_ips:
-    - ((broker_ip))
   vm_type: ((default_vm_type))
   stemcell: default
   persistent_disk_type: ((default_persistent_disk_type))
@@ -164,7 +162,6 @@ properties:
       dedicated_nodes: ((dedicated_nodes_ips))
       dedicated_vm_plan_id: ((dedicated_vm_plan_id))
       enable_service_access: true
-      host: ((broker_ip))
       name: redis
       network: ((default_network))
       route_name: ((broker_name))
@@ -174,7 +171,6 @@ properties:
       shared_vm_plan_id: ((shared_vm_plan_id))
       subdomain: ((broker_name))
     config_command: configalias
-    host: ((broker_ip))
     maxmemory: 262144000
     save_command: anotherrandomstring
   syslog_aggregator:
