@@ -1,0 +1,10 @@
+---
+director_uuid: # from bosh director
+deployment_name: cf-redis
+default_az: z1
+default_network: default
+broker_ip: 10.244.0.34
+default_vm_type: default
+default_persistent_disk_type: default
+broker_name: cf-redis-broker
+system_domain: bosh-lite.com

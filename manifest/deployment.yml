@@ -34,24 +34,6 @@ instance_groups:
       nats: {from: nats, deployment: "((cf_deployment_name))"}
   - name: syslog-configurator
     release: cf-redis
-  - name: metron_agent
-    release: loggregator
-    properties:
-      metron_agent:
-        deployment: ((deployment_name))
-      loggregator:
-        tls:
-          ca_cert: ((loggregator_root_cert))
-          metron:
-            cert: ((loggregator_client_cert))
-            key: ((loggregator_client_private_key))
-  - name: consul_agent
-    release: consul
-    consumes:
-      consul_common: {from: consul_common_link, deployment: "((cf_deployment_name))"}
-      consul_client: {from: consul_client_link, deployment: "((cf_deployment_name))"}
-      consul_server: nil
-    provides: {}
 - instances: 3
   name: dedicated-node
   azs: [((default_az))]
@@ -66,24 +48,6 @@ instance_groups:
     release: cf-redis
   - name: syslog-configurator
     release: cf-redis
-  - name: metron_agent
-    release: loggregator
-    properties:
-      metron_agent:
-        deployment: ((deployment_name))
-      loggregator:
-        tls:
-          ca_cert: ((loggregator_root_cert))
-          metron:
-            cert: ((loggregator_client_cert))
-            key: ((loggregator_client_private_key))
-  - name: consul_agent
-    release: consul
-    consumes:
-      consul_common: {from: consul_common_link, deployment: "((cf_deployment_name))"}
-      consul_client: {from: consul_client_link, deployment: "((cf_deployment_name))"}
-      consul_server: nil
-    provides: {}
 - instances: 1
   name: broker-registrar
   azs: [((default_az))]
@@ -147,9 +111,6 @@ properties:
     api_url: https://api.((system_domain))
     apps_domain: ((apps_domain))
     system_domain: ((system_domain))
-  loggregator:
-    etcd:
-      machines: ((etcd_machines_ips))
   redis:
     agent:
       backend_port: 54321
