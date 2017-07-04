@@ -57,7 +57,7 @@ describe 'metrics', :skip_metrics => true do
 
     expect(metric).to match(/value:\d/)
     expect(metric).to include("origin:\"#{@origin_tag}\"")
-    expect(metric).to include('deployment:"cf-redis"')
+    expect(metric).to include(%Q{deployment:"#{bosh_manifest.deployment_name}"})
     expect(metric).to include('eventType:ValueMetric')
     expect(metric).to match(/timestamp:\d/)
     expect(metric).to match(/index:"[\dabcdef-]*"/)
