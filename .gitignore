@@ -11,3 +11,4 @@ rspec.xml
 /releases/*.tgz
 vendor/*
 .envrc
+secrets/
