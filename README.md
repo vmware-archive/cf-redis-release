@@ -3,145 +3,48 @@
 This repository contains a BOSH release for a Cloud Foundry Redis service
 broker.
 
-## Prepare Workspace
-
-Clone the `cf-redis-release` repo into `~/workspace` using:
-
-```
+```shell
 git clone https://github.com/pivotal-cf/cf-redis-release ~/workspace/cf-redis-release
-~/workspace/cf-redis-release/scripts/update-release
+cd ~/workspace/cf-redis-release
+git submodule update --init --recursive
 ```
 
-The `routing-release` is a dependent release of `cf-redis-release`, clone it
-using:
+## Deployment dependencies
 
-```
-git clone https://github.com/cloudfoundry-incubator/routing-release ~/workspace/routing-release
-```
+1. a bosh director
+1. a cloud foundry deployment
+1. routing release `0.157.0` (`bosh upload-release http://bosh.io/d/github.com/cloudfoundry-incubator/cf-routing-release?v=0.157.0`)
+1. fill out a `.envrc` file (using the `.envrc.template`)
 
-## Deploying
+## Deployment
 
-Modify the sample stubs in `templates/sample_stubs` to suit your deployment environment.
+Populate a vars file (using `manifest/vars-lite.yml` as a template), save it to
+`secrets/vars.yml`. You will need values from both your cloud-config and secrets
+from your cf-deployment.
 
-Run the `scripts/generate-deployment-manifest` script to generate a deployment manifest. Change the <INFRA> to `aws`, `vsphere` or `warden`.
+To deploy:
 
-```
-./scripts/generate-deployment-manifest templates/sample_stubs/infrastructure-<INFRA>.yml templates/sample_stubs/meta.yml > manifests/cf-redis-custom.yml
-```
-
-Run the `scripts/deploy-release` script. Examples as follows:
-
-```
-# Deploying locally to BOSH lite
-export BOSH_MANIFEST=manifests/cf-redis-custom.yml
-./scripts/deploy-release lite
-
-# Deploying to a different BOSH director
-export BOSH_MANIFEST=manifests/cf-redis-custom.yml
-./scripts/deploy-release my-bosh-alias
+```shell
+bosh upload-stemcell https://s3.amazonaws.com/bosh-core-stemcells/warden/bosh-stemcell-3363.27-warden-boshlite-ubuntu-trusty-go_agent.tgz
+bosh create-release
+bosh upload-release
+bosh deploy --vars-file secrets/vars.yml manifest/deployment.yml
 ```
 
-Note that the argument is a BOSH alias, which you must have configured prior to running the script. E.G.
+## Network Configuration
 
-```
-bosh target https://192.168.50.4:25555 lite
-```
+The following ports and ranges are used in this service:
 
-## Configuration
-
-### BOSH Lite
-
-You can generate an example bosh-lite deployment manifest as follows:
-
-```
-bosh target lite
-./scripts/generate-deployment-manifest warden templates/sample_stubs/infrastructure-warden.yml > cf-redis-lite.yml
-```
-
-- You can increase the count of the `dedicated-vm` plan nodes from the example of `1`
-
-```
-# templates/sample_stubs/sample_warden_stub.yml
-
-properties:
-  template_only:
-    dedicated_plan:
-      instance_count: 1
-```
-Increase the `instance_count: 1` to the value you want.
-
-### Properties
-
-All required properties are listed in the `templates/sample_stubs/sample_*_stub.yml` files. There are a number of other optional properties. Descriptions for all properties can be found in the relevant `spec` files for each job.
-
-### Broker Registrar
-By default, the broker registrar will enable access to your deployed service to
-all orgs. You can specify which orgs you wish to grant access to by adding the
-following configuration to your manifest:
-
-```
-properties:
-  redis:
-    broker:
-      enable_service_access: true
-      service_access_orgs:
-      - dev_org
-      - prod_org
-```
-
-### AWS
-
-#### Subnet ACL
-
-Allow the following:
- * Destination port 80 access to the service broker from the cloud controllers
- * Destination port 6379 access to all dedicated nodes from the DEA network(s)
- * Destination ports 32768 to 61000 on the service broker from the DEA network(s). This is only required for the shared service plan.
-
-## Deployment Steps
-
- 1. depending on your IAAS, pick one of the sample Spiff stubs in `templates/sample_stubs/`
- 1. adjust the spiff stub based on your environment, i.e. replace all PLACEHOLDERs with actual values (see above details for the Subnet ACL)
- 1. target your bosh director, e.g. `bosh target https://192.168.50.4:25555`
- 1. create a deployment manifest using the `scripts/generate_deployment_manifest` script, e.g. `./scripts/generate_deployment_manifest warden templates/sample_stubs/sample_warden_stub.yml > cf-redis.yml`
- 1. set bosh deployment using the new manifest, i.e. `bosh deployment cf-redis.yml`
- 1. upload a cf-redis release, e.g. `bosh upload release releases/cf-redis/cf-redis-[version].yml`
- 1. `bosh deploy`
- 1. register service broker by runing `bosh run errand broker-registrar`
- 1. optionally, run smoke tests to verify your deployment, i.e. `bosh run errand smoke-tests`
-
-## BOSH Links
-
-BOSH supports sharing of information between deployments via
-[BOSH Links](https://bosh.io/docs/links.html). This release exposes the redis
-`CONFIG` command alias for both dedicated and shared instances. They are
-consumed by:
-
-```yaml
-consumes:
-- name: redis_broker
-  type: redis
-- name: dedicated_node
-  type: redis
-```
+- broker vm, port 12350: access to the broker from the cloud controllers
+- broker vm, ports 32768-61000: on the service broker from the Diego Cell and
+Diego Brain network(s). This is only required for the shared service plan
+- dedicated node, port 6379: access to all dedicated nodes from the Diego Cell
+and Diego Brain network(s)
 
 ## Testing
 
-To test first deploy locally using the Bosh-lite instructions above.
-
-### System Tests
-
-To run the system tests locally, just run: `BOSH_MANIFEST=manifests/cf-redis-lite.yml ./scripts/system-tests`.
-
-To run the system tests in docker, just run: `BOSH_MANIFEST=manifests/cf-redis-lite.yml ./scripts/system-tests-in-docker`.
-
-### Unit Tests
-
-The unit tests are run along with the system tests above, you can run them independently also:
-
-To run the unit tests locally, just run: `bundle exec rake spec:unit`.
-
-You can run it from docker by using `./scripts/from-docker bundle exec rake spec:unit`.
+1. `bundle install`
+1. `bundle exec rspec spec`
 
 ## Related Documentation
 
