@@ -8,3 +8,16 @@ default_vm_type: default
 default_persistent_disk_type: default
 broker_name: cf-redis-broker
 system_domain: bosh-lite.com
+apps_domain: bosh-lite.com
+service_name: cf-redis
+service_id: 87fcad4e-609a-11e7-ac39-53647042408a
+shared_vm_plan_id: d5872a1c-609a-11e7-8054-4f7cb0e27a24
+dedicated_vm_plan_id: d5f8b7e0-609a-11e7-b47f-83954dac1e41
+dedicated_nodes_ips: [] # 3x static IPs in default_network from cloud-config
+stemcell_os: ubuntu-trusty
+stemcell_version: latest
+cf_deployment_name: cf
+broker_username: broker
+broker_password: # provide a password
+cf_username: admin
+cf_password: admin

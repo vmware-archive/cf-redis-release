@@ -59,7 +59,7 @@ instance_groups:
   properties:
     broker:
       host: ((broker_name)).((system_domain))
-      name: redis
+      name: ((broker_name))
       username: ((broker_username))
       password: ((broker_password))
   jobs:
@@ -76,7 +76,7 @@ instance_groups:
   properties:
     broker:
       host: ((broker_name)).((system_domain))
-      name: redis
+      name: ((broker_name))
       password: ((broker_password))
       username: ((broker_username))
   jobs:
@@ -102,7 +102,7 @@ instance_groups:
 properties:
   broker:
     host: ((broker_name)).((system_domain))
-    name: redis
+    name: ((broker_name))
     password: ((broker_password))
     username: ((broker_username))
   cf:
@@ -123,12 +123,12 @@ properties:
       dedicated_nodes: ((dedicated_nodes_ips))
       dedicated_vm_plan_id: ((dedicated_vm_plan_id))
       enable_service_access: true
-      name: redis
+      name: ((broker_name))
       network: ((default_network))
       route_name: ((broker_name))
       service_id: ((service_id))
       service_instance_limit: 5
-      service_name: p-redis
+      service_name: ((service_name))
       shared_vm_plan_id: ((shared_vm_plan_id))
       subdomain: ((broker_name))
     config_command: configalias
