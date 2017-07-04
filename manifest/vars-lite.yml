@@ -1,23 +1,25 @@
 ---
-director_uuid: # from bosh director
 deployment_name: cf-redis
-default_az: z1
-default_network: default
-broker_ip: 10.244.0.34
-default_vm_type: default
-default_persistent_disk_type: default
 broker_name: cf-redis-broker
+service_name: p-redis
+dedicated_vm_plan_id:  # generate uuid, i.e. `uuidgen`
+service_id:  # generate uuid, i.e. `uuidgen`
+shared_vm_plan_id:  # generate uuid, i.e. `uuidgen`
+dedicated_node_count: 2
+dedicated_nodes_ips: # add a list of static ips from `default_network` in your
+                     # with length `dedicated_node_count`
+director_uuid:  # UUID from `bosh environment`
+default_vm_type:  # some vm_type from your cloud-config
+default_persistent_disk_type: # some disk_type from your cloud-config
+default_network:  # some network from your cloud-config
+default_az:  # some az from your cloud-config
+stemcell_os: ubuntu-trusty
+stemcell_version: 3363.latest
+cf_deployment_name: cf
 system_domain: bosh-lite.com
 apps_domain: bosh-lite.com
-service_name: cf-redis
-service_id: 87fcad4e-609a-11e7-ac39-53647042408a
-shared_vm_plan_id: d5872a1c-609a-11e7-8054-4f7cb0e27a24
-dedicated_vm_plan_id: d5f8b7e0-609a-11e7-b47f-83954dac1e41
-dedicated_nodes_ips: [] # 3x static IPs in default_network from cloud-config
-stemcell_os: ubuntu-trusty
-stemcell_version: latest
-cf_deployment_name: cf
-broker_username: broker
-broker_password: # provide a password
+broker_password:  # make one up
+broker_username:  # make one up
 cf_username: admin
-cf_password: admin
+cf_password:  # `bosh int secrets/cf-creds.yml --path /cf_admin_password` where
+              # `secrets/cf-creds.yml` is cf's vars-store
