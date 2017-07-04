@@ -34,7 +34,7 @@ instance_groups:
       nats: {from: nats, deployment: "((cf_deployment_name))"}
   - name: syslog-configurator
     release: cf-redis
-- instances: 3
+- instances: ((dedicated_node_count))
   name: dedicated-node
   azs: [((default_az))]
   vm_type: ((default_vm_type))
