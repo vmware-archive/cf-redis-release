@@ -14,7 +14,8 @@ git submodule update --init --recursive
 1. a bosh director
 1. a cloud foundry deployment
 1. routing release `0.157.0` (`bosh upload-release http://bosh.io/d/github.com/cloudfoundry-incubator/cf-routing-release?v=0.157.0`)
-1. fill out a `.envrc` file (using the `.envrc.template`)
+1. fill out the "bosh v2 CLI" of `.envrc.template` file and save as .envrc
+1. `direnv allow`
 
 ## Deployment
 
