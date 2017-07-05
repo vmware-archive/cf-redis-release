@@ -4,7 +4,7 @@ ruby '2.4.0'
 
 gem 'aws-sdk'
 gem 'bosh_cli'
-gem 'redis'
+gem 'redis', '3.3.3'
 gem 'rake'
 gem 'process_helper'
 
