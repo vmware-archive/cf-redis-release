@@ -11,11 +11,18 @@ git submodule update --init --recursive
 
 ## Deployment dependencies
 
+1. bosh2 CLI (you may use the old CLI but instructions will use the new one)
+1. `direnv` (or set envs yourself)
 1. a bosh director
 1. a cloud foundry deployment
-1. routing release `0.157.0` (`bosh upload-release http://bosh.io/d/github.com/cloudfoundry-incubator/cf-routing-release?v=0.157.0`)
-1. fill out the "bosh v2 CLI" of `.envrc.template` file and save as .envrc
+1. fill out the following envs of the `.envrc.template` file and save as .envrc:
+   - BOSH_ENVIRONMENT
+   - BOSH_CA_CERT
+   - BOSH_CLIENT
+   - BOSH_CLIENT_SECRET
+   - BOSH_DEPLOYMENT
 1. `direnv allow`
+1. routing release `0.157.0` (`bosh upload-release http://bosh.io/d/github.com/cloudfoundry-incubator/cf-routing-release?v=0.157.0`)
 
 ## Deployment
 
