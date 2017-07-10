@@ -1,3 +1,4 @@
+require 'json'
 require 'yaml'
 require 'bosh/template/renderer'
 require 'helpers/bosh_template_render_context'
