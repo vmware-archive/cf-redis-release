@@ -1,6 +1,6 @@
 require 'yaml'
 require 'bosh/template/renderer'
-require 'helpers/bosh_emulator'
+require 'helpers/bosh_template_render_context'
 
 RSpec.describe 'smoke-tests config' do
   TEMPLATE_PATH = 'jobs/smoke-tests/templates/config.json.erb'
