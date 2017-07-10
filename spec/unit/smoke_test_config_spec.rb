@@ -36,8 +36,6 @@ RSpec.describe 'smoke-tests config' do
         'admin_user' => 'a-username',
         'admin_password' => 'a-password',
         'service_name' => 'p-redis',
-        'org_name' => 'redis-smoke-test-org-v429',
-        'space_name' => 'redis-smoke-test-space-v429',
         'plan_names' => [],
         'retry' => {
           'max_attempts' => 10,
