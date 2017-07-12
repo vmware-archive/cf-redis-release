@@ -1,0 +1,80 @@
+name: cf-redis
+version: 430.1.0
+commit_hash: 79ef223
+uncommitted_changes: false
+jobs:
+- name: broker-deregistrar
+  version: dd5fbe93b23aa21a61b0edfbb25b3851f44ed5b3d41b4e564a9959b77aeafe0e
+  fingerprint: dd5fbe93b23aa21a61b0edfbb25b3851f44ed5b3d41b4e564a9959b77aeafe0e
+  sha1: sha256:78db653ac9240100cfab0e20bf77e0a9c354478a2c4c8bc548c8b477c6fba529
+- name: broker-registrar
+  version: 7a32aa5a00459a32e83a209d22198d5bfdc746b4b25f4e6acd1b74a2e60ef100
+  fingerprint: 7a32aa5a00459a32e83a209d22198d5bfdc746b4b25f4e6acd1b74a2e60ef100
+  sha1: sha256:e53d03e38a026eaa6d0175fbf7cc73b468f50c3980c8ad677783da73ce6d293d
+- name: cf-redis-broker
+  version: 82fc7a07c3adfbb99558a5a6ed1a8049dac0178c95f96913c87dc0cd4054b659
+  fingerprint: 82fc7a07c3adfbb99558a5a6ed1a8049dac0178c95f96913c87dc0cd4054b659
+  sha1: sha256:25d77b9126dd309e88a39a98208bd1ed7f71b80a966de97b7068e3d057c441b7
+- name: dedicated-node
+  version: 46b948ee02805d60d58cf221f0a0c6f802ab90fd8a6d541078c1baa22de2f494
+  fingerprint: 46b948ee02805d60d58cf221f0a0c6f802ab90fd8a6d541078c1baa22de2f494
+  sha1: sha256:cbe20f67cd620a442e0c003ca6755e21613d4b4601fecbbf2f3f1c6052a1e079
+- name: smoke-tests
+  version: e0287b76603418645fe0534f061ee809cfcbbef99589655fc4323309d6dd1d9e
+  fingerprint: e0287b76603418645fe0534f061ee809cfcbbef99589655fc4323309d6dd1d9e
+  sha1: sha256:abdcca7b6922fd03d37bd298427991d8600602c68422f83a85bf9a847c6b825d
+- name: syslog-configurator
+  version: 686092fc11c21e1964d1799f23d8a994c2919ed34c30f1cc0641f3a694c58132
+  fingerprint: 686092fc11c21e1964d1799f23d8a994c2919ed34c30f1cc0641f3a694c58132
+  sha1: sha256:e23de0e81ef3e8f5aa4329ca93b4b1c975cf98f698c09b34eac5f31f8c8c78ac
+packages:
+- name: cf-cli
+  version: f4b24c093a4ec3daa0f6bf6fcf2b89722f3985f0f8b0c3db58949dae3ff589e6
+  fingerprint: f4b24c093a4ec3daa0f6bf6fcf2b89722f3985f0f8b0c3db58949dae3ff589e6
+  sha1: sha256:e8e781f77e70208b3d35695646e9fbb1837206de31e107bfc1edafc26b61ed8f
+  dependencies: []
+- name: cf-redis-broker
+  version: 490eeeef28fa5c4acaaaa4de0412e3cf8a0cf69d236e483eef12e9e795fe55cc
+  fingerprint: 490eeeef28fa5c4acaaaa4de0412e3cf8a0cf69d236e483eef12e9e795fe55cc
+  sha1: sha256:b5b773033a61d6ccd944b57be4d658232e592df563058d6ad6886dc4973a78a5
+  dependencies:
+  - go
+- name: cf-redis-nginx
+  version: 88ffa9dd245a64ef2bdc378fe3ac70c6b395e5b7abccf41a8b783a06210b8b0d
+  fingerprint: 88ffa9dd245a64ef2bdc378fe3ac70c6b395e5b7abccf41a8b783a06210b8b0d
+  sha1: sha256:bc6eacb0df7ae766e319d4ac9fc22cc21cd7186b43a776d53ac68807e0c48c51
+  dependencies: []
+- name: cf-redis-smoke-tests
+  version: 8538aec975020614bb7c02c7e64e014043fc686531e79ee8a9b296081f0f309a
+  fingerprint: 8538aec975020614bb7c02c7e64e014043fc686531e79ee8a9b296081f0f309a
+  sha1: sha256:e6b857d574501c75c0a3c5d0ef03ef49143839646f853ac3eb140e43c2a201b6
+  dependencies: []
+- name: ginkgo
+  version: 336346b3c539dce9fc3058493a8b844e384e22c6472db05bac30d5277f4ebe79
+  fingerprint: 336346b3c539dce9fc3058493a8b844e384e22c6472db05bac30d5277f4ebe79
+  sha1: sha256:9e3727b1a4ea462ea719e58dada38e61d67f40848714ad681b59124a11d01347
+  dependencies: []
+- name: go
+  version: 13e441264f3ef4ea08c8a788e78d7c1932a25ae255bf12035273052217d4811e
+  fingerprint: 13e441264f3ef4ea08c8a788e78d7c1932a25ae255bf12035273052217d4811e
+  sha1: sha256:d6073e1231558595947857522b98eb7fb7be8e405d814a74eb7f4df56b9e5c0f
+  dependencies: []
+- name: redis
+  version: 0ce8eb45c743f3e37b3ee7ecaf228cd1f0e76c016d042419536d16735cae963a
+  fingerprint: 0ce8eb45c743f3e37b3ee7ecaf228cd1f0e76c016d042419536d16735cae963a
+  sha1: sha256:7be8907d4f2fab8cf3e38ece51d6676c9904d08c7b51fba705c4450536f1267f
+  dependencies: []
+- name: redis-common
+  version: b16afa494f94b52288c58dcbafc0c33b602b1f6d55a9f092538f9bd051b29fc7
+  fingerprint: b16afa494f94b52288c58dcbafc0c33b602b1f6d55a9f092538f9bd051b29fc7
+  sha1: sha256:9f3161eb75f8dab555d8b8e67755b58490ac6a0ed23758ea868e3852e15246f7
+  dependencies: []
+- name: ruby
+  version: 9ee4cb0b851af160be3a95e2069ea08cda9b462640f1c770d988beaded60ca7e
+  fingerprint: 9ee4cb0b851af160be3a95e2069ea08cda9b462640f1c770d988beaded60ca7e
+  sha1: sha256:a7f4b458533fb529871f865c61bb59fdb5c72e24e76832da9135b07a8ac075fb
+  dependencies: []
+license:
+  version: 6e6b997fae69a730661aef793be8b75311da3254e147c5e7dc71447df4c72ba1
+  fingerprint: 6e6b997fae69a730661aef793be8b75311da3254e147c5e7dc71447df4c72ba1
+  sha1: sha256:61c5e03d6a7a352d612e90a50bc2bf04a4642928d715a3edfb27d754f1aaed0c
