@@ -9,7 +9,7 @@ case $1 in
   start)
     mkdir -p $(dirname $PIDFILE)
     echo $$ > $PIDFILE
-    while true; do sleep 10000; done
+    while true; do sleep 100; done
     ;;
 
   stop)
