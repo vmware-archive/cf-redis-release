@@ -84,6 +84,10 @@ module Helpers
       BOSH::SSH.new(bosh_manifest.deployment_name, instance_group, instance_id)
     end
 
+    def syslog_endpoint
+      ENV.fetch('SYSLOG_TEST_ENDPOINT')
+    end
+
     # net-ssh makes a deprecated call to `timeout`. We ignore these messages
     # because they pollute logs.
     # After using the filtered stderr we ensure to reassign the original stderr

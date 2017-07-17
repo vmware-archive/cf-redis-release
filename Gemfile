@@ -15,6 +15,7 @@ group :test do
   gem 'pry-byebug'
   gem 'rspec-shell-expectations'
   gem 'rspec-instafail'
+  gem 'rspec-eventually'
 
   gem 'prof', '0.35.0'
 end

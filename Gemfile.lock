@@ -292,6 +292,7 @@ GEM
       rspec-mocks (~> 3.6.0)
     rspec-core (3.6.0)
       rspec-support (~> 3.6.0)
+    rspec-eventually (0.2.0)
     rspec-expectations (3.6.0)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.6.0)
@@ -360,6 +361,7 @@ DEPENDENCIES
   rake
   redis (= 3.3.3)
   rspec
+  rspec-eventually
   rspec-instafail
   rspec-shell-expectations
 
