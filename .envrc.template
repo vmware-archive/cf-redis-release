@@ -38,3 +38,6 @@ export BOSH_MANIFEST=/path/to/bosh/manifest
 # export BOSH_GW_HOST=$JUMPBOX_HOST
 # export BOSH_GW_USER=$JUMPBOX_USERNAME
 # export BOSH_GW_PRIVATE_KEY=$JUMPBOX_PRIVATE_KEY_PATH
+
+# log - forwarding tests
+# export SYSLOG_TEST_ENDPOINT=

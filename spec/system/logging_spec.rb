@@ -1,8 +1,22 @@
 require 'logger'
 require 'system_spec_helper'
+require 'rspec/eventually'
 
 describe 'logging' do
   SYSLOG_FILE = "/var/log/syslog"
+
+  describe 'syslog-forwarding' do
+    before(:all) do
+      @syslog_endpoint = syslog_endpoint
+      drain_gosyslogd_endpoint(@syslog_endpoint)
+      broker_ssh.execute("sudo /var/vcap/bosh/bin/monit restart #{Helpers::Environment::BROKER_JOB_NAME}")
+      expect(broker_ssh.wait_for_process_start(Helpers::Environment::BROKER_JOB_NAME)).to be true
+    end
+
+    fit 'forwards logs' do
+      expect { get_line_from_gosyslogd_endpoint(@syslog_endpoint) }.to eventually(include 'cf-redis-broker').within 5
+    end
+  end
 
   describe 'redis broker' do
     def service
