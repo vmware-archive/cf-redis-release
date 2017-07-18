@@ -3,6 +3,7 @@ require 'prof/environment/cloud_foundry'
 require 'support/redis_service_broker'
 require 'support/redis_service_client_builder'
 require 'helpers/bosh_cli_wrapper'
+require 'helpers/utilities'
 
 class FilteredStderr < StringIO
   def write value
@@ -44,16 +45,22 @@ module Helpers
           options[:ssh_gateway_password] = 'c1oudc0w'
         end
 
-        if ENV.key?('JUMPBOX_HOST')
-          options[:ssh_gateway_host]        = parse_host(ENV['JUMPBOX_HOST'])
-          options[:ssh_gateway_username]    = ENV.fetch('JUMPBOX_USERNAME')
-          options[:ssh_gateway_password]    = ENV['JUMPBOX_PASSWORD']         if ENV.key?('JUMPBOX_PASSWORD')
-          options[:ssh_gateway_private_key] = ENV['JUMPBOX_PRIVATE_KEY_PATH'] if ENV.key?('JUMPBOX_PRIVATE_KEY_PATH')
-        end
+        options.merge! get_jumpbox_gateway_options
 
         options[:use_proxy] = ENV['USE_PROXY'] == 'true'
         Prof::Environment::CloudFoundry.new(options)
       end
+    end
+
+    def get_jumpbox_gateway_options
+      options = {}
+      if ENV.key?('JUMPBOX_HOST')
+        options[:ssh_gateway_host]        = parse_host(ENV['JUMPBOX_HOST'])
+        options[:ssh_gateway_username]    = ENV.fetch('JUMPBOX_USERNAME')
+        options[:ssh_gateway_password]    = ENV['JUMPBOX_PASSWORD']         if ENV.key?('JUMPBOX_PASSWORD')
+        options[:ssh_gateway_private_key] = ENV['JUMPBOX_PRIVATE_KEY_PATH'] if ENV.key?('JUMPBOX_PRIVATE_KEY_PATH')
+      end
+      options
     end
 
     def redis_service_broker
@@ -85,8 +92,10 @@ module Helpers
       BOSH::SSH.new(bosh_manifest.deployment_name, instance_group, instance_id)
     end
 
-    def syslog_endpoint
-      ENV.fetch('SYSLOG_TEST_ENDPOINT')
+    def get_syslog_endpoint_helper
+      syslog_endpoint = URI.parse(ENV.fetch('SYSLOG_TEST_ENDPOINT'))
+      gateway_executor = Utilities::GatewayExecutor.new(syslog_endpoint.host, syslog_endpoint.port, get_jumpbox_gateway_options)
+      Utilities::SyslogEndpointHelper.new(syslog_endpoint.host, syslog_endpoint.port, gateway_executor)
     end
 
     # net-ssh makes a deprecated call to `timeout`. We ignore these messages

@@ -6,9 +6,10 @@ describe 'logging' do
   SYSLOG_FILE = "/var/log/syslog"
 
   describe 'syslog-forwarding' do
+    let(:syslog_helper) { get_syslog_endpoint_helper }
+
     before do
-      @syslog_endpoint = syslog_endpoint
-      drain_gosyslogd_endpoint(@syslog_endpoint)
+      syslog_helper.drain
     end
 
     context 'cf-redis-broker' do
@@ -18,7 +19,7 @@ describe 'logging' do
       end
 
       it 'forwards logs' do
-        expect { get_line_from_gosyslogd_endpoint(@syslog_endpoint) }.to eventually(include Helpers::Environment::BROKER_JOB_NAME).within 5
+        expect { syslog_helper.get_line }.to eventually(include Helpers::Environment::BROKER_JOB_NAME).within 5
       end
     end
 
@@ -29,7 +30,7 @@ describe 'logging' do
       end
 
       it 'forwards logs' do
-        expect { get_line_from_gosyslogd_endpoint(@syslog_endpoint) }.to eventually(include Helpers::Environment::DEDICATED_NODE_JOB_NAME).within 5
+        expect { syslog_helper.get_line }.to eventually(include Helpers::Environment::DEDICATED_NODE_JOB_NAME).within 5
       end
     end
   end
