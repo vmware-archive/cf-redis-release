@@ -27,24 +27,59 @@ module Helpers
       log_timestamp < timestamp.to_i
     end
 
-    def get_line_from_gosyslogd_endpoint(syslog_endpoint)
-      uri = URI(syslog_endpoint)
-      Net::HTTP.get(uri).strip
+    class SyslogEndpointHelper
+      TEN_MILLISECONDS = 0.01
+      FIVE_MINUTES = 60 * 5
+
+      def initialize(syslog_host, syslog_port, gateway_executor)
+        @gateway_executor = gateway_executor
+      end
+
+      def get_line
+        @gateway_executor.exec!(Proc.new do |host, port|
+          Net::HTTP.get(URI.parse("http://#{host}:#{port}"))
+        end)
+      end
+
+      def drain
+        Timeout::timeout(FIVE_MINUTES) {
+          while true do
+            return if get_line.include? 'no logs available'
+            sleep TEN_MILLISECONDS
+          end
+        }
+      end
     end
 
-    def drain_gosyslogd_endpoint(syslog_endpoint)
-      ten_milliseconds = 0.01
-      five_minutes = 60 * 5
+    class GatewayExecutor
+      def initialize(host, port, gateway_opts = nil)
+        @host = host
+        @port = port
+        @gateway_opts = gateway_opts
+      end
 
-      Timeout::timeout(five_minutes) {
-        while true do
-          if get_line_from_gosyslogd_endpoint(syslog_endpoint).include? 'no logs available' then
-            return
+      def setup_gateway_forwarding
+        @_gateway ||= begin
+          gateway_private_key = @gateway_opts[:ssh_gateway_private_key]
+          opts = {}
+          if !gateway_private_key.nil?
+            opts[:keys] = [gateway_private_key]
+          else
+            opts[:password] = @gateway_opts[:ssh_gateway_password]
           end
-
-          sleep ten_milliseconds
+          Net::SSH::Gateway.new(
+            @gateway_opts[:ssh_gateway_host],
+            @gateway_opts[:ssh_gateway_username],
+            opts
+          )
         end
-      }
+        @_local_port ||= @_gateway.open(@host, @port)
+      end
+
+      def exec!(func)
+        return func.call(@host, @port) if @gateway_opts.nil?
+        func.call('127.0.0.1', setup_gateway_forwarding)
+      end
     end
   end
 end
