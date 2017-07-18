@@ -20,7 +20,8 @@ end
 
 module Helpers
   module Environment
-    fail "Must specify BOSH_MANIFEST environment variable" unless ENV.key?('BOSH_MANIFEST')
+    fail 'Must specify BOSH_MANIFEST environment variable' unless ENV.key?('BOSH_MANIFEST')
+    fail 'Must specify SYSLOG_TEST_ENDPOINT environment variable' unless ENV.key?('SYSLOG_TEST_ENDPOINT')
 
     BROKER_JOB_NAME = 'cf-redis-broker'
     DEDICATED_NODE_JOB_NAME = 'dedicated-node'
