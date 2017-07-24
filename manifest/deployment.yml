@@ -142,8 +142,8 @@ properties:
     maxmemory: 262144000
     save_command: anotherrandomstring
   syslog_aggregator:
-    address: 127.0.0.1
-    port: 1234
+    address: ((syslog_endpoint_host))
+    port: ((syslog_endpoint_port))
 
 releases:
 - name: cf-redis
