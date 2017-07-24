@@ -32,8 +32,15 @@ instance_groups:
     release: routing
     consumes:
       nats: {from: nats, deployment: "((cf_deployment_name))"}
-  - name: syslog-configurator
-    release: cf-redis
+  - name: syslog_forwarder
+    release: syslog-migration
+    properties:
+      syslog: ((syslog_endpoint_host))
+      port: ((syslog_endpoint_port))
+      transport: tcp
+      migration:
+        cleanup_conf_files: [05-syslog_forwarder.conf]
+
 - instances: ((dedicated_node_count))
   name: dedicated-node
   azs: [((default_az))]
@@ -143,6 +150,8 @@ releases:
   version: latest
 - name: routing
   version: 0.157.0
+- name: syslog-migration
+  version: 7
 
 stemcells:
 - alias: default

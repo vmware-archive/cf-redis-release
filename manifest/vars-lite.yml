@@ -23,3 +23,5 @@ broker_username:  # make one up
 cf_username: admin
 cf_password:  # `bosh int secrets/cf-creds.yml --path /cf_admin_password` where
               # `secrets/cf-creds.yml` is cf's vars-store
+syslog_endpoint_host: 127.0.0.1
+syslog_endpoint_port: 1234
