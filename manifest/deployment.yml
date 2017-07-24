@@ -35,11 +35,12 @@ instance_groups:
   - name: syslog_forwarder
     release: syslog-migration
     properties:
-      syslog: ((syslog_endpoint_host))
-      port: ((syslog_endpoint_port))
-      transport: tcp
-      migration:
-        cleanup_conf_files: [05-syslog_forwarder.conf]
+      syslog:
+        address: ((syslog_endpoint_host))
+        port: ((syslog_endpoint_port))
+        transport: tcp
+        migration:
+          cleanup_conf_files: [05-syslog_forwarder.conf]
 
 - instances: ((dedicated_node_count))
   name: dedicated-node
