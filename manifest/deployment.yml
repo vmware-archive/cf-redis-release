@@ -144,6 +144,7 @@ properties:
   syslog_aggregator:
     address: ((syslog_endpoint_host))
     port: ((syslog_endpoint_port))
+    transport: tcp
 
 releases:
 - name: cf-redis
