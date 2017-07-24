@@ -40,6 +40,7 @@ instance_groups:
         port: ((syslog_endpoint_port))
         transport: tcp
         migration:
+          message_format: job_index_id
           cleanup_conf_files: [05-syslog_forwarder.conf]
 
 - instances: ((dedicated_node_count))
