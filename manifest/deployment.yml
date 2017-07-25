@@ -34,7 +34,7 @@ instance_groups:
       nats: {from: nats, deployment: "((cf_deployment_name))"}
   - name: syslog_forwarder
     release: syslog-migration
-    properties:
+    properties: &syslog-configuration
       syslog:
         address: ((syslog_endpoint_host))
         port: ((syslog_endpoint_port))
@@ -57,14 +57,7 @@ instance_groups:
     release: cf-redis
   - name: syslog_forwarder
     release: syslog-migration
-    properties:
-      syslog:
-        address: ((syslog_endpoint_host))
-        port: ((syslog_endpoint_port))
-        transport: tcp
-        migration:
-          message_format: job_index_id
-          cleanup_conf_files: [05-syslog_forwarder.conf]
+    properties: *syslog-configuration
 - instances: 1
   name: broker-registrar
   azs: [((default_az))]
