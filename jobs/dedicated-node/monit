@@ -9,7 +9,7 @@ check process redis
   start program "/var/vcap/jobs/dedicated-node/bin/redis_ctl start"
   stop program "/var/vcap/jobs/dedicated-node/bin/redis_ctl stop"
   group vcap
-  depends on redis-agent, syslog-configurator
+  depends on redis-agent
 
 check process nginx
   with pidfile /var/vcap/sys/run/dedicated-node/nginx/nginx.pid

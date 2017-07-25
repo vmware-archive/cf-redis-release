@@ -55,8 +55,16 @@ instance_groups:
   jobs:
   - name: dedicated-node
     release: cf-redis
-  - name: syslog-configurator
-    release: cf-redis
+  - name: syslog_forwarder
+    release: syslog-migration
+    properties:
+      syslog:
+        address: ((syslog_endpoint_host))
+        port: ((syslog_endpoint_port))
+        transport: tcp
+        migration:
+          message_format: job_index_id
+          cleanup_conf_files: [05-syslog_forwarder.conf]
 - instances: 1
   name: broker-registrar
   azs: [((default_az))]
@@ -143,10 +151,6 @@ properties:
     config_command: configalias
     maxmemory: 262144000
     save_command: anotherrandomstring
-  syslog_aggregator:
-    address: ((syslog_endpoint_host))
-    port: ((syslog_endpoint_port))
-    transport: tcp
 
 releases:
 - name: cf-redis
