@@ -6,7 +6,7 @@ cf-cli/cf-cli_6.21.1_linux_x86-64.tgz:
   size: 6543090
   object_id: 34b04b35-3928-4264-9a49-33b07af83a7e
   sha: 7dc397d2a0d93887ef50bc1f852beb686563049e
-ginkgo/ginkgo:
+ginkgo/ginkgo: # git sha: 8382b23d18dbaaff8e5f7e83784c53ebb8ec2f47
   size: 9607291
   object_id: 0fd9f543-03eb-447a-6206-b7975959dd28
   sha: 77caa9263f56e72e3448b4c89d26c1a772efbcf9
