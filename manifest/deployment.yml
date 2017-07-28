@@ -151,7 +151,7 @@ releases:
 - name: routing
   version: 0.157.0
 - name: syslog-migration
-  version: 7
+  version: 8
 
 stemcells:
 - alias: default
