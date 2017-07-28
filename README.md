@@ -23,6 +23,7 @@ git submodule update --init --recursive
    - BOSH_DEPLOYMENT
 1. `direnv allow`
 1. routing release `0.157.0` (`bosh upload-release http://bosh.io/d/github.com/cloudfoundry-incubator/cf-routing-release?v=0.157.0`)
+1. syslog-migration release `7` (`bosh upload-release https://github.com/pivotal-cf/syslog-migration-release/releases/download/v7/syslog-migration-7.tgz`)
 
 ## Deployment
 
