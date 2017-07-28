@@ -7,14 +7,12 @@ check process process-watcher
 
 check process process-destroyer
   with pidfile /var/vcap/sys/run/cf-redis-broker/process-destroyer.pid
-  depends on syslog-configurator
   start program "/var/vcap/jobs/cf-redis-broker/bin/process-destroyer_ctl start" with timeout 60 seconds
   stop program "/var/vcap/jobs/cf-redis-broker/bin/process-destroyer_ctl stop" with timeout 60 seconds
   group vcap
 
 check process cf-redis-broker
   with pidfile /var/vcap/sys/run/cf-redis-broker/unicorn.pid
-  depends on syslog-configurator
   start program "/var/vcap/jobs/cf-redis-broker/bin/cf-redis-broker_ctl start" with timeout 60 seconds
   stop program "/var/vcap/jobs/cf-redis-broker/bin/cf-redis-broker_ctl stop" with timeout 60 seconds
   group vcap
