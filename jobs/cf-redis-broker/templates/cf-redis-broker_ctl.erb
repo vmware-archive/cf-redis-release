@@ -36,13 +36,13 @@ case $1 in
     export BROKER_CONFIG_PATH=$JOB_DIR/config/broker.yml
 
     chpst -u vcap:vcap $BIN_DIR/configmigrator \
-      > >(tee -a $LOG_DIR/cf-redis-configmigrator.stdout.log | logger -p local0.info ) \
-      2> >(tee -a $LOG_DIR/cf-redis-configmigrator.stderr.log | logger -p local0.err )
+      >> "${LOG_DIR}/cf-redis-configmigrator.stdout.log" \
+      2>> "${LOG_DIR}/cf-redis-configmigrator.stderr.log"
 
     echo $$ > $PIDFILE
     exec chpst -u vcap:vcap $BIN_DIR/broker \
-      > >(tee -a $LOG_DIR/cf-redis-broker.stdout.log | logger -p local0.info ) \
-      2> >(tee -a $LOG_DIR/cf-redis-broker.stderr.log | logger -p local0.err )
+      >> "${LOG_DIR}/cf-redis-broker.stdout.log" \
+      2>> "${LOG_DIR}/cf-redis-broker.stderr.log"
     ;;
 
   stop)
