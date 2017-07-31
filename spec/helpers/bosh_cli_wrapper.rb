@@ -40,10 +40,10 @@ module Helpers
         result = JSON.parse(stdout)
         table = result.fetch('Tables').first
         rows = table.fetch('Rows')
-        match = rows.find { |row| row.last == host }
+        match = rows.find { |row| row.fetch('ips') == host }
         return nil if match.nil?
 
-        instance_group, instance_id = match[0].split("/")
+        instance_group, instance_id = match.fetch('instance').split("/")
         return instance_group, instance_id
       end
     end
