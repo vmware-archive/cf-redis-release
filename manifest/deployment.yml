@@ -41,7 +41,9 @@ instance_groups:
         transport: tcp
         migration:
           message_format: job_index_id
-          cleanup_conf_files: [05-syslog_forwarder.conf]
+          cleanup_conf_files: 
+          - 00-syslog_forwarder.conf
+          - 05-syslog_forwarder.conf
 
 - instances: ((dedicated_node_count))
   name: dedicated-node
