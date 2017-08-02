@@ -36,7 +36,12 @@ module Helpers
       def instance(host)
         cmd = base_cmd(@deployment).push("instances").join(' ')
 
-        stdout, _, _ = Open3.capture3(cmd)
+        stdout, stderr, status = Open3.capture3(cmd)
+
+        unless status.success?
+          puts stderr
+          raise "command failed: #{cmd}"
+        end
 
         result = JSON.parse(stdout)
         table = result.fetch('Tables').first
