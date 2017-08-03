@@ -8,13 +8,14 @@ module Helpers
       private
 
       def base_cmd(deployment)
+        bosh_cmd = ENV.fetch('BOSH_V2_CLI', 'bosh')
         environment = ENV.fetch('BOSH_ENVIRONMENT')
         ca_cert = ENV.fetch('BOSH_CA_CERT_PATH')
         client = ENV.fetch('BOSH_CLIENT')
         client_secret = ENV.fetch('BOSH_CLIENT_SECRET')
 
         [
-          "bosh-go-cli",
+          bosh_cmd,
           "--environment #{environment}",
           "--ca-cert #{ca_cert}",
           "--client #{client}",
