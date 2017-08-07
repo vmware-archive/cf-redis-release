@@ -32,6 +32,7 @@ describe 'process-watcher startup logging' do
 end
 
 def monitRestartProcessWatcherAndClearLogs()
+  root_execute_on(broker_host, "truncate -s 0 #{processWatcherPath}")
   root_execute_on(broker_host, '/var/vcap/bosh/bin/monit restart process-watcher')
   expect(wait_for_process_start('process-watcher', broker_host)).to eq(true)
 end
