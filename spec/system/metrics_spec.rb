@@ -43,6 +43,7 @@ describe 'metrics', :skip_metrics => true do
      "/p-redis/info/stats/evicted_keys",
      "/p-redis/info/server/uptime_in_seconds",
      "/p-redis/info/server/uptime_in_days",
+     "/p-redis/info/persistence/rdb_last_bgsave_status",
     ].each do |metric_name|
       it "contains #{metric_name} metric for all dedicated nodes" do
         @number_of_nodes.times do |idx|
