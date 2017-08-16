@@ -25,21 +25,6 @@ describe 'dedicated plan' do
   let(:manually_drain) { '' }
   it_behaves_like 'a persistent cloud foundry service'
 
-  it 'preserves data when recreating vms' do
-    service_broker.provision_and_bind(service.name, service.plan) do |service_binding|
-      service_client = service_client_builder(service_binding)
-      service_client.write('test_key', 'test_value')
-      expect(service_client.read('test_key')).to eq('test_value')
-
-      bosh_director.stop(environment.bosh_service_broker_job_name, 0)
-      host = bosh_director.ips_for_job(environment.bosh_service_broker_job_name, bosh_manifest.deployment_name).first
-
-      bosh_director.recreate_all([environment.bosh_service_broker_job_name])
-
-      expect(service_client.read('test_key')).to eq('test_value')
-    end
-  end
-
   let(:admin_command_availability) do
     {
       'DEBUG' => false,
