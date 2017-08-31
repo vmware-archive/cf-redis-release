@@ -1,6 +1,5 @@
 require 'json'
 require 'yaml'
-require 'bosh/template/renderer'
 require 'helpers/unit_spec_utilities'
 
 include Helpers::Utilities
