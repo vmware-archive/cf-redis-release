@@ -1,3 +1,18 @@
+<%
+# broker should fail if the dedicated nodes addresses are not ip addresses.
+# This is our defense in case we accidentally have DNS turned on in a
+# BOSH Director 263+ world. Broker's statefile.json is using ip addresses to
+# uniquely identify and manage dedicated nodes thus mixing DNS with it
+# will corrupt it. Related story #150214496
+valid_ip_field = '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'
+ip_regex = Regexp.new("^(#{valid_ip_field}\.){3}#{valid_ip_field}$")
+
+p('redis.broker.dedicated_nodes').each do |node|
+  unless ip_regex.match(node.strip)
+    raise 'The broker only supports IP addresses for dedicated nodes'
+  end
+end
+%>
 ---
 redis:
   service_name: <%= p('redis.broker.service_name') %>
