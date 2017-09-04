@@ -1,4 +1,12 @@
 <%
+dedicated_node_addresses = p('redis.broker.dedicated_nodes')
+
+if dedicated_node_addresses.empty?
+  link('dedicated_node').instances.each do |instance|
+    dedicated_node_addresses.push(instance.address)
+  end
+end
+
 # broker should fail if the dedicated nodes addresses are not ip addresses.
 # This is our defense in case we accidentally have DNS turned on in a
 # BOSH Director 263+ world. Broker's statefile.json is using ip addresses to
@@ -7,8 +15,8 @@
 valid_ip_field = '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'
 ip_regex = Regexp.new("^(#{valid_ip_field}\.){3}#{valid_ip_field}$")
 
-p('redis.broker.dedicated_nodes').each do |node|
-  unless ip_regex.match(node.strip)
+dedicated_node_addresses.each do |address|
+  unless ip_regex.match(address.strip)
     raise 'The broker only supports IP addresses for dedicated nodes'
   end
 end
@@ -35,7 +43,7 @@ redis:
   description: <%= p('redis.broker.description') %>
   icon_image: <%= p('redis.broker.icon_image') %>
   dedicated:
-    nodes: <%= p('redis.broker.dedicated_nodes') %>
+    nodes: <%= dedicated_node_addresses %>
     port: <%= p('redis.broker.dedicated_port') %>
     statefile_path: <%= p('redis.statefile_path') %>
 

@@ -19,37 +19,59 @@ RSpec.describe 'broker config' do
         service_id: service_uuid
         shared_vm_plan_id: shared_vm_plan_uuid
         dedicated_vm_plan_id: dedicated_vm_plan_uuid
-        dedicated_nodes:
-        - 10.0.8.109
-        - 10.0.8.110
-        - 10.0.8.112
         service_instance_limit: 5
         auth:
           password: password
           username: username
   BROKER_MINIMUM_MANIFEST
+  BROKER_LINKS = {
+    'dedicated_node' => {
+      'instances' => [
+        {'address' => '10.0.10.5'},
+        {'address' => '10.0.10.6'},
+        {'address' => '10.0.10.7'}
+      ],
+      'properties' => {}
+    }
+  }
 
-  it 'templates the dedicated nodes addresses' do
-    manifest = generate_manifest(BROKER_MINIMUM_MANIFEST)
-    actual_template = render_template(BROKER_CONFIG_TEMPLATE_PATH, BROKER_JOB_NAME, manifest)
-    expect(YAML.load(actual_template)['redis']['dedicated']['nodes']).to eq(
-      ['10.0.8.109', '10.0.8.110', '10.0.8.112']
-    )
-  end
-
-  context 'when the dedicated nodes addresses are not IP addresses' do
-    let(:manifest) do
-      generate_manifest(BROKER_MINIMUM_MANIFEST) do |m|
+  context 'when redis.broker.dedicated_nodes property is not empty' do
+    it 'templates the dedicated nodes using addresses from this property' do
+      manifest = generate_manifest(BROKER_MINIMUM_MANIFEST) do |m|
         m['properties']['redis']['broker']['dedicated_nodes'] = [
-          'instance-id-1.dedicated-node.redis-z1.cf-cfapps-io2-redis.bosh',
-          'instance-id-2.dedicated-node.redis-z1.cf-cfapps-io2-redis.bosh',
-          'instance-id-50.dedicated-node.redis-z1.cf-cfapps-io2-redis.bosh'
+          '10.0.8.109', '10.0.8.110', '10.0.8.112'
         ]
       end
-    end
-    it 'fails to template' do
-      expect { render_template(BROKER_CONFIG_TEMPLATE_PATH, BROKER_JOB_NAME, manifest)}.to raise_error('The broker only supports IP addresses for dedicated nodes')
+      actual_template = render_template(BROKER_CONFIG_TEMPLATE_PATH, BROKER_JOB_NAME, manifest, BROKER_LINKS)
+      expect(YAML.load(actual_template)['redis']['dedicated']['nodes']).to eq(
+        ['10.0.8.109', '10.0.8.110', '10.0.8.112']
+      )
     end
   end
 
+  context 'when redis.broker.dedicated_nodes property is empty' do
+    it 'templates the dedicated nodes using addresses from dedicated_node link' do
+      manifest = generate_manifest(BROKER_MINIMUM_MANIFEST)
+      actual_template = render_template(BROKER_CONFIG_TEMPLATE_PATH, BROKER_JOB_NAME, manifest, BROKER_LINKS)
+      expect(YAML.load(actual_template)['redis']['dedicated']['nodes']).to eq(
+        ['10.0.10.5', '10.0.10.6', '10.0.10.7']
+      )
+    end
+    context 'when the link returns non-IPv4 addresses' do
+      it 'fails to template' do
+        manifest = generate_manifest(BROKER_MINIMUM_MANIFEST)
+        BROKER_LINKS_HOSTNAMES = {
+          'dedicated_node' => {
+            'instances' => [
+              {'address' => 'instance-id-1.dedicated-node.redis-z1.cf-cfapps-io2-redis.bosh'},
+              {'address' => 'instance-id-10.dedicated-node.redis-z1.cf-cfapps-io2-redis.bosh'},
+              {'address' => 'instance-id-11.dedicated-node.redis-z1.cf-cfapps-io2-redis.bosh'}
+            ],
+            'properties' => {}
+          }
+        }
+        expect { render_template(BROKER_CONFIG_TEMPLATE_PATH, BROKER_JOB_NAME, manifest, BROKER_LINKS_HOSTNAMES)}.to raise_error('The broker only supports IP addresses for dedicated nodes')
+      end
+    end
+  end
 end

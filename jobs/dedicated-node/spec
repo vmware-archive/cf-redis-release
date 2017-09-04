@@ -20,7 +20,8 @@ packages:
 - cf-redis-broker
 
 provides:
-- {name: dedicated_node, type: redis}
+- name: dedicated_node
+  type: dedicated_node
 
 properties:
   service-backup.source_folder:
