@@ -27,10 +27,10 @@ describe 'bosh specs' do
   describe 'dedicated-node' do
     subject { YAML.load_file(DEDICATED_NODE_SPEC_PATH) }
 
-    it 'is configured expose redis.config_command as a bosh link' do
+    it 'is configured to provide a bosh link' do
       expected_link = {
         'name' => 'dedicated_node',
-        'type' => 'redis',
+        'type' => 'dedicated_node',
       }
 
       expect(subject['provides']).to include(expected_link)
