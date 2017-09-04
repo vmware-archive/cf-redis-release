@@ -5,10 +5,10 @@ BROKER_SPEC_PATH = File.join(PROJECT_ROOT, 'jobs/cf-redis-broker/spec')
 DEDICATED_NODE_SPEC_PATH = File.join(PROJECT_ROOT, 'jobs/dedicated-node/spec')
 
 describe 'bosh specs' do
-  describe 'broker' do
+  describe 'cf-redis-broker' do
     subject { YAML.load_file(BROKER_SPEC_PATH) }
 
-    it 'is configured expose redis.config_command as a bosh link' do
+    it 'is configured to provide a bosh link' do
       expected_link = {
         'name' => 'redis_broker',
         'type' => 'redis_broker',
