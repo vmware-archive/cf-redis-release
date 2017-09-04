@@ -30,6 +30,10 @@ provides:
   - redis.broker.auth.username
   - redis.broker.auth.password
 
+consumes:
+- name: dedicated_node
+  type: dedicated_node
+
 properties:
   service-backup.source_folder:
     description: The directory in which we store service backups
