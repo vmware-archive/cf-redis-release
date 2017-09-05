@@ -221,6 +221,6 @@ describe 'dedicated plan' do
 end
 
 def allocate_all_instances!
-  max_instances = bosh_manifest.property('redis.broker.dedicated_nodes').length
+  max_instances = bosh_manifest.job('dedicated-node').instances
   max_instances.times.map { service_broker.provision_instance(service.name, service.plan) }
 end
