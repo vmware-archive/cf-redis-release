@@ -6,7 +6,8 @@ templates:
   redis.conf.erb: config/redis.conf
   nginx.conf.erb: config/nginx.conf
 
-  redis_ctl.erb: bin/redis_ctl
+  start.erb: bin/start
+  drain.bash: bin/drain
   redis-agent_ctl.erb: bin/redis-agent_ctl
   nginx_ctl.erb: bin/nginx_ctl
 

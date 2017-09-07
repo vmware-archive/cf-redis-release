@@ -24,10 +24,7 @@ echo "`date +%c` - Starting drain" >> ${log_dir}/drain.log 2>&1
 
 disable_process_watcher
 
-#pkill returns 1 when no instances of process to kill are running
-set +e
-  /usr/bin/pkill redis-server
-set -e
+/sbin/start-stop-daemon -n redis-server --retry TERM/600  --oknodo  --stop
 
 if /bin/pidof redis-server > /dev/null 2>&1
 then
