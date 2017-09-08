@@ -6,7 +6,6 @@ properties:
   <<: (( merge ))
   broker: (( .meta.broker ))
   cf: (( .meta.cf ))
-  syslog_aggregator: (( .meta.syslog_aggregator ))
   redis:
     broker:
       <<: (( merge ))
@@ -56,13 +55,13 @@ job_templates:
     release: (( .meta.release_name ))
   - name: route_registrar
     release: routing
-  - name: syslog-configurator
-    release: (( .meta.release_name ))
+  - name: syslog-forwarder
+    release: syslog-migration
   dedicated_node:
   - name: dedicated-node
     release: (( .meta.release_name ))
-  - name: syslog-configurator
-    release: (( .meta.release_name ))
+  - name: syslog-forwarder
+    release: syslog-migration
   broker_registrar:
   - name: broker-registrar
     release: (( .meta.release_name ))
