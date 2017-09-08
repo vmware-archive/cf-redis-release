@@ -24,15 +24,23 @@ echo "`date +%c` - Starting drain" >> ${log_dir}/drain.log 2>&1
 
 disable_process_watcher
 
-/sbin/start-stop-daemon -n redis-server --retry TERM/600  --oknodo  --stop
+set +e
+    /sbin/start-stop-daemon -n redis-server --retry TERM/600  --oknodo  --stop >> ${log_dir}/drain.log 2>&1
+    exit_status=$?
+set -e
 
-if /bin/pidof redis-server > /dev/null 2>&1
-then
-  echo "`date +%c` - Waiting for redis-server shutdown" >> ${log_dir}/drain.log 2>&1
-  echo -10
-else
-  echo "`date +%c` - All redis-servers shutdown" >> ${log_dir}/drain.log 2>&1
-  echo 0
-fi
+case "$exit_status" in
+    0)
+        echo "$(date): All redis-servers shutdown" >> ${log_dir}/drain.log 2>&1
+        ;;
+    2)
+        echo "$(date): Redis took more than ${retry_strategy} seconds to exit" >> ${log_dir}/drain.log 2>&1
+        exit 1
+        ;;
+    *)
+        echo "$(date): Failed to exit with start-stop-daemon exit_status: ${exit_status}" >> ${log_dir}/drain.log 2>&1
+        exit 1
+esac
 
+echo 0
 exit 0
