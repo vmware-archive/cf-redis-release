@@ -12,16 +12,15 @@ log_error() {
   echo "$(date): $*" 1>> "$SHUTDOWN_ERR_LOG"
 }
 
-if [ ${1} == "kill_quickly" ]; then
-    # Try and gracefully give redis 20 seconds to stop, otherwise hard quit
-    retry_strategy="TERM/20/QUIT/1/KILL"
-else
-    # Wait up to 10 minutes for redis to save and shutdown
-    retry_strategy="TERM/600"
-fi
-
 if [ -f "${PIDFILE}" ]; then
-    log "Shutting down redis with shutdown strategy: ${retry_strategy}."
+
+    if [ ${1} == "kill_quickly" ]; then
+        log "Will try and gracefully shutdown redis for 20 seconds and then quit. May lose data if rdb takes longer than 20 seconds to write"
+        retry_strategy="TERM/20/QUIT/1/KILL"
+    else
+        log "Will try and gracefully shutdown redis for 10 minutes and fail if redis fails to save and quit in that time"
+        retry_strategy="TERM/600"
+    fi
 
     /sbin/start-stop-daemon \
       --pidfile "$PIDFILE" \
