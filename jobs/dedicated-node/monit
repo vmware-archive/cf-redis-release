@@ -7,7 +7,7 @@ check process redis-agent
 check process redis
   with pidfile /var/vcap/sys/run/redis.pid
   start program "/var/vcap/jobs/dedicated-node/bin/start"
-  stop program "/var/vcap/jobs/dedicated-node/bin/drain kill_quickly"
+  stop program "/var/vcap/jobs/dedicated-node/bin/drain quickly"
   group vcap
   depends on redis-agent
 

@@ -14,9 +14,9 @@ log_error() {
 
 if [ -f "${PIDFILE}" ]; then
 
-    if [ ${1} == "kill_quickly" ]; then
-        log "Will try and gracefully shutdown redis for 20 seconds and then quit. May lose data if rdb takes longer than 20 seconds to write"
-        retry_strategy="TERM/20/QUIT/1/KILL"
+    if [ ${1} == "quickly" ]; then
+        log "Will try and gracefully shutdown redis for 25"
+        retry_strategy="TERM/25"
     else
         log "Will try and gracefully shutdown redis for 10 minutes and fail if redis fails to save and quit in that time"
         retry_strategy="TERM/600"
