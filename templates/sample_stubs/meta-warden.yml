@@ -6,7 +6,7 @@ meta:
   apps_domain: bosh-lite.com
   environment: bosh-lite
   external_domain: bosh-lite.com
-  syslog_aggregator:
+  syslog:
     address: 127.0.0.1
     port: 1234
   broker:

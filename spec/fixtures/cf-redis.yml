@@ -39,8 +39,8 @@ jobs:
     release: cf-redis
   - name: route_registrar
     release: routing
-  - name: syslog-configurator
-    release: cf-redis
+  - name: syslog-forwarder
+    release: syslog-migration
 - instances: 2
   name: dedicated-node
   networks:
@@ -53,8 +53,8 @@ jobs:
   templates:
   - name: dedicated-node
     release: cf-redis
-  - name: syslog-configurator
-    release: cf-redis
+  - name: syslog-forwarder
+    release: syslog-migration
 - instances: 1
   lifecycle: errand
   name: broker-registrar
@@ -140,7 +140,7 @@ meta:
   release_name: cf-redis
   route_name: redis-broker
   service_name: redis
-  syslog_aggregator:
+  syslog:
     address: 127.0.0.1
     port: 1234
 name: bosh-lite-redis
@@ -323,7 +323,7 @@ properties:
     host: 10.244.3.2
     maxmemory: 262144000
     save_command: anotherrandomstring
-  syslog_aggregator:
+  syslog:
     address: 127.0.0.1
     port: 1234
 releases:

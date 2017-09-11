@@ -5,7 +5,7 @@ meta:
   release_name: cf-redis
   apps_domain: REPLACE_WITH_APP_DOMAIN
   external_domain: REPLACE_WITH_DOMAIN
-  syslog_aggregator:
+  syslog:
     address: REPLACE_WITH_SYSLOG_AGGREGATOR_HOST
     port: REPLACE_WITH_SYSLOG_AGGREGATOR_PORT
   broker:

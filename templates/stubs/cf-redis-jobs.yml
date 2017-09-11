@@ -6,6 +6,7 @@ properties:
   <<: (( merge ))
   broker: (( .meta.broker ))
   cf: (( .meta.cf ))
+  syslog: (( .meta.syslog ))
   redis:
     broker:
       <<: (( merge ))

@@ -6,7 +6,7 @@ meta:
   release_version: REPLACE_WITH_REDIS_RELEASE_VERSION # Optional, you can delete this property to always get latest
   apps_domain: REPLACE_WITH_APP_DOMAIN
   system_domain: REPLACE_WITH_DOMAIN
-  syslog_aggregator:
+  syslog:
     address: REPLACE_WITH_SYSLOG_AGGREGATOR_HOST
     port: REPLACE_WITH_SYSLOG_AGGREGATOR_PORT
   broker:
