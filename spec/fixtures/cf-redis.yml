@@ -39,7 +39,7 @@ jobs:
     release: cf-redis
   - name: route_registrar
     release: routing
-  - name: syslog-forwarder
+  - name: syslog_forwarder
     release: syslog-migration
 - instances: 2
   name: dedicated-node
@@ -53,7 +53,7 @@ jobs:
   templates:
   - name: dedicated-node
     release: cf-redis
-  - name: syslog-forwarder
+  - name: syslog_forwarder
     release: syslog-migration
 - instances: 1
   lifecycle: errand
