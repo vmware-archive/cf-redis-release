@@ -1,5 +1,5 @@
 <%
-dedicated_node_addresses = p('redis.broker.dedicated_nodes')
+dedicated_node_addresses = p('redis.broker.dedicated_nodes').clone
 
 if dedicated_node_addresses.empty?
   link('dedicated_node').instances.each do |instance|
