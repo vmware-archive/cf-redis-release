@@ -27,10 +27,17 @@
     config['plan_names'].push('shared-vm')
   end
 
-  if p('redis.broker.dedicated_nodes').count > 0
+  dedicated_node_addresses = p('redis.broker.dedicated_nodes').clone
+  if dedicated_node_addresses.empty?
+    link('dedicated_node').instances.each do |instance|
+      dedicated_node_addresses.push(instance.address)
+    end
+  end
+
+  unless dedicated_node_addresses.empty?
     config['plan_names'].push('dedicated-vm')
 
-    p("redis.broker.dedicated_nodes").each do |node|
+    dedicated_node_addresses.each do |node|
       config['security_groups'].push({
         'protocol' => 'tcp',
         'ports' => '6379',

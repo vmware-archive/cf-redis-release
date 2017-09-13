@@ -32,6 +32,9 @@ RSpec.describe 'smoke-tests config' do
         }
       ],
       'properties' => {}
+    },
+    'dedicated_node' => {
+      'instances' => []
     }
   }
 
@@ -97,21 +100,45 @@ RSpec.describe 'smoke-tests config' do
     expect(JSON.parse(actual_template)['plan_names']).to include('shared-vm')
   end
 
-  it 'configures testing of dedicated-vm plan' do
-    manifest = generate_manifest(MINIMUM_MANIFEST) do |m|
-      m['instance_groups'].first['jobs'].first['properties']['redis']['broker']['dedicated_nodes'] = [
-        'a-dedicated-node-ip',
-        'another-dedicated-node-ip'
-      ]
+  context 'when redis.broker.dedicated_nodes property is not empty' do
+    it 'configures testing of dedicated-vm plan using dedicated node addresses from the property' do
+      manifest = generate_manifest(MINIMUM_MANIFEST) do |m|
+        m['instance_groups'].first['jobs'].first['properties']['redis']['broker']['dedicated_nodes'] = [
+          '10.0.9.15',
+          '10.0.9.16'
+        ]
+      end
+
+      actual_template = render_template(TEMPLATE_PATH, JOB_NAME, manifest, LINKS)
+
+      actual_config = JSON.parse(actual_template)
+      expect(actual_config['plan_names']).to include('dedicated-vm')
+      expect(actual_config['security_groups']).to include(
+        { 'protocol' => 'tcp', 'ports' => '6379', 'destination' => '10.0.9.15' },
+        { 'protocol' => 'tcp', 'ports' => '6379', 'destination' => '10.0.9.16' }
+      )
     end
-
-    actual_template = render_template(TEMPLATE_PATH, JOB_NAME, manifest, LINKS)
-
-    actual_config = JSON.parse(actual_template)
-    expect(actual_config['plan_names']).to include('dedicated-vm')
-    expect(actual_config['security_groups']).to include(
-      { 'protocol' => 'tcp', 'ports' => '6379', 'destination' => 'a-dedicated-node-ip' },
-      { 'protocol' => 'tcp', 'ports' => '6379', 'destination' => 'another-dedicated-node-ip' }
-    )
   end
-end
+
+  context 'when redis.broker.dedicated_nodes property is empty' do
+    it 'configures testing of dedicated-vm plan using dedicated node addresses from dedicated_node link' do
+      manifest = generate_manifest(MINIMUM_MANIFEST)
+      links_with_dedicated_nodes = LINKS.clone
+      links_with_dedicated_nodes['dedicated_node']['instances'] = [
+        {'address' => '10.0.10.5'},
+        {'address' => '10.0.10.6'},
+        {'address' => '10.0.10.7'}
+      ]
+      actual_template = render_template(TEMPLATE_PATH, JOB_NAME, manifest, links_with_dedicated_nodes)
+
+      actual_config = JSON.parse(actual_template)
+      expect(actual_config['plan_names']).to include('dedicated-vm')
+      expect(actual_config['security_groups']).to include(
+        { 'protocol' => 'tcp', 'ports' => '6379', 'destination' => '10.0.10.5' },
+        { 'protocol' => 'tcp', 'ports' => '6379', 'destination' => '10.0.10.6' },
+        { 'protocol' => 'tcp', 'ports' => '6379', 'destination' => '10.0.10.7' },
+      )
+    end
+  end
+
+  end

@@ -13,6 +13,8 @@ packages:
 consumes:
 - name: redis_broker
   type: redis_broker
+- name: dedicated_node
+  type: dedicated_node
 
 properties:
   cf.api_url:
