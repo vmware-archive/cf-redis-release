@@ -3,7 +3,7 @@ require 'system_spec_helper'
 describe 'metrics', :skip_metrics => true do
 
   before do
-    @number_of_nodes = bosh_manifest.job(Helpers::Environment::DEDICATED_NODE_JOB_NAME).static_ips.count
+    @number_of_nodes = bosh_manifest.job(Helpers::Environment::DEDICATED_NODE_JOB_NAME).instances
     @origin_tag = bosh_manifest.property('service_metrics.origin')
     @outFile = Tempfile.new('smetrics')
     @pid = spawn(

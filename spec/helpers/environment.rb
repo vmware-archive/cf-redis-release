@@ -127,14 +127,6 @@ module Helpers
       gateway
     end
 
-    def broker_host
-      bosh_manifest.job(BROKER_JOB_NAME).static_ips.first
-    end
-
-    def node_hosts
-      bosh_manifest.job(DEDICATED_NODE_JOB_NAME).static_ips
-    end
-
     def broker_backend_port
       bosh_manifest.property('redis').fetch('broker').fetch('backend_port')
     end
