@@ -51,7 +51,6 @@ instance_groups:
   vm_type: ((default_vm_type))
   networks:
   - name: ((default_network))
-    static_ips: ((dedicated_nodes_ips))
   persistent_disk_type: ((default_persistent_disk_type))
   stemcell: default
   jobs:
