@@ -10,8 +10,6 @@ jobs:
   name: cf-redis-broker
   networks:
   - name: redis_z1
-    static_ips:
-    - 10.244.3.2
   persistent_disk: 4096
   properties:
     nats:
@@ -45,9 +43,6 @@ jobs:
   name: dedicated-node
   networks:
   - name: redis_z1
-    static_ips:
-    - 10.244.3.6
-    - 10.244.3.10
   persistent_disk: 4096
   resource_pool: redis_z1
   templates:
