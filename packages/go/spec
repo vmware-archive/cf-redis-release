@@ -2,4 +2,4 @@
 name: go
 
 files:
-- go/go1.7.4.linux-amd64.tar.gz
+- go/go1.9.linux-amd64.tar.gz
