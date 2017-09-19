@@ -149,7 +149,7 @@ releases:
 - name: cf-redis
   version: latest
 - name: routing
-  version: 0.157.0
+  version: 0.162.0
 - name: syslog-migration
   version: 8
 

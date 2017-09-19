@@ -39,7 +39,7 @@ base_releases:
 - name: (( .meta.release_name ))
   version: (( .meta.release_version || "latest"))
 - name: routing
-  version: 0.143.0
+  version: 0.162.0
 
 additional_releases: (( merge || [] ))
 
