@@ -1,40 +1,41 @@
-aws-cli/awscli-bundle.zip:
-  size: 5207424
-  object_id: 0221dcb3-3ce0-44e6-8c4f-c5c2abf1b0eb
-  sha: db33b4740a670c9fb3bc5515cd7f9861fa1b1b13
-cf-cli/cf-cli_6.21.1_linux_x86-64.tgz:
-  size: 6543090
-  object_id: 34b04b35-3928-4264-9a49-33b07af83a7e
-  sha: 7dc397d2a0d93887ef50bc1f852beb686563049e
-ginkgo/ginkgo: # git sha: 8382b23d18dbaaff8e5f7e83784c53ebb8ec2f47
-  size: 9607291
-  object_id: 2039c592-fb9f-44bb-7e80-4d64ecceab7b
-  sha: 77caa9263f56e72e3448b4c89d26c1a772efbcf9
-go/go1.7.4.linux-amd64.tar.gz:
-  size: 84021919
-  object_id: a7ff4215-f3ce-45f6-ad46-241e05f43731
-  sha: 2e5baf03d1590e048c84d1d5b4b6f2540efaaea1
-nginx/nginx-1.8.0.tar.gz:
-  size: 832104
-  object_id: 77904c0d-6bb2-4e3e-b981-16828770f7a2
-  sha: 12bad312764feae50246685ab2e74512d1aa9b2f
-redis/redis-3.2.8.tar.gz:
-  size: 1547237
-  object_id: 1d49ca62-4d96-4770-9263-b4eff654b60e
-  sha: 6780d1abb66f33a97aad0edbe020403d0a15b67f
-ruby/bundler-1.3.5.gem:
-  size: 268800
-  object_id: 67d8e9d8-a79a-4ebe-8061-9ac59d0224b5
-  sha: 2cad3052a59b83f1f616e8202f5c714e46bd8523
-ruby/ruby-2.1.5.tar.gz:
-  size: 15127433
-  object_id: 698d02c7-61f9-4d14-893a-f4a8f085fc92
-  sha: 9c0a238bd7839a4b51871641945a3da90997b8c2
+---
 ruby/rubygems-2.1.11.tgz:
-  size: 367166
   object_id: a043d80c-896d-4165-b81f-a922a7817a33
   sha: ca3033432cae28deb7ced79cda271cb292b70e59
+  size: 367166
 ruby/yaml-0.1.5.tar.gz:
-  size: 504897
   object_id: b31f889b-5ae8-42ac-b6f1-f66b7126c784
   sha: 8b78cb9f759c7d80db8a7328c0ebecfe34fde737
+  size: 504897
+ruby/bundler-1.3.5.gem:
+  object_id: 67d8e9d8-a79a-4ebe-8061-9ac59d0224b5
+  sha: 2cad3052a59b83f1f616e8202f5c714e46bd8523
+  size: 268800
+aws-cli/awscli-bundle.zip:
+  object_id: 0221dcb3-3ce0-44e6-8c4f-c5c2abf1b0eb
+  sha: db33b4740a670c9fb3bc5515cd7f9861fa1b1b13
+  size: 5207424
+nginx/nginx-1.8.0.tar.gz:
+  object_id: 77904c0d-6bb2-4e3e-b981-16828770f7a2
+  sha: 12bad312764feae50246685ab2e74512d1aa9b2f
+  size: 832104
+ruby/ruby-2.1.5.tar.gz:
+  object_id: 698d02c7-61f9-4d14-893a-f4a8f085fc92
+  sha: 9c0a238bd7839a4b51871641945a3da90997b8c2
+  size: 15127433
+redis/redis-3.2.8.tar.gz:
+  object_id: 1d49ca62-4d96-4770-9263-b4eff654b60e
+  sha: 6780d1abb66f33a97aad0edbe020403d0a15b67f
+  size: 1547237
+cf-cli/cf-cli_6.21.1_linux_x86-64.tgz:
+  object_id: 34b04b35-3928-4264-9a49-33b07af83a7e
+  sha: 7dc397d2a0d93887ef50bc1f852beb686563049e
+  size: 6543090
+ginkgo/ginkgo: # git sha 8382b23d18dbaaff8e5f7e83784c53ebb8ec2f47
+  size: 10013184
+  object_id: 4d7c1296-a46e-48c9-6558-97693ae03915
+  sha: 40d5be1b4b2d21a421f541601820b20817b18b66
+go/go1.9.linux-amd64.tar.gz:
+  size: 102601309
+  object_id: d18b55a6-ae29-4783-421e-84609ce7e497
+  sha: 6a00c39435edc1e102f1fb75cc1137fba4c9e4e2
