@@ -31,11 +31,11 @@ cf-cli/cf-cli_6.21.1_linux_x86-64.tgz:
   object_id: 34b04b35-3928-4264-9a49-33b07af83a7e
   sha: 7dc397d2a0d93887ef50bc1f852beb686563049e
   size: 6543090
-go/go1.7.4.linux-amd64.tar.gz:
-  object_id: a7ff4215-f3ce-45f6-ad46-241e05f43731
-  sha: 2e5baf03d1590e048c84d1d5b4b6f2540efaaea1
-  size: 84021919
-ginkgo/ginkgo:
-  object_id: e31291e6-190a-4d3a-82d5-931d41a4f00c
-  sha: 377b5e10bcddabe5b5d667cdea5b4f474f972aae
-  size: 9580871
+ginkgo/ginkgo: # git sha 8382b23d18dbaaff8e5f7e83784c53ebb8ec2f47
+  size: 10013184
+  object_id: 4d7c1296-a46e-48c9-6558-97693ae03915
+  sha: 40d5be1b4b2d21a421f541601820b20817b18b66
+go/go1.9.linux-amd64.tar.gz:
+  size: 102601309
+  object_id: d18b55a6-ae29-4783-421e-84609ce7e497
+  sha: 6a00c39435edc1e102f1fb75cc1137fba4c9e4e2
