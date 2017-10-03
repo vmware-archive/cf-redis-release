@@ -15,7 +15,7 @@ RSpec.describe 'broker config' do
   properties:
     redis:
       broker:
-        service_name: p-redis-v430
+        service_name: p-redis-v431
         service_id: service_uuid
         shared_vm_plan_id: shared_vm_plan_uuid
         dedicated_vm_plan_id: dedicated_vm_plan_uuid
