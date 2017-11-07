@@ -28,6 +28,20 @@ instance_groups:
   jobs:
   - name: cf-redis-broker
     release: cf-redis
+  - name: broker-registrar
+    release: cf-redis
+    properties:
+      broker:
+        host: ((broker_name)).((system_domain))
+        name: ((broker_name))
+        password: ((broker_password))
+        username: ((broker_username))
+      cf:
+        admin_username: ((cf_username))
+        admin_password: ((cf_password))
+        api_url: https://api.((system_domain))
+        apps_domain: ((apps_domain))
+        system_domain: ((system_domain))
   - name: route_registrar
     release: routing
     consumes:
@@ -74,7 +88,7 @@ instance_groups:
       username: ((broker_username))
       password: ((broker_password))
   jobs:
-  - name: broker-registrar
+  - name: broker-registrar-clone
     release: cf-redis
 - instances: 1
   lifecycle: errand
