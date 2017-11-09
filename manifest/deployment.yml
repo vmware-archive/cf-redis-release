@@ -41,9 +41,15 @@ instance_groups:
         transport: tcp
         migration:
           message_format: job_index_id
-          cleanup_conf_files: 
+          cleanup_conf_files:
           - 00-syslog_forwarder.conf
           - 05-syslog_forwarder.conf
+  - name: broker-registrar
+    release: cf-redis
+  - name: broker-deregistrar
+    release: cf-redis
+  - name: smoke-tests
+    release: cf-redis
 
 - instances: ((dedicated_node_count))
   name: dedicated-node
@@ -59,56 +65,6 @@ instance_groups:
   - name: syslog_forwarder
     release: syslog-migration
     properties: *syslog-configuration
-- instances: 1
-  name: broker-registrar
-  azs: [((default_az))]
-  vm_type: ((default_vm_type))
-  stemcell: default
-  lifecycle: errand
-  networks:
-  - name: ((default_network))
-  properties:
-    broker:
-      host: ((broker_name)).((system_domain))
-      name: ((broker_name))
-      username: ((broker_username))
-      password: ((broker_password))
-  jobs:
-  - name: broker-registrar
-    release: cf-redis
-- instances: 1
-  lifecycle: errand
-  name: broker-deregistrar
-  azs: [((default_az))]
-  vm_type: ((default_vm_type))
-  stemcell: default
-  networks:
-  - name: ((default_network))
-  properties:
-    broker:
-      host: ((broker_name)).((system_domain))
-      name: ((broker_name))
-      password: ((broker_password))
-      username: ((broker_username))
-  jobs:
-  - name: broker-deregistrar
-    release: cf-redis
-- instances: 1
-  lifecycle: errand
-  name: smoke-tests
-  azs: [((default_az))]
-  vm_type: ((default_vm_type))
-  stemcell: default
-  networks:
-  - name: ((default_network))
-  properties:
-    retry:
-      backoff: linear
-      baseline_interval_milliseconds: 1000
-      max_attempts: 10
-  jobs:
-  - name: smoke-tests
-    release: cf-redis
 
 properties:
   broker:
@@ -144,6 +100,10 @@ properties:
     config_command: configalias
     maxmemory: 262144000
     save_command: anotherrandomstring
+  retry:
+    backoff: linear
+    baseline_interval_milliseconds: 1000
+    max_attempts: 10
 
 releases:
 - name: cf-redis
