@@ -1,0 +1,21 @@
+---
+name: broker-deregistrar-clone
+packages:
+- cf-cli
+templates:
+  errand.sh.erb: bin/run
+properties:
+  cf.api_url:
+    description: 'Full URL of Cloud Foundry API'
+  cf.admin_username:
+    description: 'Username of the admin user'
+  cf.admin_password:
+    description: 'Password of the admin user'
+  cf.skip_ssl_validation:
+    description: 'Skip SSL certificate validation'
+    default: true
+  broker.name:
+    description: 'Name of the service broker'
+  redis.broker.service_name:
+    description: 'Service name'
+    default: p-redis

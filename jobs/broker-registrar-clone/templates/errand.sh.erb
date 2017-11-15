@@ -1,0 +1,34 @@
+#!/bin/bash
+
+set -e
+set -x
+
+export PATH=$PATH:/var/vcap/packages/cf-cli/bin
+
+CF_API_URL='<%= p("cf.api_url") %>'
+CF_ADMIN_USERNAME='<%= p("cf.admin_username") %>'
+CF_ADMIN_PASSWORD='<%= p("cf.admin_password") %>'
+CF_DIAL_TIMEOUT=30
+BROKER_NAME='<%= p("broker.name") %>'
+BROKER_SERVICE_NAME='<%= p("redis.broker.service_name") %>'
+BROKER_URL='<%= p("broker.protocol") %>://<%= p("broker.host") %>'
+BROKER_USERNAME='<%= p("broker.username") %>'
+BROKER_PASSWORD='<%= p("broker.password") %>'
+SKIP_SSL_VALIDATION='<%= p("cf.skip_ssl_validation") ? "--skip-ssl-validation" : "" %>'
+
+cf --version
+cf api $SKIP_SSL_VALIDATION $CF_API_URL
+cf auth $CF_ADMIN_USERNAME $CF_ADMIN_PASSWORD
+cf create-service-broker $BROKER_NAME $BROKER_USERNAME $BROKER_PASSWORD $BROKER_URL || cf update-service-broker $BROKER_NAME $BROKER_USERNAME $BROKER_PASSWORD $BROKER_URL
+# disable-servic-access must happen in order to reset service-access. You can then reconfigure access accordingly.
+cf disable-service-access $BROKER_SERVICE_NAME
+
+<% if p("redis.broker.enable_service_access") %>
+  <% if p("redis.broker.service_access_orgs").empty? %>
+    cf enable-service-access $BROKER_SERVICE_NAME
+  <% else %>
+    <% p("redis.broker.service_access_orgs").each do |org| %>
+      cf enable-service-access -o <%= org %> $BROKER_SERVICE_NAME
+    <% end %>
+  <% end %>
+<% end %>
