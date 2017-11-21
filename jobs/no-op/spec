@@ -1,0 +1,9 @@
+---
+name: no-op
+
+templates:
+no-op-errand: bin/run
+
+packages: []
+
+properties: {}
