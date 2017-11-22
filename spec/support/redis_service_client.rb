@@ -72,7 +72,7 @@ module Support
         options = credentials.merge(
           'host' => '127.0.0.1',
           'port' => forwarding_port,
-          'timeout' => 30,
+          'timeout' => 120,
           'reconnect_attempts' => 5
         )
 
