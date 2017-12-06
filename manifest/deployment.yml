@@ -65,7 +65,7 @@ instance_groups:
   - name: syslog_forwarder
     release: syslog-migration
     properties: *syslog-configuration
-  - name: permissions-test
+  - name: permissions-tests
     release: redis-service
 
 properties:
