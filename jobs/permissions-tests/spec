@@ -1,0 +1,16 @@
+---
+name: permissions-tests
+
+templates:
+  run_tests.sh: bin/run
+
+packages:
+  - golang-1.9-linux
+  - ginkgo
+  - permissions-tests
+
+properties: {}
+  # mode: "dedicated-node"
+  # combos:
+  #   default: []
+  #   description: "Array of hashes containing a path, expected owner, expected group, expected permission"

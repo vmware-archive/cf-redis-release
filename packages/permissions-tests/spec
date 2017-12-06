@@ -1,0 +1,7 @@
+---
+name: permissions-tests
+
+dependencies: []
+
+files:
+- permissions-tests/**/*.go
