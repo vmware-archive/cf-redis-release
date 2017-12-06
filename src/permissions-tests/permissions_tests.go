@@ -32,9 +32,9 @@ var _ = Describe("Ownership and permissions", func() {
 			Expect(getPermissions(int(fileStat.Mode))).To(Equal(getPermissions(expectedPermissions)))
 		},
 		Entry("/var/vcap/store/redis", "/var/vcap/store/redis", "vcap", "vcap", 0750),
-		Entry("/var/vcap/store/redis/config/redis.conf", "/var/vcap/store/redis/config/redis.conf", "vcap", "vcap", 0640), //different from on-demand
-		Entry("/var/vcap/jobs/redis/config", "/var/vcap/jobs/dedicated-node/config", "vcap", "vcap", 0750),                //different from on-demand
-		Entry("/var/vcap/jobs/redis/config/redis.conf", "/var/vcap/jobs/redis/config/redis.conf", "vcap", "vcap", 0640),
+		Entry("/var/vcap/store/redis/redis.conf", "/var/vcap/store/redis/redis.conf", "vcap", "vcap", 0640),         //different from on-demand
+		Entry("/var/vcap/jobs/dedicated-node/config", "/var/vcap/jobs/dedicated-node/config", "vcap", "vcap", 0750), //different from on-demand
+		Entry("/var/vcap/jobs/dedicated-node/config/redis.conf", "/var/vcap/jobs/dedicated-node/config/redis.conf", "vcap", "vcap", 0640),
 	)
 })
 
