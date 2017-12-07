@@ -10,7 +10,10 @@ CONFIG_PATH=/var/vcap/store/redis/redis.conf
 source /var/vcap/packages/redis-common/utils.sh
 
 mkdir -p $LOG_DIR $RUN_DIR $DATA_DIR $BACKUP_TMP_DIR
-chown vcap:vcap $LOG_DIR $RUN_DIR $DATA_DIR $BACKUP_TMP_DIR
+
+chown vcap:vcap $LOG_DIR $RUN_DIR $DATA_DIR ${DATA_DIR}/redis.conf $BACKUP_TMP_DIR
+chmod 750 ${DATA_DIR}
+chmod 640 ${DATA_DIR}/redis.conf
 [ -e $LOG_DIR/redis.log ] && chown vcap:vcap $LOG_DIR/redis.log
 
 # Remove temp backup files that might be left over because of a previously
@@ -24,4 +27,3 @@ sysctl vm.overcommit_memory=1
 
 exec chpst -u vcap:vcap /var/vcap/packages/redis/bin/redis-server "$CONFIG_PATH" \
   >> "${LOG_DIR}/redis.log" 2>&1
-
