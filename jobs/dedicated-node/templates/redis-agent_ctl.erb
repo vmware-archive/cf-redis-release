@@ -3,6 +3,7 @@
 LOG_DIR=/var/vcap/sys/log/redis-agent
 DATA_DIR=/var/vcap/store/redis
 PIDFILE=/var/vcap/sys/run/redis-agent.pid
+JOB_CONFIG_DIR=/var/vcap/jobs/dedicated-node/config
 <% if_p('service-backup.source_folder') do %>
 BACKUP_SOURCE_DIR=<%= p('service-backup.source_folder') %>
 <% end %>
@@ -26,13 +27,14 @@ case $1 in
   start)
 
     mkdir -p $LOG_DIR $DATA_DIR $BACKUP_SOURCE_DIR
-    chown vcap:vcap $LOG_DIR $DATA_DIR $BACKUP_SOURCE_DIR
-
+    chown vcap:vcap $LOG_DIR $DATA_DIR $BACKUP_SOURCE_DIR ${JOB_CONFIG_DIR} ${JOB_CONFIG_DIR}/redis.conf
+    chmod 750 ${JOB_CONFIG_DIR}
+    chmod 640 ${JOB_CONFIG_DIR}/redis.conf
     cd $DATA_DIR
 
     echo $$ > $PIDFILE
     exec /var/vcap/packages/cf-redis-broker/bin/agent \
-      -agentConfig=/var/vcap/jobs/dedicated-node/config/agent.yml \
+      -agentConfig=${JOB_CONFIG_DIR}/agent.yml \
       >> "${LOG_DIR}/redis-agent.stdout.log" \
       2>> "${LOG_DIR}/redis-agent.stderr.log"
     ;;
