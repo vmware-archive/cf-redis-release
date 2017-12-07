@@ -65,6 +65,10 @@ instance_groups:
   - name: syslog_forwarder
     release: syslog-migration
     properties: *syslog-configuration
+  - name: permissions-tests
+    release: redis-test
+    properties:
+      mode: dedicated-node
 
 properties:
   broker:
@@ -113,6 +117,8 @@ releases:
   version: 0.162.0
 - name: syslog-migration
   version: 9
+- name: redis-test
+  version: latest
 
 stemcells:
 - alias: default
