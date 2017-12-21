@@ -33,6 +33,8 @@ case $1 in
     # This value is (maxclients + 32).
     ulimit -n 10032
 
+    echo never > /sys/kernel/mm/transparent_hugepage/enabled
+
     export BROKER_CONFIG_PATH=$JOB_DIR/config/broker.yml
 
     chpst -u vcap:vcap $BIN_DIR/configmigrator \
