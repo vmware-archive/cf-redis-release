@@ -19,9 +19,10 @@ rm -f $DATA_DIR/temp-*.rdb
 
 ulimit -n 10032
 
+echo never > /sys/kernel/mm/transparent_hugepage/enabled
+
 # Recommended for running redis on a VM in production (https://www.pivotaltracker.com/story/show/74949514)
 sysctl vm.overcommit_memory=1
 
 exec chpst -u vcap:vcap /var/vcap/packages/redis/bin/redis-server "$CONFIG_PATH" \
   >> "${LOG_DIR}/redis.log" 2>&1
-
