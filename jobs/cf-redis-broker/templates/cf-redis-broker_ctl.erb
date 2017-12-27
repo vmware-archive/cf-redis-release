@@ -34,6 +34,7 @@ case $1 in
     ulimit -n 10032
 
     echo never > /sys/kernel/mm/transparent_hugepage/enabled
+    sysctl -w net.core.somaxconn=511
 
     export BROKER_CONFIG_PATH=$JOB_DIR/config/broker.yml
 
