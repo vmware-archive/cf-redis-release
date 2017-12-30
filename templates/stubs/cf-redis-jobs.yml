@@ -40,7 +40,9 @@ base_releases:
   version: (( .meta.release_version || "latest"))
 - name: routing
   version: 0.162.0
-
+- name: syslog-migration
+  version: latest
+  
 additional_releases: (( merge || [] ))
 
 releases: (( base_releases additional_releases ))
