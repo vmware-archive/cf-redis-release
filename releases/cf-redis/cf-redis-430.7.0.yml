@@ -1,0 +1,76 @@
+name: cf-redis
+version: 430.7.0
+commit_hash: ef6865e
+uncommitted_changes: false
+jobs:
+- name: broker-deregistrar
+  version: dd5fbe93b23aa21a61b0edfbb25b3851f44ed5b3d41b4e564a9959b77aeafe0e
+  fingerprint: dd5fbe93b23aa21a61b0edfbb25b3851f44ed5b3d41b4e564a9959b77aeafe0e
+  sha1: sha256:78db653ac9240100cfab0e20bf77e0a9c354478a2c4c8bc548c8b477c6fba529
+- name: broker-registrar
+  version: 7a32aa5a00459a32e83a209d22198d5bfdc746b4b25f4e6acd1b74a2e60ef100
+  fingerprint: 7a32aa5a00459a32e83a209d22198d5bfdc746b4b25f4e6acd1b74a2e60ef100
+  sha1: sha256:e53d03e38a026eaa6d0175fbf7cc73b468f50c3980c8ad677783da73ce6d293d
+- name: cf-redis-broker
+  version: 46104c673a3baf725858cda81fac00e534a0ef74e4fd0c610af9bbe7550c5a37
+  fingerprint: 46104c673a3baf725858cda81fac00e534a0ef74e4fd0c610af9bbe7550c5a37
+  sha1: sha256:47c3db363ad1d107ee219b2d31192a51a6ee3fd5db660c160d03c6f30e745118
+- name: dedicated-node
+  version: 8a5538936a25e85017f9daec8f2400f715d0a74c41a3916a926e52b1b94840c7
+  fingerprint: 8a5538936a25e85017f9daec8f2400f715d0a74c41a3916a926e52b1b94840c7
+  sha1: sha256:6f6a4c78d495bf477846c11124c835af945bb6b4117a1d9fcd54131fde6fc477
+- name: smoke-tests
+  version: 7280d5f12cc46e79c061c4940330a26d9430321c41cc3d2be8fec3b9838bbd3b
+  fingerprint: 7280d5f12cc46e79c061c4940330a26d9430321c41cc3d2be8fec3b9838bbd3b
+  sha1: sha256:013046c1074f792e764fbc5ca587487e4e83f4fadf3c4e10a894cdfa0ff15134
+packages:
+- name: cf-cli
+  version: f4b24c093a4ec3daa0f6bf6fcf2b89722f3985f0f8b0c3db58949dae3ff589e6
+  fingerprint: f4b24c093a4ec3daa0f6bf6fcf2b89722f3985f0f8b0c3db58949dae3ff589e6
+  sha1: sha256:e8e781f77e70208b3d35695646e9fbb1837206de31e107bfc1edafc26b61ed8f
+  dependencies: []
+- name: cf-redis-broker
+  version: eadd757a8a220d7c97eb2fad55420ee7a5a076ffc7f071cfdaac2ede0457ce7f
+  fingerprint: eadd757a8a220d7c97eb2fad55420ee7a5a076ffc7f071cfdaac2ede0457ce7f
+  sha1: sha256:3d66e2734a29800478df3b9fd0366ca0a3965a05727a85ba44a1705f303e91ee
+  dependencies:
+  - go
+- name: cf-redis-nginx
+  version: 88ffa9dd245a64ef2bdc378fe3ac70c6b395e5b7abccf41a8b783a06210b8b0d
+  fingerprint: 88ffa9dd245a64ef2bdc378fe3ac70c6b395e5b7abccf41a8b783a06210b8b0d
+  sha1: sha256:bc6eacb0df7ae766e319d4ac9fc22cc21cd7186b43a776d53ac68807e0c48c51
+  dependencies: []
+- name: cf-redis-smoke-tests
+  version: 2f592e46a98350a90bdb18c8896ed58756cc26631f43310ee88b56bc7eaa2680
+  fingerprint: 2f592e46a98350a90bdb18c8896ed58756cc26631f43310ee88b56bc7eaa2680
+  sha1: sha256:1b00d6eb8d69d93f37646a6a8676cb91722e43b5c468d84ad519ce32118f909b
+  dependencies: []
+- name: ginkgo
+  version: 49b0aecac184f8df66fd37e0ee9af8b0a22628d3214ddd0a076903acca4d44a2
+  fingerprint: 49b0aecac184f8df66fd37e0ee9af8b0a22628d3214ddd0a076903acca4d44a2
+  sha1: sha256:e5056937611b76c19d8b6474a576c690f57a9e9346d8b27a4bf9068d143b0cc0
+  dependencies: []
+- name: go
+  version: 9e6447e30b1bc28ca16d2aab75c0cec0915895eeed9cd8ebefb4b911f293afc9
+  fingerprint: 9e6447e30b1bc28ca16d2aab75c0cec0915895eeed9cd8ebefb4b911f293afc9
+  sha1: sha256:a6b855ebede253f09e25233d2d19ac988c973c9f4adc09854f004191162f9a28
+  dependencies: []
+- name: redis
+  version: b027df77e6e8391c0ca0e9e2efe3e0c04c10547e689df51d0d7e151dfb5732f3
+  fingerprint: b027df77e6e8391c0ca0e9e2efe3e0c04c10547e689df51d0d7e151dfb5732f3
+  sha1: sha256:53fea686920adc5782b86bedd6825554a34359a13f6eee02e7ba96987b59a689
+  dependencies: []
+- name: redis-common
+  version: b16afa494f94b52288c58dcbafc0c33b602b1f6d55a9f092538f9bd051b29fc7
+  fingerprint: b16afa494f94b52288c58dcbafc0c33b602b1f6d55a9f092538f9bd051b29fc7
+  sha1: sha256:9f3161eb75f8dab555d8b8e67755b58490ac6a0ed23758ea868e3852e15246f7
+  dependencies: []
+- name: ruby
+  version: 9ee4cb0b851af160be3a95e2069ea08cda9b462640f1c770d988beaded60ca7e
+  fingerprint: 9ee4cb0b851af160be3a95e2069ea08cda9b462640f1c770d988beaded60ca7e
+  sha1: sha256:a7f4b458533fb529871f865c61bb59fdb5c72e24e76832da9135b07a8ac075fb
+  dependencies: []
+license:
+  version: 6e6b997fae69a730661aef793be8b75311da3254e147c5e7dc71447df4c72ba1
+  fingerprint: 6e6b997fae69a730661aef793be8b75311da3254e147c5e7dc71447df4c72ba1
+  sha1: sha256:61c5e03d6a7a352d612e90a50bc2bf04a4642928d715a3edfb27d754f1aaed0c
