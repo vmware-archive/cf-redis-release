@@ -34,3 +34,7 @@ properties:
   redis.broker.service_access_orgs:
     description: 'Limit your service to only be accessible by the given org.'
     default: []
+  redis.broker.dedicated_node_count:
+    description: 'Number of provisioned dedicated instances'
+  redis.broker.service_instance_limit:
+    description: 'Number of shared vm instances allowed'

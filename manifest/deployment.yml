@@ -96,6 +96,7 @@ properties:
       route_name: ((broker_name))
       service_id: ((service_id))
       service_instance_limit: 5
+      dedicated_node_count: ((dedicated_node_count))
       service_name: ((service_name))
       shared_vm_plan_id: ((shared_vm_plan_id))
       subdomain: ((broker_name))
