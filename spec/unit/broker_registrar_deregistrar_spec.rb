@@ -12,7 +12,9 @@ PROPERTIES = {
     "broker.password" => "password",
     "cf.skip_ssl_validation" => false,
     "redis.broker.enable_service_access" => true,
-    "redis.broker.service_access_orgs" => []
+    "redis.broker.service_access_orgs" => [],
+    "redis.broker.service_instance_limit" => 1,
+    "redis.broker.dedicated_node_count" => 1
 }
 
 shared_examples 'ssl validation is configurable' do
