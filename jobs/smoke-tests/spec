@@ -33,6 +33,8 @@ properties:
   redis.broker.service_name:
     description: Service name displayed in the catalog metadata
     default: p-redis
+  redis.broker.dedicated_node_count:
+    description: Number of provisioned dedicated instances
   redis.broker.service_instance_limit:
     description: The maximum number of instances allowed
   redis.broker.dedicated_nodes:

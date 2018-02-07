@@ -1,6 +1,11 @@
 #!/bin/bash
 set -e
 
+<% if p("redis.broker.service_instance_limit") == 0 && p("redis.broker.dedicated_node_count") == 0 %>
+    echo "Exiting as there are no shared-vms allowed or dedicated nodes provisioned and thus no way to test"
+    exit 0
+<% end %>
+
 export GOROOT=$(readlink -nf /var/vcap/packages/go)
 export PATH=${GOROOT}/bin:${PATH}
 
