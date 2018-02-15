@@ -5,6 +5,11 @@ set -x
 
 export PATH=$PATH:/var/vcap/packages/cf-cli/bin
 
+<% if p("redis.broker.service_instance_limit") == 0 && p("redis.broker.dedicated_node_count") == 0 %>
+    echo "Exiting as there are no shared-vms allowed or dedicated nodes provisioned"
+    exit 0
+<% end %>
+
 CF_API_URL='<%= p("cf.api_url") %>'
 CF_ADMIN_USERNAME='<%= p("cf.admin_username") %>'
 CF_ADMIN_PASSWORD='<%= p("cf.admin_password") %>'
