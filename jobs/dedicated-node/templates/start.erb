@@ -19,7 +19,10 @@ rm -f $DATA_DIR/temp-*.rdb
 
 ulimit -n 10032
 
-echo never > /sys/kernel/mm/transparent_hugepage/enabled
+if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
+  echo never > /sys/kernel/mm/transparent_hugepage/enabled
+fi
+
 sysctl -w net.core.somaxconn=511
 
 # Recommended for running redis on a VM in production (https://www.pivotaltracker.com/story/show/74949514)
