@@ -8,8 +8,8 @@ cf-cli/cf-cli_6.21.1_linux_x86-64.tgz:
   sha: 7dc397d2a0d93887ef50bc1f852beb686563049e
 ginkgo/ginkgo: # git sha 8382b23d18dbaaff8e5f7e83784c53ebb8ec2f47
   size: 10583320
-  object_id: 65fe38e3-b356-465a-5eb2-8b33740b4879
-  sha: 730a12ac065306606bbb026754eb88eab63ea21e
+  object_id: 375645ba-af16-4ced-67aa-9f14a03f7c18
+  sha: e5697ace4ec310cc6bc1ac157b26dd254faa93ac
 go/go1.10.linux-amd64.tar.gz:
   size: 119905205
   object_id: 471755d1-4c91-44e7-7c42-9d6f1b5cce94
