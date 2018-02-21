@@ -15,6 +15,8 @@ RSpec.describe 'smoke-tests config' do
       properties:
         cf:
           api_url: a-cf-url
+          org_name: an-org-name
+          space_name: a-space-name
           admin_username: a-username
           admin_password: a-password
           apps_domain: an-apps-domain
@@ -44,6 +46,8 @@ RSpec.describe 'smoke-tests config' do
       actual_template = render_template(TEMPLATE_PATH, JOB_NAME, manifest, LINKS)
       expect(JSON.parse(actual_template)).to eq({
         'api' => 'a-cf-url',
+        'org_name' => 'an-org-name',
+        'space_name' => 'a-space-name',
         'apps_domain' => 'an-apps-domain',
         'system_domain' => 'a-system-domain',
         'admin_user' => 'a-username',
