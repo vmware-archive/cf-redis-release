@@ -18,10 +18,10 @@ nginx/nginx-1.8.0.tar.gz:
   size: 832104
   object_id: 77904c0d-6bb2-4e3e-b981-16828770f7a2
   sha: 12bad312764feae50246685ab2e74512d1aa9b2f
-redis/redis-3.2.11.tar.gz:
-  size: 1550452
-  object_id: ec399fcd-5705-4248-444d-0ccdbd22b69f
-  sha: ca726709eca5b704ac645a6626997430345ac16e
+redis/redis-4.0.8.tar.gz:
+  size: 1729973
+  object_id: 8c253d4c-47ad-43f0-56c4-66af854d8304
+  sha: f723b327022cef981b4e1d69c37a8db2faeb0622
 ruby/bundler-1.3.5.gem:
   size: 268800
   object_id: 67d8e9d8-a79a-4ebe-8061-9ac59d0224b5
