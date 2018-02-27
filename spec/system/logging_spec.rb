@@ -78,7 +78,7 @@ describe 'logging' do
   end
 
   describe 'dedicated redis process' do
-    REDIS_SERVER_STARTED_PATTERN = "Server started, Redis version"
+    REDIS_SERVER_STARTED_PATTERN = "Ready to accept connections"
 
     def service
       Prof::MarketplaceService.new(
@@ -90,7 +90,7 @@ describe 'logging' do
     before(:all) do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
       @binding = service_broker.bind_instance(@service_instance)
-      @redis_server_accept_conn_pattern = "The server is now ready to accept connections on port #{@binding.credentials[:port]}"
+      @redis_server_running_on_port_pattern = "Running mode=.*, port=#{@binding.credentials[:port]}"
 
       @host = @binding.credentials[:host]
       @log = Logger.new(STDOUT)
@@ -104,14 +104,14 @@ describe 'logging' do
     end
 
     it 'logs to syslog' do
+      expect(count_from_log(dedicated_node_ssh, @redis_server_running_on_port_pattern, SYSLOG_FILE)).to be > 0
       expect(count_from_log(dedicated_node_ssh, REDIS_SERVER_STARTED_PATTERN, SYSLOG_FILE)).to be > 0
-      expect(count_from_log(dedicated_node_ssh, @redis_server_accept_conn_pattern, SYSLOG_FILE)).to be > 0
     end
 
     it 'logs to its local log file' do
       redis_log_file = "/var/vcap/sys/log/redis/redis.log"
+      expect(count_from_log(dedicated_node_ssh, @redis_server_running_on_port_pattern, redis_log_file)).to be > 0
       expect(count_from_log(dedicated_node_ssh, REDIS_SERVER_STARTED_PATTERN, redis_log_file)).to be > 0
-      expect(count_from_log(dedicated_node_ssh, @redis_server_accept_conn_pattern, redis_log_file)).to be > 0
     end
   end
 end
