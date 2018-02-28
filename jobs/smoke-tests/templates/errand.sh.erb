@@ -6,11 +6,8 @@ set -e
     exit 0
 <% end %>
 
-export GOROOT=$(readlink -nf /var/vcap/packages/go)
-export PATH=${GOROOT}/bin:${PATH}
-
-export GOPATH=/var/vcap/packages/cf-redis-smoke-tests
-export PATH=${GOPATH}/bin:${PATH}
+source /var/vcap/packages/golang-1.10-linux/bosh/runtime.env
+export GOPATH=$GOPATH:/var/vcap/packages/cf-redis-smoke-tests
 
 cd /var/vcap/packages/cf-redis-smoke-tests/src/github.com/pivotal-cf/cf-redis-smoke-tests
 export PATH=$PATH:/var/vcap/packages/cf-cli/bin
