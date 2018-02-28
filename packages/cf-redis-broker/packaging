@@ -1,16 +1,15 @@
 # abort script on any command that exits with a non zero value
 set -e
 
+source /var/vcap/packages/golang-1.10-linux/bosh/compile.env
+
 PACKAGE_NAME=github.com/pivotal-cf/cf-redis-broker
 PACKAGE_DIR=${BOSH_INSTALL_TARGET}/src/${PACKAGE_NAME}
 
 mkdir -p $(dirname $PACKAGE_DIR)
-
 cp -a $(basename $PACKAGE_NAME)/ $PACKAGE_DIR
 
-export GOROOT=$(readlink -nf /var/vcap/packages/go)
-export GOPATH=$BOSH_INSTALL_TARGET:${PACKAGE_DIR}/Godeps/_workspace
-export PATH=$GOROOT/bin:$PATH
+export GOPATH=$GOPATH:$BOSH_INSTALL_TARGET:${PACKAGE_DIR}/Godeps/_workspace
 
 BINARIES=( broker processmonitor agent configmigrator )
 for BINARY in "${BINARIES[@]}"
