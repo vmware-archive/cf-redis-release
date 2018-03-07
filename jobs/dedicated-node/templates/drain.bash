@@ -4,6 +4,9 @@ PIDFILE=/var/vcap/sys/run/redis.pid
 LOG_DIR=/var/vcap/sys/log/redis
 SHUTDOWN_LOG="${LOG_DIR}"/shutdown_stdout.log
 SHUTDOWN_ERR_LOG="${LOG_DIR}"/shutdown_stderr.log
+REDIS_CLI_COMMAND=/var/vcap/packages/redis/bin/redis-cli
+REDIS_PASS="$(awk '$1 == "requirepass" {print $2}' /var/vcap/store/redis/redis.conf)"
+REDIS_PORT=$(awk '$1 == "port" {print $2}' /var/vcap/store/redis/redis.conf)
 
 log() {
   echo "$(date): $*" 1>> "$SHUTDOWN_LOG"
@@ -21,6 +24,13 @@ if [ -f "${PIDFILE}" ]; then
         log "Will try and gracefully shutdown redis for 10 minutes and fail if redis fails to save and quit in that time"
         retry_strategy="TERM/600"
     fi
+
+    ${REDIS_CLI_COMMAND} -p ${REDIS_PORT} -a "${REDIS_PASS}" BGREWRITEAOF
+
+    until ${REDIS_CLI_COMMAND} -p ${REDIS_PORT} -a "${REDIS_PASS}" INFO | grep aof_rewrite_in_progress:0
+    do
+      sleep 1
+    done
 
     /sbin/start-stop-daemon \
       --pidfile "$PIDFILE" \
