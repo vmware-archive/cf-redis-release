@@ -27,8 +27,14 @@ if [ -f "${PIDFILE}" ]; then
 
     ${REDIS_CLI_COMMAND} -p ${REDIS_PORT} -a "${REDIS_PASS}" BGREWRITEAOF
 
+    timeout_timestamp=$(date "+%s" + 120)
     until ${REDIS_CLI_COMMAND} -p ${REDIS_PORT} -a "${REDIS_PASS}" INFO | grep aof_rewrite_in_progress:0
     do
+      if [ $timeout_timestamp -lt $(date "+%s") ]; then
+        log_error "Redis failed to rewrite AOF file within 120 seconds"
+        exit 1
+      fi
+
       sleep 1
     done
 
