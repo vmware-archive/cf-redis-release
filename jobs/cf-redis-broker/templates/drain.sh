@@ -24,12 +24,13 @@ disable_process_watcher() {
 
 echo "`date +%c` - Starting AOF rewrites" >> ${log_dir}/drain.log 2>&1
 
+set +e
 for redis_path in $(find /var/vcap/store/cf-redis-broker/redis-data -name redis.conf); do
     REDIS_PASS="$(awk '$1 == "requirepass" {print $2}' ${redis_path})"
     REDIS_PORT=$(awk '$1 == "port" {print $2}' "${redis_path}")
     ${REDIS_CLI_COMMAND} -p ${REDIS_PORT} -a "${REDIS_PASS}" BGREWRITEAOF
 
-    timeout_timestamp=$(date "+%s" + 120)
+    timeout_timestamp=$(($(date "+%s") + 120))
     until ${REDIS_CLI_COMMAND} -p ${REDIS_PORT} -a "${REDIS_PASS}" INFO | grep aof_rewrite_in_progress:0
     do
       if [ $timeout_timestamp -lt $(date "+%s") ]; then
@@ -45,9 +46,8 @@ echo "`date +%c` - Starting drain" >> ${log_dir}/drain.log 2>&1
 
 disable_process_watcher
 
-set +e
-    /sbin/start-stop-daemon -n redis-server --retry TERM/600  --oknodo  --stop >> ${log_dir}/drain.log 2>&1
-    exit_status=$?
+/sbin/start-stop-daemon -n redis-server --retry TERM/600  --oknodo  --stop >> ${log_dir}/drain.log 2>&1
+exit_status=$?
 set -e
 
 case "$exit_status" in
