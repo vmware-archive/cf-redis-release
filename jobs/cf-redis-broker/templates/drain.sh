@@ -30,11 +30,11 @@ for redis_path in $(find /var/vcap/store/cf-redis-broker/redis-data -name redis.
     REDIS_PORT=$(awk '$1 == "port" {print $2}' "${redis_path}")
     ${REDIS_CLI_COMMAND} -p ${REDIS_PORT} -a "${REDIS_PASS}" BGREWRITEAOF >> ${log_dir}/drain.log 2>&1
 
-    timeout_timestamp=$(($(date "+%s") + 120))
+    timeout_timestamp=$(($(date "+%s") + 900))
     until ${REDIS_CLI_COMMAND} -p ${REDIS_PORT} -a "${REDIS_PASS}" INFO | grep aof_rewrite_in_progress:0  >> ${log_dir}/drain.log 2>&1
     do
       if [ $timeout_timestamp -lt $(date "+%s") ]; then
-        echo "$(date): Redis at ${redis_path} failed to rewrite AOF file within 120 seconds" >> ${log_dir}/drain.log 2>&1
+        echo "$(date): Redis at ${redis_path} failed to rewrite AOF file within 900 seconds" >> ${log_dir}/drain.log 2>&1
         exit 1
       fi
 
