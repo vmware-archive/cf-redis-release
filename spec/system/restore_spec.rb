@@ -20,7 +20,7 @@ shared_examples 'it errors when run as non-root user' do |plan|
 
   it 'logs that restore should be run as root' do
     output = @instance_ssh.execute("#{RESTORE_BINARY} #{get_restore_args(plan, @service_instance.id, BACKUP_PATH)}")
-    expect(output).to include 'Permission denied'.or(include 'Operation not permitted')
+    expect(output).to include('Permission denied').or include('Operation not permitted')
     expect(broker_registered?).to be true
   end
 end
