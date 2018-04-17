@@ -1,0 +1,76 @@
+name: cf-redis
+version: 434.0.0
+commit_hash: 6b28aff
+uncommitted_changes: false
+jobs:
+- name: broker-deregistrar
+  version: 7a05e6ad655f4b7171d32447c41490fa67034761b4b57f7bd61fed23d58245cd
+  fingerprint: 7a05e6ad655f4b7171d32447c41490fa67034761b4b57f7bd61fed23d58245cd
+  sha1: sha256:47a11ebbd7f79376d109d63d99b77ef47dc14ca58803a31971add480ae392b8b
+- name: broker-registrar
+  version: 35d025e0aa962c7f0b5a92cc03ee6feb5579ecf087dcfc1dcac581eb5bb684d5
+  fingerprint: 35d025e0aa962c7f0b5a92cc03ee6feb5579ecf087dcfc1dcac581eb5bb684d5
+  sha1: sha256:89eee29d86e927ec7c65b92926a81eaeee3982ca3b95b542c5e96a2b9462ed7a
+- name: cf-redis-broker
+  version: ae79ab716f22ffc0dd72e169749e496e335a3d4f5eb5c0396b3d67ba8ca98b81
+  fingerprint: ae79ab716f22ffc0dd72e169749e496e335a3d4f5eb5c0396b3d67ba8ca98b81
+  sha1: sha256:951b9864dd0ed94f988ab26f4db2143d26b500540f0cfe90d10a02e68889e9a1
+- name: dedicated-node
+  version: 008f9b419305d9250169285abe443c70db00e69b61928e7f1a6f45782567abcf
+  fingerprint: 008f9b419305d9250169285abe443c70db00e69b61928e7f1a6f45782567abcf
+  sha1: sha256:15947009ed40086d6b1dd219d63867010560820b0b749cf33d7df29b9715faee
+- name: smoke-tests
+  version: 2b02d84d13881c91ea399d2e56b378593fb62622daaab2b05765c3cfd373d3df
+  fingerprint: 2b02d84d13881c91ea399d2e56b378593fb62622daaab2b05765c3cfd373d3df
+  sha1: sha256:9bfc1fd1b8a479a820d14c1856511b84a1006e058c84f35c9ee3e0114eca6709
+packages:
+- name: cf-cli
+  version: f4b24c093a4ec3daa0f6bf6fcf2b89722f3985f0f8b0c3db58949dae3ff589e6
+  fingerprint: f4b24c093a4ec3daa0f6bf6fcf2b89722f3985f0f8b0c3db58949dae3ff589e6
+  sha1: sha256:27e1f4965a08a2a6d3cabd77b84b0844dc1db1c9e64cef16fd6c652259f05d7d
+  dependencies: []
+- name: cf-redis-broker
+  version: f5adc5349cd391195cec5117b50baca1153603a40dc78f25d02fec4bd90ea3a5
+  fingerprint: f5adc5349cd391195cec5117b50baca1153603a40dc78f25d02fec4bd90ea3a5
+  sha1: sha256:30f1bb74c21fed77e24371441ab4742008679290249681920512c4063be1b764
+  dependencies:
+  - golang-1.10-linux
+- name: cf-redis-nginx
+  version: 88ffa9dd245a64ef2bdc378fe3ac70c6b395e5b7abccf41a8b783a06210b8b0d
+  fingerprint: 88ffa9dd245a64ef2bdc378fe3ac70c6b395e5b7abccf41a8b783a06210b8b0d
+  sha1: sha256:0559a21676bffeb5ed6136e25116ec1ef76c226a334e9329ae4e3d5aa5328719
+  dependencies: []
+- name: cf-redis-smoke-tests
+  version: e7abc99751eae108ebd818a33f1039566839a5aabde9b0af828980fcd5d1b512
+  fingerprint: e7abc99751eae108ebd818a33f1039566839a5aabde9b0af828980fcd5d1b512
+  sha1: sha256:d2d634fe2916e712aeade4a6c570d70b15407883f5eb606fb7e447466532e2e0
+  dependencies: []
+- name: ginkgo
+  version: c65eebdcf137dec66c6fac2c818dd1e933cd6fc53c41efdabd5fb917dbf144c4
+  fingerprint: c65eebdcf137dec66c6fac2c818dd1e933cd6fc53c41efdabd5fb917dbf144c4
+  sha1: sha256:3f91b8876b7b6e9fd39cc5e3263302e908fd799c0c67450357496254d97ebad6
+  dependencies: []
+- name: golang-1.10-linux
+  version: 48c842421b6f05acf88dc6ec17f7574dade28a86
+  fingerprint: 48c842421b6f05acf88dc6ec17f7574dade28a86
+  sha1: e9a18aebf2c407ce17423c22c913b6612cf4b75f
+  dependencies: []
+- name: redis
+  version: cc123bd31473efa9f56c559fe2560934aee65190bca6cb926d1e9ba9b3903a27
+  fingerprint: cc123bd31473efa9f56c559fe2560934aee65190bca6cb926d1e9ba9b3903a27
+  sha1: sha256:5a6e0676eee56a50c98fa209e7a1f403e9756e3e776883f8d572233feb3755bc
+  dependencies: []
+- name: redis-common
+  version: b16afa494f94b52288c58dcbafc0c33b602b1f6d55a9f092538f9bd051b29fc7
+  fingerprint: b16afa494f94b52288c58dcbafc0c33b602b1f6d55a9f092538f9bd051b29fc7
+  sha1: sha256:49d2766f71834b96672f75a022868f41db62a2df581d01707f2bbb373fd4774c
+  dependencies: []
+- name: ruby
+  version: 9ee4cb0b851af160be3a95e2069ea08cda9b462640f1c770d988beaded60ca7e
+  fingerprint: 9ee4cb0b851af160be3a95e2069ea08cda9b462640f1c770d988beaded60ca7e
+  sha1: sha256:16f6b84181b138873a261534497017e3205fe71ca2a0a74a461a7611991af3af
+  dependencies: []
+license:
+  version: 6e6b997fae69a730661aef793be8b75311da3254e147c5e7dc71447df4c72ba1
+  fingerprint: 6e6b997fae69a730661aef793be8b75311da3254e147c5e7dc71447df4c72ba1
+  sha1: sha256:03891c092dc81af0830da013b0e7aaa376d25db37cd3c016f0a50478c0256b99
