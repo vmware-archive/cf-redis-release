@@ -2,10 +2,6 @@ aws-cli/awscli-bundle.zip:
   size: 5207424
   object_id: 0221dcb3-3ce0-44e6-8c4f-c5c2abf1b0eb
   sha: db33b4740a670c9fb3bc5515cd7f9861fa1b1b13
-cf-cli/cf-cli_6.21.1_linux_x86-64.tgz:
-  size: 6543090
-  object_id: 34b04b35-3928-4264-9a49-33b07af83a7e
-  sha: 7dc397d2a0d93887ef50bc1f852beb686563049e
 ginkgo/ginkgo:
   size: 10583320
   object_id: 375645ba-af16-4ced-67aa-9f14a03f7c18

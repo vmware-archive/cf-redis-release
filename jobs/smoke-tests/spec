@@ -8,7 +8,7 @@ packages:
 - golang-1.10-linux
 - ginkgo
 - cf-redis-smoke-tests
-- cf-cli
+- cf-cli-6-linux
 
 consumes:
 - name: redis_broker

@@ -3,7 +3,7 @@
 set -e
 set -x
 
-export PATH=$PATH:/var/vcap/packages/cf-cli/bin
+export PATH=$PATH:/var/vcap/packages/cf-cli-6-linux/bin
 
 <% if p("redis.broker.service_instance_limit") == 0 && p("redis.broker.dedicated_node_count") == 0 %>
     echo "Exiting as there are no shared-vms allowed or dedicated nodes provisioned"
