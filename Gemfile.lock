@@ -282,7 +282,7 @@ GEM
       nokogiri (~> 1.5)
       trollop (~> 2.1)
     recursive-open-struct (0.5.0)
-    redis (4.0.1)
+    redis (3.3.3)
     rest-client (2.0.2)
       http-cookie (>= 1.0.2, < 2.0)
       mime-types (>= 1.16, < 4.0)
@@ -356,7 +356,7 @@ DEPENDENCIES
   pry
   pry-byebug
   rake
-  redis
+  redis (= 3.3.3)
   rspec
   rspec-eventually
   rspec-instafail
