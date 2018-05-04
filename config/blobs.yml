@@ -14,3 +14,19 @@ redis/redis-4.0.8.tar.gz:
   size: 1729973
   object_id: 8c253d4c-47ad-43f0-56c4-66af854d8304
   sha: f723b327022cef981b4e1d69c37a8db2faeb0622
+ruby/bundler-1.3.5.gem:
+  size: 268800
+  object_id: 67d8e9d8-a79a-4ebe-8061-9ac59d0224b5
+  sha: 2cad3052a59b83f1f616e8202f5c714e46bd8523
+ruby/ruby-2.1.5.tar.gz:
+  size: 15127433
+  object_id: 698d02c7-61f9-4d14-893a-f4a8f085fc92
+  sha: 9c0a238bd7839a4b51871641945a3da90997b8c2
+ruby/rubygems-2.1.11.tgz:
+  size: 367166
+  object_id: a043d80c-896d-4165-b81f-a922a7817a33
+  sha: ca3033432cae28deb7ced79cda271cb292b70e59
+ruby/yaml-0.1.5.tar.gz:
+  size: 504897
+  object_id: b31f889b-5ae8-42ac-b6f1-f66b7126c784
+  sha: 8b78cb9f759c7d80db8a7328c0ebecfe34fde737
