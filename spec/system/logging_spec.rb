@@ -94,13 +94,13 @@ describe 'logging' do
 
       @host = @binding.credentials[:host]
       @log = Logger.new(STDOUT)
-      @log.info("Provisioned dedicated instance #{@host} for tests")
+      @log.info("Provisioned dedicated instance #{@host}:#{@binding.credentials[:port]} for tests")
     end
 
     after(:all) do
       service_broker.unbind_instance(@binding)
       service_broker.deprovision_instance(@service_instance)
-      @log.info("Deprovisioned dedicated instance #{@host} for tests")
+      @log.info("Deprovisioned dedicated instance #{@host}:#{@binding.credentials[:port]} for tests")
     end
 
     it 'logs to syslog' do
