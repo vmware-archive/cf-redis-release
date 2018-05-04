@@ -4,7 +4,6 @@ require 'system/shared_examples/redis_instance'
 
 require 'prof/external_spec/shared_examples/service'
 require 'prof/marketplace_service'
-require 'logger'
 
 describe 'shared plan' do
   def service
@@ -19,7 +18,6 @@ describe 'shared plan' do
       environment.bosh_service_broker_job_name,
       bosh_manifest.deployment_name,
     ).first
-    @log = Logger.new(STDOUT)
   end
 
   # TODO do not manually run drain once bosh bug fixed
