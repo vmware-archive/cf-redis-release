@@ -27,12 +27,10 @@ describe 'shared plan' do
     before(:all) do
       @preprovision_timestamp = broker_ssh.execute('date +%s')
       @service_instance       = service_broker.provision_instance(service.name, service.plan)
-      @log.info("Provisioned shared instance #{@service_instance} for tests")
     end
 
     after(:all) do
       service_broker.deprovision_instance(@service_instance)
-      @log.info("Deprovisioned shared instance #{@service_instance} for tests")
     end
 
     it 'logs instance provisioning' do
@@ -50,11 +48,9 @@ describe 'shared plan' do
   describe 'redis deprovisioning' do
     before(:all) do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @log.info("Provisioned shared instance #{@service_instance} for tests")
 
       @predeprovision_timestamp = broker_ssh.execute("date +%s")
       service_broker.deprovision_instance(@service_instance)
-      @log.info("Deprovisioned shared instance #{@service_instance} for tests")
     end
 
     it 'logs instance deprovisioning' do
@@ -73,7 +69,6 @@ describe 'shared plan' do
     before(:all) do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
       @service_binding  = service_broker.bind_instance(@service_instance)
-      @log.info("Provisioned shared instance #{@service_instance} for tests")
 
       @service_client = service_client_builder(@service_binding)
       @service_client.write('test_key', 'test_value')
@@ -86,7 +81,6 @@ describe 'shared plan' do
     after(:all) do
       service_broker.unbind_instance(@service_binding)
       service_broker.deprovision_instance(@service_instance)
-      @log.info("Deprovisioned shared instance #{@service_instance} for tests")
     end
 
     it 'preserves data' do
@@ -115,13 +109,11 @@ describe 'shared plan' do
     before(:all) do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
       @service_binding  = service_broker.bind_instance(@service_instance)
-      @log.info("Provisioned shared instance #{@service_instance} for tests")
     end
 
     after(:all) do
       service_broker.unbind_instance(@service_binding)
       service_broker.deprovision_instance(@service_instance)
-      @log.info("Deprovisioned shared instance #{@service_instance} for tests")
     end
 
     describe 'configuration' do
@@ -206,7 +198,6 @@ describe 'shared plan' do
     before(:all) do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
       @service_binding  = service_broker.bind_instance(@service_instance)
-      @log.info("Provisioned shared instance #{@service_instance} for tests")
 
       ps_output = broker_ssh.execute('sudo ps aux | grep redis-serve[r]')
       expect(ps_output.strip).not_to be_empty
@@ -234,7 +225,6 @@ describe 'shared plan' do
 
       service_broker.unbind_instance(@service_binding)
       service_broker.deprovision_instance(@service_instance)
-      @log.info("Deprovisioned shared instance #{@service_instance} for tests")
     end
 
     it 'successfuly drained the redis instance' do
@@ -247,7 +237,6 @@ describe 'shared plan' do
     before do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
       @service_binding  = service_broker.bind_instance(@service_instance)
-      @log.info("Provisioned shared instance #{@service_instance} for tests")
 
       ps_output = broker_ssh.execute('sudo ps aux | grep redis-serve[r]')
       expect(ps_output).not_to be_empty
@@ -260,7 +249,6 @@ describe 'shared plan' do
 
       service_broker.unbind_instance(@service_binding)
       service_broker.deprovision_instance(@service_instance)
-      @log.info("Deprovisioned shared instance #{@service_instance} for tests")
     end
 
     it 'kills all redis-server processes when stopped' do
