@@ -7,7 +7,9 @@ BIN_DIR=/var/vcap/packages/cf-redis-broker/bin
 INSTANCE_LOG_DIR=<%= p('redis.log_directory') %>
 DATA_DIR=<%= p('redis.data_directory') %>
 PIDFILE_DIR=<%= p('redis.pidfile_directory') %>
-STATEFILE_DIR=`dirname <%= p('redis.statefile_path') %>`
+STATEFILE=`dirname <%= p('redis.statefile_path') %>`
+CONF_FILE=<%= p('redis.conf_path') %>
+CONF_DIR=<%= p('redis.conf_directory') %>
 <% if_p('service-backup.source_folder') do %>
 BACKUP_SOURCE_DIR=<%= p('service-backup.source_folder') %>
 <% end %>
@@ -23,8 +25,12 @@ case $1 in
   start)
     pid_guard $PIDFILE "Redis Broker"
 
-    mkdir -p $RUN_DIR $LOG_DIR $DATA_DIR $INSTANCE_LOG_DIR $STATEFILE_DIR $BACKUP_TMP_DIR $PIDFILE_DIR $BACKUP_SOURCE_DIR
-    chown vcap:vcap $RUN_DIR $LOG_DIR $DATA_DIR $INSTANCE_LOG_DIR $STATEFILE_DIR $BACKUP_TMP_DIR $PIDFILE_DIR $BACKUP_SOURCE_DIR
+    mkdir -p $RUN_DIR $LOG_DIR $DATA_DIR $INSTANCE_LOG_DIR $STATEFILE $BACKUP_TMP_DIR $PIDFILE_DIR $BACKUP_SOURCE_DIR
+    chown vcap:vcap $RUN_DIR $LOG_DIR $DATA_DIR $INSTANCE_LOG_DIR $STATEFILE $BACKUP_TMP_DIR $PIDFILE_DIR $BACKUP_SOURCE_DIR $CONF_FILE $CONF_DIR
+    chmod 755 ${DATA_DIR}
+    chmod 750 ${CONF_DIR}
+    chmod 640 ${CONF_FILE}
+    chmod 750 ${PIDFILE_DIR}
 
     # Recommended for running redis on a VM in production (https://www.pivotaltracker.com/story/show/74949514)
     sysctl vm.overcommit_memory=1
