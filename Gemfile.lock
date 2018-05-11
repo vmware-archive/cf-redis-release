@@ -350,6 +350,7 @@ PLATFORMS
 
 DEPENDENCIES
   aws-sdk
+  bosh_cli
   httparty
   process_helper
   prof (= 0.38.0)
@@ -366,4 +367,4 @@ RUBY VERSION
    ruby 2.4.0p0
 
 BUNDLED WITH
-   1.16.1
+   1.15.3
