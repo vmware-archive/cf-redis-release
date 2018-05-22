@@ -1,7 +1,7 @@
-# Cloud Foundry Redis Service Broker
+# Cloud Foundry Redis Release
 
 This repository contains a BOSH release for a Cloud Foundry Redis service
-broker.
+broker. It will support dedicated and shared-vm plans.
 
 ```shell
 git clone https://github.com/pivotal-cf/cf-redis-release ~/workspace/cf-redis-release
@@ -22,8 +22,8 @@ git submodule update --init --recursive
    - BOSH_CLIENT_SECRET
    - BOSH_DEPLOYMENT
 1. `direnv allow`
-1. routing release `0.157.0` (`bosh upload-release http://bosh.io/d/github.com/cloudfoundry-incubator/cf-routing-release?v=0.157.0`)
-1. syslog-migration release `8` (`bosh upload-release https://github.com/pivotal-cf/syslog-migration-release/releases/download/v8/syslog-migration-8.tgz`)
+1. routing release (`bosh upload-release http://bosh.io/d/github.com/cloudfoundry-incubator/cf-routing-release?v=0.161.0`)
+1. syslog-migration release `11` (`bosh upload-release https://github.com/pivotal-cf/syslog-migration-release/releases/download/v8/syslog-migration-11.tgz`)
 
 ## Deployment
 
@@ -40,7 +40,7 @@ bosh upload-release
 bosh deploy --vars-file secrets/vars.yml manifest/deployment.yml
 
 # or if you are deploying on GCP:
-#bosh deploy --vars-file secrets/vars.yml manifest/deployment.yml --ops-file manifest/ops-public-ip-gcp.yml
+bosh deploy --vars-file secrets/vars.yml manifest/deployment.yml --ops-file manifest/ops-public-ip-gcp.yml
 # this ops-file adds a GCP specific vm_extension: `public_ip`, which is required to allow
 # instances to send outgoing public traffic. e.g. for the broker_registrar to register with the CF.
 ```
