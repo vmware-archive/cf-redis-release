@@ -14,25 +14,37 @@ git submodule update --init --recursive
 
 ## Deployment dependencies
 
-1. bosh2 CLI (you may use the old CLI but instructions will use the new one)
-1. `direnv` (or set envs yourself)
-1. a bosh director
-1. a cloud foundry deployment
-1. fill out the following envs of the `.envrc.template` file and save as .envrc:
+1. [BOSH CLI v2+](https://github.com/cloudfoundry/bosh-cli) (you may use the old [BOSH CLI](https://github.com/cloudfoundry/bosh) but instructions will use the new one)
+2. [direnv](https://github.com/direnv/direnv) (or set environment variables yourself)
+3. a bosh director
+4. a cloud foundry deployment
+
+## Setup
+1. fill out the following environment variables of the `.envrc.template` file
+and save as .envrc or export them:
    - BOSH_ENVIRONMENT
    - BOSH_CA_CERT
    - BOSH_CLIENT
    - BOSH_CLIENT_SECRET
    - BOSH_DEPLOYMENT
-1. `direnv allow`
-1. routing release (`bosh upload-release http://bosh.io/d/github.com/cloudfoundry-incubator/cf-routing-release?v=0.161.0`)
-1. syslog-migration release `11` (`bosh upload-release https://github.com/pivotal-cf/syslog-migration-release/releases/download/v8/syslog-migration-11.tgz`)
+1. in case you are using `direnv`
+    ```shell
+    direnv allow
+    ```
+1. upload routing release 
+    ```shell
+    bosh upload-release http://bosh.io/d/github.com/cloudfoundry-incubator/cf-routing-release?v=0.161.0
+    ```
+1. upload syslog-migration release `11`
+    ```shell
+    bosh upload-release https://github.com/pivotal-cf/syslog-migration-release/releases/download/v8/syslog-migration-11.tgz
+    ```
 
 ## Deployment
 
-Populate a vars file (using `manifest/vars-lite.yml` as a template), save it to
-`secrets/vars.yml`. You will need values from both your cloud-config and secrets
-from your cf-deployment.
+Populate a vars file (using `manifest/vars-lite.yml` as a template), save it
+to `secrets/vars.yml`. You will need values from both your cloud-config and
+secrets from your cf-deployment.
 
 To deploy:
 
@@ -55,13 +67,19 @@ The following ports and ranges are used in this service:
 - broker vm, port 12350: access to the broker from the cloud controllers
 - broker vm, ports 32768-61000: on the service broker from the Diego Cell and
 Diego Brain network(s). This is only required for the shared service plan
-- dedicated node, port 6379: access to all dedicated nodes from the Diego Cell
-and Diego Brain network(s)
+- dedicated node, port 6379: access to all dedicated nodes from the Diego
+Cell and Diego Brain network(s)
 
 ## Testing
 
-1. `bundle install`
-1. `bundle exec rspec spec`
+1. install gem requirements 
+    ```shell
+    bundle install
+    ```
+2. run the tests
+    ```
+    bundle exec rspec spec`
+    ```
 
 ## Related Documentation
 
@@ -92,17 +110,18 @@ instances. BOSH will not try to re-use the previous IPs since those are still
 restricted in the cloud config. Since the IPs have changed, application
 bindings will break and the state in the broker will be out of sync with the
 new deployment. It is possible that previously allocated instances containing
-application data are erroneously re-allocated to another unrelated application,
-causing data to be leaked.
+application data are erroneously re-allocated to another unrelated
+application, causing data to be leaked.
 
 In order to avoid this scenario, the operator must remove the reserved static
-IPs in the cloud config at the same time as they are remove from the manifest.
-This will allow BOSH to keep the same IP addresses for the existing nodes.
+IPs in the cloud config at the same time as they are remove from the
+manifest. This will allow BOSH to keep the same IP addresses for the existing
+nodes.
 
 To safely transition from static to dynamic IPs:
 1. look up the static IPs that were specified in the manifest when deploying
-   your dedicated nodes
+your dedicated nodes
 1. ensure these IPs are no longer included in the static range of the network
-   in your cloud config
+in your cloud config
 1. remove the static IPs from the manifest
 1. deploy using the manifest without static IPs
