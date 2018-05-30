@@ -13,7 +13,7 @@ templates:
   nginx.conf.erb: config/nginx.conf
   redis.conf.erb: config/redis.conf
 
-  drain.sh: bin/drain
+  drain.sh.erb: bin/drain
 
 packages:
 - cf-redis-broker
