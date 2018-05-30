@@ -28,7 +28,7 @@ set +e
 for redis_path in $(find /var/vcap/store/cf-redis-broker/redis-data -name redis.conf); do
     REDIS_PASS="$(awk '$1 == "requirepass" {print $2}' ${redis_path})"
     REDIS_PORT=$(awk '$1 == "port" {print $2}' "${redis_path}")
-    ${REDIS_CLI_COMMAND} -p ${REDIS_PORT} -a "${REDIS_PASS}" BGREWRITEAOF >> ${log_dir}/drain.log 2>&1
+    ${REDIS_CLI_COMMAND} -p ${REDIS_PORT} -a "${REDIS_PASS}" <%= p('redis.bg_rewrite_aof_command') %> >> ${log_dir}/drain.log 2>&1
 
     timeout_timestamp=$(($(date "+%s") + 900))
     while ${REDIS_CLI_COMMAND} -p ${REDIS_PORT} -a "${REDIS_PASS}" INFO | grep aof_rewrite_in_progress:1  >> ${log_dir}/drain.log 2>&1

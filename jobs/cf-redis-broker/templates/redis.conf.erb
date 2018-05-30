@@ -693,8 +693,8 @@ aof-rewrite-incremental-fsync yes
 rename-command CONFIG "<%= p('redis.config_command') %>"
 rename-command SAVE "<%= p('redis.save_command') %>"
 rename-command BGSAVE "<%= p('redis.bg_save_command') %>"
+rename-command BGREWRITEAOF "<%= p('redis.bg_rewrite_aof_command') %>"
 
-rename-command BGREWRITEAOF ""
 rename-command DEBUG ""
 rename-command MONITOR ""
 rename-command SHUTDOWN ""

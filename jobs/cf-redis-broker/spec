@@ -67,6 +67,9 @@ properties:
   redis.bg_save_command:
     default: ""
     description: The name of the obfuscated redis BGSAVE command.
+  redis.bg_rewrite_aof_command:
+    default: "06368efbfc3749d09b6ec60a0b54e4b5"
+    description: The name of the obfuscated redis BGREWRITEAOF command.
   redis.client_timeout:
     default: 0
     description: Close the connection after a client is idle for N seconds (0 to disable)
