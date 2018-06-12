@@ -23,7 +23,10 @@ rm -f $DATA_DIR/temp-*.rdb
 ulimit -n 10032
 
 if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
+  # fail silently as bosh-lite is a read-only file system
+  set +e
   echo never > /sys/kernel/mm/transparent_hugepage/enabled
+  set -e
 fi
 
 sysctl -w net.core.somaxconn=511
