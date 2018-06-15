@@ -42,12 +42,9 @@ module Helpers
       end
 
       def drain
-        Timeout::timeout(FIVE_MINUTES) {
-          while true do
-            return if get_line.include? 'no logs available'
-            sleep TEN_MILLISECONDS
-          end
-        }
+        @gateway_executor.exec!(Proc.new do |host, port|
+          Net::HTTP.get(URI.parse("http://#{host}:#{port}/drain"))
+        end)
       end
     end
 
