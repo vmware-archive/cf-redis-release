@@ -37,7 +37,7 @@ http {
     }
 
     ssl_protocols TLSv1.2;  # don’t use SSLv3 ref: POODLE
-    ssl_ciphers 'DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!3DES:!MD5:!PSK';
+    ssl_ciphers 'DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!3DES:!MD5:!PSK:!ADH:!SRP';
     ssl_prefer_server_ciphers on;
     ssl_certificate        /var/vcap/store/dedicated-node/nginx/redis-agent.pem;
     ssl_certificate_key    /var/vcap/store/dedicated-node/nginx/redis-agent.key;
