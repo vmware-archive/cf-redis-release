@@ -53,11 +53,6 @@ describe 'logging' do
       expect(count_from_log(broker_ssh, redis_server_starting_pattern, SYSLOG_FILE)).to be > 0
     end
 
-    it 'logs to syslog' do
-      nginx_pattern = "Cf#{environment.service_broker_name.capitalize}BrokerNginxAccess"
-      expect(count_from_log(broker_ssh, nginx_pattern, SYSLOG_FILE)).to be > 0
-    end
-
     it 'allows log access via bosh' do
       log_files_by_job = {
         Helpers::Environment::BROKER_JOB_NAME => [
@@ -117,6 +112,6 @@ describe 'logging' do
 end
 
 def count_from_log(ssh_target, pattern, log_file)
-  output = ssh_target.execute(%Q{sudo grep -c "#{pattern}" #{log_file}})
+  output = ssh_target.execute(%Q{sudo grep -v grep #{log_file} | grep -c "#{pattern}"})
   Integer(output.strip)
 end
