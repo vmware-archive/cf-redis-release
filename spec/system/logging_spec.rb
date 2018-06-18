@@ -112,6 +112,6 @@ describe 'logging' do
 end
 
 def count_from_log(ssh_target, pattern, log_file)
-  output = ssh_target.execute(%Q{sudo grep -c "#{pattern}" #{log_file}})
+  output = ssh_target.execute(%Q{sudo grep -v grep #{log_file} | grep -c "#{pattern}"})
   Integer(output.strip)
 end
