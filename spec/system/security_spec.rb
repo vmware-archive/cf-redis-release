@@ -50,7 +50,7 @@ def get_allowed_ciphers
     function cipher_is_allowed() {
       result=$(test_cipher $cipher)
 
-      if [[ "$result" =~ "Cipher is ${cipher}" || "$result" =~ "Cipher    :" ]]; then
+      if [[ "$result" =~ "Cipher is ${cipher}" || "$result" =~ "Cipher    : ${cipher}" ]]; then
         echo true
       fi
     }
