@@ -33,7 +33,7 @@ instance_groups:
     consumes:
       nats: {from: nats, deployment: "((cf_deployment_name))"}
   - name: syslog_forwarder
-    release: syslog-migration
+    release: syslog
     properties: &syslog-configuration
       syslog:
         address: ((syslog_endpoint_host))
@@ -63,7 +63,7 @@ instance_groups:
   - name: dedicated-node
     release: cf-redis
   - name: syslog_forwarder
-    release: syslog-migration
+    release: syslog
     properties: *syslog-configuration
 
 properties:
@@ -111,8 +111,8 @@ releases:
   version: latest
 - name: routing
   version: 0.174.0
-- name: syslog-migration
-  version: 9
+- name: syslog
+  version: 11.3.2
 
 stemcells:
 - alias: default
