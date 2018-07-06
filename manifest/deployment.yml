@@ -39,11 +39,6 @@ instance_groups:
         address: ((syslog_endpoint_host))
         port: ((syslog_endpoint_port))
         transport: tcp
-        migration:
-          message_format: job_index_id
-          cleanup_conf_files:
-          - 00-syslog_forwarder.conf
-          - 05-syslog_forwarder.conf
   - name: broker-registrar
     release: cf-redis
   - name: broker-deregistrar
@@ -112,7 +107,7 @@ releases:
 - name: routing
   version: 0.174.0
 - name: syslog
-  version: 11.3.2
+  version: latest
 
 stemcells:
 - alias: default
