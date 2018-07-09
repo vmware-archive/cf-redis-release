@@ -38,7 +38,7 @@ cf auth $CF_ADMIN_USERNAME $CF_ADMIN_PASSWORD
 cf create-service-broker $BROKER_NAME $BROKER_USERNAME $BROKER_PASSWORD $BROKER_URL || cf update-service-broker $BROKER_NAME $BROKER_USERNAME $BROKER_PASSWORD $BROKER_URL
 set -x
 
-# disable-servic-access must happen in order to reset service-access. You can then reconfigure access accordingly.
+# disable-service-access must happen in order to reset service-access. You can then reconfigure access accordingly.
 cf disable-service-access $BROKER_SERVICE_NAME
 
 <% if p("redis.broker.enable_service_access") %>
@@ -50,3 +50,5 @@ cf disable-service-access $BROKER_SERVICE_NAME
     <% end %>
   <% end %>
 <% end %>
+
+cf disable-service-access $BROKER_SERVICE_NAME -p dedicated-vm

@@ -92,6 +92,11 @@ describe 'cf-redis-broker broker_registrar errand' do
       expect(template_out_script).to include("cf enable-service-access -o #{org_2} $BROKER_SERVICE_NAME")
     end
   end
+  context 'dedicated service plan' do
+    it 'is disabled' do
+      expect(template_out_script).to include("cf disable-service-access $BROKER_SERVICE_NAME -p dedicated-vm")
+    end
+  end
 end
 
 
