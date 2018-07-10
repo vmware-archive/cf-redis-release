@@ -14,8 +14,6 @@ properties:
   cf.skip_ssl_validation:
     description: 'Skip SSL certificate validation'
     default: true
-  broker.name:
-    description: 'Name of the service broker'
   broker.protocol:
     description: 'Protocol (http/https) provided to the Cloud Controller when registering/deregistering the broker'
     default: https
