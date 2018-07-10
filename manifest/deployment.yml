@@ -50,6 +50,8 @@ instance_groups:
     release: cf-redis
   - name: smoke-tests
     release: cf-redis
+  - name: remove-deprecated-functionality
+    release: cf-redis
 
 - instances: ((dedicated_node_count))
   name: dedicated-node
