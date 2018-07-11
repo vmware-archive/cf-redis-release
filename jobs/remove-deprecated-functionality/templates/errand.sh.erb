@@ -30,4 +30,6 @@ set +x
 cf auth $CF_ADMIN_USERNAME $CF_ADMIN_PASSWORD
 set -x
 
+set +e
 cf disable-service-access $BROKER_SERVICE_NAME -p dedicated-vm
+set -e
