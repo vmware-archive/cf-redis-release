@@ -119,17 +119,17 @@ module Helpers
       end
 
       def eventually_contains_shutdown_log(prestop_timestamp)
-        24.times do
+        12.times do
           vm_log = execute("sudo cat /var/log/syslog")
           contains_expected_shutdown_log = drop_log_lines_before(prestop_timestamp, vm_log).any? do |line|
             line.include?('Starting Redis Broker shutdown')
           end
 
           return true if contains_expected_shutdown_log
-          sleep 10
+          sleep 5
         end
 
-        puts "Broker did not log shutdown within 240 seconds"
+        puts "Broker did not log shutdown within 60 seconds"
         false
       end
 
