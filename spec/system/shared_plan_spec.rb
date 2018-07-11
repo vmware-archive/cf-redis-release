@@ -88,7 +88,7 @@ describe 'shared plan' do
     end
   end
 
-  context 'when stopping the broker vm' do
+  context 'when stopping the broker vm', :skip => true  do
     before(:all) do
       @prestop_timestamp = broker_ssh.execute("date +%s")
       bosh_director.stop(environment.bosh_service_broker_job_name, 0)
