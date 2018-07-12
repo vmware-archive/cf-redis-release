@@ -17,8 +17,6 @@ describe 'dedicated plan' do
 
   let(:redis_config_command) { bosh_manifest.property('redis.config_command') }
 
-  # defining manually_drain skips duplicate shared_example within prof
-  let(:manually_drain) { '' }
   it_behaves_like 'a persistent cloud foundry service'
 
   let(:admin_command_availability) do
@@ -76,7 +74,7 @@ describe 'dedicated plan' do
     end
 
     it 'logs instance provisioning' do
-      vm_log = broker_ssh.execute('sudo cat /var/log/syslog')
+      vm_log = broker_ssh.execute('sudo cat /var/vcap/sys/log/cf-redis-broker/cf-redis-broker.stdout.log')
       contains_expected_log = drop_log_lines_before(@preprovision_timestamp, vm_log).any? do |line|
         line.include?('Successfully provisioned Redis instance') &&
         line.include?('dedicated-vm') &&
@@ -95,7 +93,7 @@ describe 'dedicated plan' do
     end
 
     it 'logs instance deprovisioning' do
-      vm_log = broker_ssh.execute('sudo cat /var/log/syslog')
+      vm_log = broker_ssh.execute('sudo cat /var/vcap/sys/log/cf-redis-broker/cf-redis-broker.stdout.log')
       contains_expected_log = drop_log_lines_before(@predeprovision_timestamp, vm_log).any? do |line|
         line.include?('Successfully deprovisioned Redis instance') &&
         line.include?('dedicated-vm') &&

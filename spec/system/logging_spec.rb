@@ -48,11 +48,6 @@ describe 'logging' do
       expect(broker_ssh.wait_for_process_start(Helpers::Environment::BROKER_JOB_NAME)).to be true
     end
 
-    it 'logs broker startup to syslog' do
-      redis_server_starting_pattern = "redis-broker.Starting CF Redis broker"
-      expect(count_from_log(broker_ssh, redis_server_starting_pattern, SYSLOG_FILE)).to be > 0
-    end
-
     it 'allows log access via bosh' do
       log_files_by_job = {
         Helpers::Environment::BROKER_JOB_NAME => [
@@ -96,11 +91,6 @@ describe 'logging' do
       service_broker.unbind_instance(@binding)
       service_broker.deprovision_instance(@service_instance)
       @log.info("Deprovisioned dedicated instance #{@host} for tests")
-    end
-
-    it 'logs to syslog' do
-      expect(count_from_log(dedicated_node_ssh, @redis_server_running_on_port_pattern, SYSLOG_FILE)).to be > 0
-      expect(count_from_log(dedicated_node_ssh, REDIS_SERVER_STARTED_PATTERN, SYSLOG_FILE)).to be > 0
     end
 
     it 'logs to its local log file' do

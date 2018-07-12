@@ -120,7 +120,7 @@ module Helpers
 
       def eventually_contains_shutdown_log(prestop_timestamp)
         12.times do
-          vm_log = execute("sudo cat /var/log/syslog")
+          vm_log = execute("sudo cat /var/vcap/sys/log/cf-redis-broker/cf-redis-broker.stdout.log")
           contains_expected_shutdown_log = drop_log_lines_before(prestop_timestamp, vm_log).any? do |line|
             line.include?('Starting Redis Broker shutdown')
           end

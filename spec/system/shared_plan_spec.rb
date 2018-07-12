@@ -20,9 +20,6 @@ describe 'shared plan' do
     ).first
   end
 
-  # TODO do not manually run drain once bosh bug fixed
-  let(:manually_drain) { '/var/vcap/jobs/cf-redis-broker/bin/drain' }
-
   describe 'redis provisioning' do
     before(:all) do
       @preprovision_timestamp = broker_ssh.execute('date +%s')
@@ -34,7 +31,7 @@ describe 'shared plan' do
     end
 
     it 'logs instance provisioning' do
-      vm_log = broker_ssh.execute('sudo cat /var/log/syslog')
+      vm_log = broker_ssh.execute('sudo cat /var/vcap/sys/log/cf-redis-broker/cf-redis-broker.stdout.log')
       contains_expected_log = drop_log_lines_before(@preprovision_timestamp, vm_log).any? do |line|
         line.include?('Successfully provisioned Redis instance') &&
         line.include?('shared-vm') &&
@@ -54,7 +51,7 @@ describe 'shared plan' do
     end
 
     it 'logs instance deprovisioning' do
-      vm_log = broker_ssh.execute('sudo cat /var/log/syslog')
+      vm_log = broker_ssh.execute('sudo cat /var/vcap/sys/log/cf-redis-broker/cf-redis-broker.stdout.log')
       contains_expected_log = drop_log_lines_before(@predeprovision_timestamp, vm_log).any? do |line|
         line.include?('Successfully deprovisioned Redis instance') &&
         line.include?('shared-vm') &&
@@ -88,7 +85,7 @@ describe 'shared plan' do
     end
   end
 
-  context 'when stopping the broker vm', :skip => true  do
+  context 'when stopping the broker vm'  do
     before(:all) do
       @prestop_timestamp = broker_ssh.execute("date +%s")
       bosh_director.stop(environment.bosh_service_broker_job_name, 0)
