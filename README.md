@@ -1,7 +1,7 @@
 # Cloud Foundry Redis Release
 
 This repository contains a BOSH release for a Cloud Foundry Redis service
-broker. It will support dedicated and shared-vm plans.
+broker. It supports shared-vm plans. Dedicated-vm plans are being deprecated.
 
 > There is no active feature development for this repository. Please note that
 some features *might* change or get removed in future commits.
