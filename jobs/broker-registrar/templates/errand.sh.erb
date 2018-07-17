@@ -51,6 +51,8 @@ cf disable-service-access $BROKER_SERVICE_NAME
   <% end %>
 <% end %>
 
-set +e
-cf disable-service-access $BROKER_SERVICE_NAME -p dedicated-vm
-set -e
+<% if p("redis.broker.enable_deprecate_dedicated_service_access") %>
+  set +e
+  cf disable-service-access $BROKER_SERVICE_NAME -p dedicated-vm
+  set -e
+<% end %>

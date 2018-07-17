@@ -38,3 +38,6 @@ properties:
     description: 'Number of provisioned dedicated instances'
   redis.broker.service_instance_limit:
     description: 'Number of shared vm instances allowed'
+  redis.broker.enable_deprecate_dedicated_service_access:
+    description: 'If set to true broker-registrar errand will disable access to dedicated-vm plan'
+    default: false
