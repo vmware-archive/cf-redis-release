@@ -66,7 +66,7 @@ describe 'metrics', :skip_metrics => true do
   end
 
   def find_metric(metric_name, job_name, job_index)
-    job_id = metron_id_from_job_index(job_name, job_index)
+    job_id = loggregator_agent_id_from_job_index(job_name, job_index)
     60.times do
       File.open(firehose_out_file, "r") do |file|
         regex = /(?=.*job:"#{job_name}")(?=.*index:"#{job_id}")(?=.*name:"#{metric_name}")/
@@ -80,11 +80,10 @@ describe 'metrics', :skip_metrics => true do
     fail("metric '#{metric_name}' for job '#{job_name}' with index '#{job_id}' not found")
   end
 
-  def metron_id_from_job_index(job_name, job_index)
+  def loggregator_agent_id_from_job_index(job_name, job_index)
     job_ssh = Helpers::BOSH::SSH.new(bosh_manifest.deployment_name, job_name, job_index)
 
-    metron_agent_config = job_ssh.execute('sudo cat /var/vcap/jobs/metron_agent/config/metron_agent.json')
-    JSON.parse(metron_agent_config).fetch("Index")
+    job_ssh.execute("sudo -- sh -c '/var/vcap/jobs/loggregator_agent/bin/environment.sh &> /dev/null; printf '%s' $AGENT_IP'")
   end
 
   def firehose_out_file
