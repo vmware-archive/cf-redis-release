@@ -19,7 +19,9 @@ git submodule update --init --recursive
 3. a bosh director
 4. a cloud foundry deployment
 
-## Setup
+## Deployment
+Run the following steps:
+
 1. fill out the following environment variables of the `.envrc.template` file
 and save as .envrc or export them:
    - BOSH_ENVIRONMENT
@@ -27,22 +29,17 @@ and save as .envrc or export them:
    - BOSH_CLIENT
    - BOSH_CLIENT_SECRET
    - BOSH_DEPLOYMENT
-1. in case you are using `direnv`
+1. if you're using the `.envrc` file
     ```shell
     direnv allow
     ```
-1. upload routing release 
+1. upload dependent releases
     ```shell
     bosh upload-release http://bosh.io/d/github.com/cloudfoundry-incubator/cf-routing-release?v=0.161.0
-    ```
-1. upload syslog release `11`
-    ```shell
     bosh upload-release --sha1 64cf40d44746b50edffa78cb0e0dd6f072fee695 \
-      https://bosh.io/d/github.com/cloudfoundry/syslog-release?v=11.3.2
+          https://bosh.io/d/github.com/cloudfoundry/syslog-release?v=11.3.2
     ```
-
-## Deployment
-
+    
 Populate a vars file (using `manifest/vars-lite.yml` as a template), save it
 to `secrets/vars.yml`. You will need values from both your cloud-config and
 secrets from your cf-deployment.
