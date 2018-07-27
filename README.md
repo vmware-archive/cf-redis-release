@@ -35,9 +35,10 @@ and save as .envrc or export them:
     ```shell
     bosh upload-release http://bosh.io/d/github.com/cloudfoundry-incubator/cf-routing-release?v=0.161.0
     ```
-1. upload syslog-migration release `11`
+1. upload syslog release `11`
     ```shell
-    bosh upload-release https://github.com/pivotal-cf/syslog-migration-release/releases/download/v8/syslog-migration-11.tgz
+    bosh upload-release --sha1 64cf40d44746b50edffa78cb0e0dd6f072fee695 \
+      https://bosh.io/d/github.com/cloudfoundry/syslog-release?v=11.3.2
     ```
 
 ## Deployment
