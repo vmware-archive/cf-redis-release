@@ -107,7 +107,7 @@ releases:
 - name: cf-redis
   version: latest
 - name: routing
-  version: 0.174.0
+  version: latest
 - name: syslog
   version: latest
 

@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# This script is only runnable by users with access to our s3 bucket and closed source releases
+# Open Source users are better off manually bosh interpolating vars-lite.yml and deployment.yml together
+
+RELEASES_DIR=bosh_releases
+S3_RELEASES_PATH=s3://london-pipelines/redis/dependent-releases/
+STEMCELL_VERSION=3468.53
+SUPPORT_REPO_PATH=~/workspace/pcf-redis-meta
+RELEASE_PATH=~/workspace/redis-service-adapter-release
+BOSH_CLI=${BOSH_CLI:-bosh}
+
+main(){
+    check_env_set
+    clean_out_releases
+    create_service_adapter_release
+    download_other_releases
+    upload_releases
+    create_cf_redis_manifest
+    deploy
+}
+
+check_env_set(){
+if [[ -z "${BOSH_ENVIRONMENT}" ]]; then
+    printf "Exiting as no bosh environment set on env"
+    exit 1
+fi
+}
+
+clean_out_releases() {
+    rm -rf ${RELEASES_DIR}
+    mkdir ${RELEASES_DIR}
+}
+
+create_service_adapter_release() {
+    ${BOSH_CLI} create-release --force
+    ${BOSH_CLI} upload-release -n --rebase
+}
+
+download_other_releases() {
+    declare -a releases=("cf-redis" "redis-backups" "service-backup" "redis-metrics" "service-metrics" "loggregator-agent" "syslog" "routing" "go-syslogd")
+
+    for release_name in "${releases[@]}"
+    do
+        release_file_name=$(aws s3 ls ${S3_RELEASES_PATH} | egrep ${release_name}-[0-9.]+\.tgz | sort -r | head -n 1 | perl -pe 's/^(?:\S+\s+){3}//')
+        underscored_release_name=${release_name//-/_}
+        eval ${underscored_release_name}_version=$([[ ${release_file_name} =~ ${release_name}-([0-9]+\.[0-9]+\.?[0-9]*).tgz ]] && echo "${BASH_REMATCH[1]}")
+        aws s3 cp ${S3_RELEASES_PATH}${release_file_name} ${RELEASES_DIR}
+    done
+}
+
+upload_releases() {
+    ls ${RELEASES_DIR}/*.tgz | xargs -IN ${BOSH_CLI} upload-release -n N
+}
+
+create_cf_redis_manifest(){
+    MANIFEST_FILE=$(mktemp)
+    trap 'rm -f "${MANIFEST_FILE}"' EXIT
+
+    ${BOSH_CLI} interpolate \
+    -o ~/workspace/pcf-redis-meta/pipelines/releases/cf-redis/opsvars/ops-closed-source.yml \
+    -o ~/workspace/pcf-redis-meta/pipelines/tiles/common/cf-redis/ops-metrics-legacy-format.yml \
+    --vars-file ~/workspace/pcf-redis-meta/pipelines/releases/cf-redis/opsvars/vars-cf-redis.yml \
+    --vars-file ~/workspace/pcf-redis-meta/pipelines/releases/common/opsvars/vars-bosh-lite-cloud-config.yml \
+    --vars-file ~/workspace/pcf-redis-meta/pipelines/releases/common/opsvars/vars-bosh-lite.yml \
+    --vars-file ~/workspace/pcf-redis-meta/pipelines/tiles/common/cf-redis/vars.yml \
+    -v system_domain=${BOSH_LITE_DOMAIN} \
+    -v apps_domain=${BOSH_LITE_DOMAIN} \
+    -v director_uuid=$(${BOSH_CLI} env --column=UUID) \
+    ~/workspace/cf-redis-release/manifest/deployment.yml | tee ${MANIFEST_FILE}
+}
+
+deploy(){
+    ${BOSH_CLI} -d cf-redis deploy ${MANIFEST_FILE} -n
+}
+
+main

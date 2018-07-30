@@ -12,3 +12,4 @@ rspec.xml
 vendor/*
 .envrc
 secrets/
+bosh_releases/
