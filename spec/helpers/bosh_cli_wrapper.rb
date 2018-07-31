@@ -26,7 +26,7 @@ module Helpers
       end
     end
 
-    class Instances
+    class Deployment
       include BaseCommand
 
       def initialize(deployment)
@@ -51,6 +51,18 @@ module Helpers
 
         instance_group, instance_id = match.fetch('instance').split("/")
         return instance_group, instance_id
+      end
+
+      def execute(args)
+        cmd = base_cmd(@deployment).push(args).join(' ')
+        stdout, stderr, status = Open3.capture3(cmd)
+
+        unless status.success?
+          puts stderr
+          raise "command failed: #{cmd}"
+        end
+
+        JSON.parse(stdout)
       end
     end
 

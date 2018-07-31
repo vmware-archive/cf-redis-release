@@ -88,7 +88,7 @@ module Helpers
     end
 
     def instance_ssh(host_ip)
-      instance_group, instance_id = BOSH::Instances.new(bosh_manifest.deployment_name).instance(host_ip)
+      instance_group, instance_id = BOSH::Deployment.new(bosh_manifest.deployment_name).instance(host_ip)
       BOSH::SSH.new(bosh_manifest.deployment_name, instance_group, instance_id)
     end
 

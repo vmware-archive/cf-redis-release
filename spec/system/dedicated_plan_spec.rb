@@ -116,7 +116,8 @@ describe 'dedicated plan' do
       # Restart dedicated node
       dedicated_node_index = bosh_director.ips_for_job(Helpers::Environment::DEDICATED_NODE_JOB_NAME, bosh_manifest.deployment_name).index(service_instance_host)
       expect(dedicated_node_index).to_not be_nil
-      bosh_director.recreate_instance(Helpers::Environment::DEDICATED_NODE_JOB_NAME, dedicated_node_index)
+
+      Helpers::BOSH::Deployment.new(bosh_manifest.deployment_name).execute(%W(recreate -n #{Helpers::Environment::DEDICATED_NODE_JOB_NAME}/#{dedicated_node_index}))
 
       # Ensure data is intact
       expect(client.read('test_key')).to eq('test_value')
@@ -136,7 +137,7 @@ describe 'dedicated plan' do
         expect(@old_client.read('test_key')).to eq('test_value')
 
         host = service_binding.credentials[:host]
-        _, instance_id = Helpers::BOSH::Instances.new(bosh_manifest.deployment_name).instance(host)
+        _, instance_id = Helpers::BOSH::Deployment.new(bosh_manifest.deployment_name).instance(host)
         @node_ssh = Helpers::BOSH::SSH.new(bosh_manifest.deployment_name, Helpers::Environment::DEDICATED_NODE_JOB_NAME, instance_id)
 
         aof_contents = @node_ssh.execute('sudo cat /var/vcap/store/redis/appendonly.aof')

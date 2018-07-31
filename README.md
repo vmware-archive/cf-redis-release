@@ -23,7 +23,7 @@ git submodule update --init --recursive
 Run the following steps:
 
 1. fill out the following environment variables of the `.envrc.template` file
-and save as .envrc or export them:
+and save as .envrc or export them. All or almost all the variables are required for tests but these are the minimum required for deploy:
    - BOSH_ENVIRONMENT
    - BOSH_CA_CERT
    - BOSH_CLIENT
