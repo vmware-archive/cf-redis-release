@@ -107,9 +107,9 @@ releases:
 - name: cf-redis
   version: latest
 - name: routing
-  version: latest
+  version: ((routing_version))
 - name: syslog
-  version: latest
+  version: ((syslog_version))
 
 stemcells:
 - alias: default

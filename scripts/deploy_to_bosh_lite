@@ -10,13 +10,25 @@ RELEASE_PATH=~/workspace/redis-service-adapter-release
 BOSH_CLI=${BOSH_CLI:-bosh}
 
 main(){
+    warn_about_go_syslogd
     check_env_set
     clean_out_releases
-    create_service_adapter_release
+    create_cf_redis_release
     download_other_releases
     upload_releases
     create_cf_redis_manifest
     deploy
+    setup_envrc_file
+}
+
+warn_about_go_syslogd(){
+echo "For this script to work ~/workspace/pcf-redis-meta/pipelines/releases/cf-redis/opsvars/vars-cf-redis.yml needs the correct go-syslogd ip"
+read -p "Would you like to continue? (y/n) " -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]
+then
+    [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1
+fi
 }
 
 check_env_set(){
@@ -31,13 +43,13 @@ clean_out_releases() {
     mkdir ${RELEASES_DIR}
 }
 
-create_service_adapter_release() {
+create_cf_redis_release() {
     ${BOSH_CLI} create-release --force
     ${BOSH_CLI} upload-release -n --rebase
 }
 
 download_other_releases() {
-    declare -a releases=("cf-redis" "redis-backups" "service-backup" "redis-metrics" "service-metrics" "loggregator-agent" "syslog" "routing" "go-syslogd")
+    declare -a releases=("redis-backups" "service-backup" "redis-metrics" "service-metrics" "loggregator-agent" "syslog" "routing")
 
     for release_name in "${releases[@]}"
     do
@@ -54,18 +66,25 @@ upload_releases() {
 
 create_cf_redis_manifest(){
     MANIFEST_FILE=$(mktemp)
-    trap 'rm -f "${MANIFEST_FILE}"' EXIT
 
     ${BOSH_CLI} interpolate \
     -o ~/workspace/pcf-redis-meta/pipelines/releases/cf-redis/opsvars/ops-closed-source.yml \
     -o ~/workspace/pcf-redis-meta/pipelines/tiles/common/cf-redis/ops-metrics-legacy-format.yml \
+    -v service_backup_version="\"${service_backup_version}\"" \
+    -v service_metrics_version="\"${service_metrics_version}\"" \
+    -v redis_metrics_version="\"${redis_metrics_version}\"" \
+    -v redis_backups_version="\"${redis_backups_version}\"" \
+    -v routing_version="\"${routing_version}\"" \
+    -v syslog_version="\"${syslog_version}\"" \
+    -v loggregator_agent_version="\"$([[ ${loggregator_agent_version} =~ ([0-9]+\.[0-9]+) ]] && echo "${BASH_REMATCH[1]}")\"" \
+    -v stemcell_version=${STEMCELL_VERSION} \
+    -v system_domain=${BOSH_LITE_DOMAIN} \
+    -v apps_domain=${BOSH_LITE_DOMAIN} \
+    -v director_uuid=$(${BOSH_CLI} env --column=UUID) \
     --vars-file ~/workspace/pcf-redis-meta/pipelines/releases/cf-redis/opsvars/vars-cf-redis.yml \
     --vars-file ~/workspace/pcf-redis-meta/pipelines/releases/common/opsvars/vars-bosh-lite-cloud-config.yml \
     --vars-file ~/workspace/pcf-redis-meta/pipelines/releases/common/opsvars/vars-bosh-lite.yml \
     --vars-file ~/workspace/pcf-redis-meta/pipelines/tiles/common/cf-redis/vars.yml \
-    -v system_domain=${BOSH_LITE_DOMAIN} \
-    -v apps_domain=${BOSH_LITE_DOMAIN} \
-    -v director_uuid=$(${BOSH_CLI} env --column=UUID) \
     ~/workspace/cf-redis-release/manifest/deployment.yml | tee ${MANIFEST_FILE}
 }
 
@@ -73,4 +92,33 @@ deploy(){
     ${BOSH_CLI} -d cf-redis deploy ${MANIFEST_FILE} -n
 }
 
+setup_envrc_file(){
+    printf -- "${BOSH_CA_CERT}" > "${BOSH_CA_CERT_FILE:=$(mktemp)}"
+    printf -- "${BOSH_GW_PRIVATE_KEY_CONTENTS}" > "${BOSH_GW_PRIVATE_KEY_FILE:=$(mktemp)}"
+
+    cat << EOF > .envrc
+export BOSH_V2_CLI=${BOSH_CLI}
+export BOSH_MANIFEST=${MANIFEST_FILE}
+
+export BOSH_CA_CERT_PATH=${BOSH_CA_CERT_FILE}
+export BOSH_GW_PRIVATE_KEY=${BOSH_GW_PRIVATE_KEY_FILE}
+export JUMPBOX_PRIVATE_KEY_PATH=${BOSH_GW_PRIVATE_KEY_FILE}
+
+export JUMPBOX_HOST=${BOSH_ENVIRONMENT}
+export BOSH_USERNAME=${BOSH_CLIENT}
+export BOSH_PASSWORD=${BOSH_CLIENT_SECRET}
+export BOSH_ENV_LOGIN="true"
+export JUMPBOX_USERNAME=jumpbox
+
+export CF_USERNAME=admin
+export CF_PASSWORD=$(credhub login --skip-tls-validation &> /dev/null && credhub get -n /bosh-lite/cf/cf_admin_password | grep value | cut -d ' ' -f2)
+export CF_API="https://api.$BOSH_LITE_DOMAIN"
+export DOPPLER_ADDR="wss://doppler.$BOSH_LITE_DOMAIN"
+EOF
+
+echo "Manually add to .envrc the following:
+
+export SYSLOG_TEST_ENDPOINT=http://10.244.0.141:12351 # fill in correct ip
+"
+}
 main
