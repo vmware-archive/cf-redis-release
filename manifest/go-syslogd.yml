@@ -1,0 +1,30 @@
+---
+name: ((deployment-name))
+instance_groups:
+- azs:
+  - z1
+  instances: 1
+  jobs:
+  - name: go-syslogd
+    properties:
+      syslog:
+        http_port: 12351
+        port: 12350
+    release: go-syslogd
+  name: syslog-test-endpoint
+  networks:
+  - name: default
+  stemcell: default
+  vm_type: minimal
+releases:
+- name: go-syslogd
+  version: ((go-syslogd-version))
+stemcells:
+- alias: default
+  os: ubuntu-xenial
+  version: '((stemcell-version))'
+update:
+  canaries: 1
+  canary_watch_time: 30000-180000
+  max_in_flight: 6
+  update_watch_time: 30000-180000

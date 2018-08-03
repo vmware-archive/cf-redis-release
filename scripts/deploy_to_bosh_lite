@@ -1,34 +1,27 @@
 #!/usr/bin/env bash
 # This script is only runnable by users with access to our s3 bucket and closed source releases
 # Open Source users are better off manually bosh interpolating vars-lite.yml and deployment.yml together
+set -e
 
 RELEASES_DIR=bosh_releases
 S3_RELEASES_PATH=s3://london-pipelines/redis/dependent-releases/
-STEMCELL_VERSION=3468.53
+STEMCELL_VERSION=97.3
 SUPPORT_REPO_PATH=~/workspace/pcf-redis-meta
 RELEASE_PATH=~/workspace/redis-service-adapter-release
 BOSH_CLI=${BOSH_CLI:-bosh}
+GO_SYSLOGD_DEPLOYMENT_NAME=go-syslogd-for-system-tests
 
 main(){
-    warn_about_go_syslogd
     check_env_set
     clean_out_releases
     create_cf_redis_release
     download_other_releases
     upload_releases
+    deploy_go_syslogd
+    populate_vars_file
     create_cf_redis_manifest
     deploy
     setup_envrc_file
-}
-
-warn_about_go_syslogd(){
-echo "For this script to work ~/workspace/pcf-redis-meta/pipelines/releases/cf-redis/opsvars/vars-cf-redis.yml needs the correct go-syslogd ip"
-read -p "Would you like to continue? (y/n) " -r
-echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]
-then
-    [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1
-fi
 }
 
 check_env_set(){
@@ -49,15 +42,24 @@ create_cf_redis_release() {
 }
 
 download_other_releases() {
-    declare -a releases=("redis-backups" "service-backup" "redis-metrics" "service-metrics" "loggregator-agent" "syslog" "routing")
+    declare -a releases=("redis-backups" "service-backup" "redis-metrics" "service-metrics" "loggregator-agent" "syslog" "routing" "go-syslogd")
 
+    echo "Validating and uploading releases"
     for release_name in "${releases[@]}"
     do
         release_file_name=$(aws s3 ls ${S3_RELEASES_PATH} | egrep ${release_name}-[0-9.]+\.tgz | sort -r | head -n 1 | perl -pe 's/^(?:\S+\s+){3}//')
         underscored_release_name=${release_name//-/_}
-        eval ${underscored_release_name}_version=$([[ ${release_file_name} =~ ${release_name}-([0-9]+\.[0-9]+\.?[0-9]*).tgz ]] && echo "${BASH_REMATCH[1]}")
-        aws s3 cp ${S3_RELEASES_PATH}${release_file_name} ${RELEASES_DIR}
+        local version=$([[ ${release_file_name} =~ ${release_name}-([0-9]+\.[0-9]+\.?[0-9]*).tgz ]] && echo "${BASH_REMATCH[1]}")
+        eval ${underscored_release_name}_version=${version}
+
+        set +e
+        ${BOSH_CLI} releases | grep ${release_name} | grep ${version} &> /dev/null
+        rc=$?; if [[ $rc != 0 ]]; then
+            aws s3 cp ${S3_RELEASES_PATH}${release_file_name} ${RELEASES_DIR};
+        fi
+        set -e
     done
+    echo "done uploading releases"
 }
 
 upload_releases() {
@@ -81,7 +83,7 @@ create_cf_redis_manifest(){
     -v system_domain=${BOSH_LITE_DOMAIN} \
     -v apps_domain=${BOSH_LITE_DOMAIN} \
     -v director_uuid=$(${BOSH_CLI} env --column=UUID) \
-    --vars-file ~/workspace/pcf-redis-meta/pipelines/releases/cf-redis/opsvars/vars-cf-redis.yml \
+    --vars-file ${VARS_CF_REDIS} \
     --vars-file ~/workspace/pcf-redis-meta/pipelines/releases/common/opsvars/vars-bosh-lite-cloud-config.yml \
     --vars-file ~/workspace/pcf-redis-meta/pipelines/releases/common/opsvars/vars-bosh-lite.yml \
     --vars-file ~/workspace/pcf-redis-meta/pipelines/tiles/common/cf-redis/vars.yml \
@@ -97,6 +99,7 @@ setup_envrc_file(){
     printf -- "${BOSH_GW_PRIVATE_KEY_CONTENTS}" > "${BOSH_GW_PRIVATE_KEY_FILE:=$(mktemp)}"
 
     cat << EOF > .envrc
+export SYSLOG_TEST_ENDPOINT=${SYSLOG_TEST_ENDPOINT}
 export BOSH_V2_CLI=${BOSH_CLI}
 export BOSH_MANIFEST=${MANIFEST_FILE}
 
@@ -115,10 +118,34 @@ export CF_PASSWORD=$(credhub login --skip-tls-validation &> /dev/null && credhub
 export CF_API="https://api.$BOSH_LITE_DOMAIN"
 export DOPPLER_ADDR="wss://doppler.$BOSH_LITE_DOMAIN"
 EOF
-
-echo "Manually add to .envrc the following:
-
-export SYSLOG_TEST_ENDPOINT=http://10.244.0.141:12351 # fill in correct ip
-"
 }
+
+deploy_go_syslogd(){
+    ${BOSH_CLI} -d ${GO_SYSLOGD_DEPLOYMENT_NAME} deploy \
+    -v deployment-name=${GO_SYSLOGD_DEPLOYMENT_NAME} \
+    -v go-syslogd-version=${go_syslogd_version} \
+    -v stemcell-version=${STEMCELL_VERSION} -n \
+    ~/workspace/cf-redis-release/manifest/go-syslogd.yml
+
+    SYSLOG_TEST_ENDPOINT=$(${BOSH_CLI} -d ${GO_SYSLOGD_DEPLOYMENT_NAME} vms --column ips)
+}
+
+populate_vars_file(){
+    VARS_CF_REDIS=$(mktemp)
+    trap "rm -rf ${VARS_CF_REDIS}" EXIT
+
+    cat << EOF > ${VARS_CF_REDIS}
+---
+deployment_name: cf-redis
+broker_name: redis-broker-ci
+service_name: p-redis-ci
+shared_vm_plan_id: 67c41b80-c336-48f3-b519-5695edec3de1
+service_id: 80cf68be-5d05-4993-9224-f364d81bc514
+dedicated_vm_plan_id: 2123ff9b-b3c5-445b-8eca-d8325fd40e5c
+dedicated_node_count: 3
+syslog_endpoint_host: ${SYSLOG_TEST_ENDPOINT}
+syslog_endpoint_port: 12350
+EOF
+}
+
 main
