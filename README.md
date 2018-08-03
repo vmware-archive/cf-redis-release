@@ -20,43 +20,11 @@ git submodule update --init --recursive
 4. a cloud foundry deployment
 
 ## Deployment
-Run the following steps:
+Source bosh-lite lock file from `london-services-locks/redis-bosh-lite-pool/ready/claimed/`.
+If this is a fresh bosh-lite you may need to upload the (warden) stemcell specified at the top of `scripts/deploy_to_bosh_lite`.
 
-1. fill out the following environment variables of the `.envrc.template` file
-and save as .envrc or export them. All or almost all the variables are required for tests but these are the minimum required for deploy:
-   - BOSH_ENVIRONMENT
-   - BOSH_CA_CERT
-   - BOSH_CLIENT
-   - BOSH_CLIENT_SECRET
-   - BOSH_DEPLOYMENT
-1. if you're using the `.envrc` file
-    ```shell
-    direnv allow
-    ```
-1. upload dependent releases
-    ```shell
-    bosh upload-release http://bosh.io/d/github.com/cloudfoundry-incubator/cf-routing-release?v=0.161.0
-    bosh upload-release --sha1 64cf40d44746b50edffa78cb0e0dd6f072fee695 \
-          https://bosh.io/d/github.com/cloudfoundry/syslog-release?v=11.3.2
-    ```
-    
-Populate a vars file (using `manifest/vars-lite.yml` as a template), save it
-to `secrets/vars.yml`. You will need values from both your cloud-config and
-secrets from your cf-deployment.
-
-To deploy:
-
-```shell
-bosh upload-stemcell https://s3.amazonaws.com/bosh-core-stemcells/warden/bosh-stemcell-3363.27-warden-boshlite-ubuntu-trusty-go_agent.tgz
-bosh create-release
-bosh upload-release
-bosh deploy --vars-file secrets/vars.yml manifest/deployment.yml
-
-# or if you are deploying on GCP:
-bosh deploy --vars-file secrets/vars.yml manifest/deployment.yml --ops-file manifest/ops-public-ip-gcp.yml
-# this ops-file adds a GCP specific vm_extension: `public_ip`, which is required to allow
-# instances to send outgoing public traffic. e.g. for the broker_registrar to register with the CF.
-```
+Run `./scripts/deploy_to_bosh_lite`, if the bosh v2 cli is something other than `bosh` then specify it with, e.g. `BOSH_CLI=bosh2`.
+This will generate a `.envrc` file that will then allow you to run system tests against the deployment with `bundle exec rake spec:system`.
 
 ## Network Configuration
 
