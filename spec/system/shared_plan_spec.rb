@@ -1,8 +1,8 @@
 require 'system_spec_helper'
 require 'support/redis_service_client'
 require 'system/shared_examples/redis_instance'
+require 'system/shared_examples/service'
 
-require 'prof/external_spec/shared_examples/service'
 require 'prof/marketplace_service'
 
 describe 'shared plan' do
