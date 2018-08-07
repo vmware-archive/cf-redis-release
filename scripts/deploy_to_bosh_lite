@@ -42,7 +42,7 @@ create_cf_redis_release() {
 }
 
 download_other_releases() {
-    declare -a releases=("redis-backups" "service-backup" "redis-metrics" "service-metrics" "loggregator-agent" "syslog" "routing" "go-syslogd")
+    declare -a releases=("redis-backups" "service-backup" "redis-metrics" "service-metrics" "loggregator-agent" "syslog" "routing" "go-syslogd" "bpm")
 
     echo "Validating and uploading releases"
     for release_name in "${releases[@]}"
