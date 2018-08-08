@@ -13,8 +13,8 @@ default_vm_type:  # some vm_type from your cloud-config
 default_persistent_disk_type: # some disk_type from your cloud-config
 default_network:  # some network from your cloud-config
 default_az:  # some az from your cloud-config
-stemcell_os: ubuntu-trusty
-stemcell_version: 3363.latest
+stemcell_os: ubuntu-xenial
+stemcell_version: 97.latest
 cf_deployment_name:  # name of your cf deployment
 system_domain: bosh-lite.com
 apps_domain: bosh-lite.com

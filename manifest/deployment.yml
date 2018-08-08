@@ -32,6 +32,8 @@ instance_groups:
     release: routing
     consumes:
       nats: {from: nats, deployment: "((cf_deployment_name))"}
+  - name: bpm
+    release: bpm
   - name: syslog_forwarder
     release: syslog
     properties: &syslog-configuration
@@ -108,6 +110,8 @@ releases:
   version: latest
 - name: routing
   version: ((routing_version))
+- name: bpm
+  version: ((bpm_version))
 - name: syslog
   version: ((syslog_version))
 

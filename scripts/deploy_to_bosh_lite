@@ -78,6 +78,7 @@ create_cf_redis_manifest(){
     -v redis_backups_version="\"${redis_backups_version}\"" \
     -v routing_version="\"${routing_version}\"" \
     -v syslog_version="\"${syslog_version}\"" \
+    -v bpm_version="\"${bpm_version}\"" \
     -v loggregator_agent_version="\"$([[ ${loggregator_agent_version} =~ ([0-9]+\.[0-9]+) ]] && echo "${BASH_REMATCH[1]}")\"" \
     -v stemcell_version=${STEMCELL_VERSION} \
     -v system_domain=${BOSH_LITE_DOMAIN} \

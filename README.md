@@ -20,11 +20,45 @@ git submodule update --init --recursive
 4. a cloud foundry deployment
 
 ## Deployment
-Source bosh-lite lock file from `london-services-locks/redis-bosh-lite-pool/ready/claimed/`.
-If this is a fresh bosh-lite you may need to upload the (warden) stemcell specified at the top of `scripts/deploy_to_bosh_lite`.
+Run the following steps:
 
-Run `./scripts/deploy_to_bosh_lite`, if the bosh v2 cli is something other than `bosh` then specify it with, e.g. `BOSH_CLI=bosh2`.
-This will generate a `.envrc` file that will then allow you to run system tests against the deployment with `bundle exec rake spec:system`.
+1. fill out the following environment variables of the `.envrc.template` file
+and save as .envrc or export them. All or almost all the variables are required for tests but these are the minimum required for deploy:
+   - BOSH_ENVIRONMENT
+   - BOSH_CA_CERT
+   - BOSH_CLIENT
+   - BOSH_CLIENT_SECRET
+   - BOSH_DEPLOYMENT
+1. if you're using the `.envrc` file
+    ```shell
+    direnv allow
+    ```
+1. upload dependent releases
+    ```shell
+    bosh upload-release http://bosh.io/d/github.com/cloudfoundry-incubator/cf-routing-release
+    bosh upload-release http://bosh.io/d/github.com/cloudfoundry/syslog-release
+    bosh upload-release http://bosh.io/d/github.com/cloudfoundry-incubator/bpm-release # required for routing 180+
+    ```
+
+Populate a vars file (using `manifest/vars-lite.yml` as a template), save it
+to `secrets/vars.yml`. You will need values from both your cloud-config and
+secrets from your cf-deployment.
+
+There is another setup example in `scripts/deploy_to_bosh_lite` although the script itself requires access to a non-public AWS bucket.
+
+To deploy:
+
+```shell
+bosh upload-stemcell https://s3.amazonaws.com/bosh-core-stemcells/warden/bosh-stemcell-97.3-warden-boshlite-ubuntu-xenial-go_agent.tgz
+bosh create-release
+bosh upload-release
+bosh deploy --vars-file secrets/vars.yml manifest/deployment.yml
+
+# or if you are deploying on GCP:
+bosh deploy --vars-file secrets/vars.yml manifest/deployment.yml --ops-file manifest/ops-public-ip-gcp.yml
+# this ops-file adds a GCP specific vm_extension: `public_ip`, which is required to allow
+# instances to send outgoing public traffic. e.g. for the broker_registrar to register with the CF.
+```
 
 ## Network Configuration
 
