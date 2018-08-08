@@ -53,11 +53,6 @@ bosh upload-stemcell https://s3.amazonaws.com/bosh-core-stemcells/warden/bosh-st
 bosh create-release
 bosh upload-release
 bosh deploy --vars-file secrets/vars.yml manifest/deployment.yml
-
-# or if you are deploying on GCP:
-bosh deploy --vars-file secrets/vars.yml manifest/deployment.yml --ops-file manifest/ops-public-ip-gcp.yml
-# this ops-file adds a GCP specific vm_extension: `public_ip`, which is required to allow
-# instances to send outgoing public traffic. e.g. for the broker_registrar to register with the CF.
 ```
 
 ## Network Configuration
