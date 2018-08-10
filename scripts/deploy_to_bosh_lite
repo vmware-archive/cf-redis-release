@@ -13,10 +13,10 @@ GO_SYSLOGD_DEPLOYMENT_NAME=go-syslogd-for-system-tests
 
 main(){
     check_env_set
-    clean_out_releases
+#    clean_out_releases
     create_cf_redis_release
     download_other_releases
-    upload_releases
+#    upload_releases
     deploy_go_syslogd
     populate_vars_file
     create_cf_redis_manifest

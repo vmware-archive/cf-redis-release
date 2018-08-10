@@ -28,6 +28,14 @@ instance_groups:
   jobs:
   - name: cf-redis-broker
     release: cf-redis
+  - name: garden
+    release: garden-runc
+    properties:
+      garden:
+        listen_network: tcp
+        listen_address: 0.0.0.0:7777
+        debug_listen_address: 0.0.0.0:17013
+        log_level: debug
   - name: route_registrar
     release: routing
     consumes:
@@ -114,7 +122,8 @@ releases:
   version: ((bpm_version))
 - name: syslog
   version: ((syslog_version))
-
+- name: garden-runc
+  version: latest
 stemcells:
 - alias: default
   os: ((stemcell_os))
