@@ -120,3 +120,33 @@ your dedicated nodes
 in your cloud config
 1. remove the static IPs from the manifest
 1. deploy using the manifest without static IPs
+
+## Errands
+
+The Cf-Redis Service Broker offers the following [BOSH errands](https://bosh.io/docs/errands/):
+
+### broker-registrar
+Communicates to the CloudFoundry [Cloud Controller](https://docs.cloudfoundry.org/concepts/architecture/cloud-controller.html)
+which maintains the database for the [CF Marketplace](https://cli.cloudfoundry.org/en-US/cf/marketplace.html).
+This enables the service plans on the CF Marketplace so that App Developers can create and delete service instances of those plans.
+
+**Note:** As of v434.0.13, the broker-registrar will disable service access to the dedicate-vm service plan
+as the service plan is being deprecated.
+
+### broker-deregistrar
+Communicates with the CF Cloud Controller to remove the cf-redis broker and service plans from the CF Marketplace
+as well as [delete the broker deployment](https://cli.cloudfoundry.org/en-US/cf/delete-service-broker.html) from BOSH.
+
+**Note:** If any service instances exist, the errand will **fail**. This is to prevent orphan deployments which the CF Cloud Controller will lose record of but will continue to live as a BOSH deployment which would continue to incur costs.
+
+If you wish to remove the service broker, perform a
+`cf delete-service SERVICE_INSTANCE` and remove all service instances associated with the broker and run the errand after all service instances have been removed.
+
+### smoke-tests
+Runs smoke tests which tests the lifecycle and functionality of the both the dedicated-vm and shared-vm services.
+See the [Redis documentation](https://docs.pivotal.io/redis/smoke-tests.html) for more information.
+
+### remove-deprecated-functionality
+Available as of v434.0.13. Communicates with the CF Cloud Controller to disable service access to the dedicate-vm service plan.
+This allows operators to remove the dedicated-vm service plan from the marketplace
+in order to prevent App Developers from creating new service instances in preparation for the deprecation of the dedicated-vm plan.
