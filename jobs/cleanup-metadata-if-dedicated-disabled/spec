@@ -1,12 +1,9 @@
 ---
 name: cleanup-metadata-if-dedicated-disabled
-
-templates:
-  errand.sh.erb: bin/run
-
 packages:
 - cf-cli-6-linux
-
+templates:
+  errand.sh.erb: bin/run
 properties:
   cf.api_url:
     description: 'Full URL of Cloud Foundry API'

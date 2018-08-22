@@ -4,8 +4,8 @@ set -e
 set -x
 
 export PATH=$PATH:/var/vcap/packages/cf-cli-6-linux/bin
-#
-<!--<% if p("redis.broker.dedicated_node_count") == 0 %>-->
+
+<% if p("redis.broker.dedicated_node_count") == 0 %>
 
   CF_API_URL='<%= p("cf.api_url") %>'
 
@@ -15,7 +15,7 @@ export PATH=$PATH:/var/vcap/packages/cf-cli-6-linux/bin
   set -x
 
   CF_DIAL_TIMEOUT=30
-  DEDICATED_VM_PLAN_GUID='<%= p('redis.broker.dedicated_vm_plan_id') %>'
+  DEDICATED_VM_PLAN_ID='<%= p('redis.broker.dedicated_vm_plan_id') %>'
   SKIP_SSL_VALIDATION='<%= p("cf.skip_ssl_validation") ? "--skip-ssl-validation" : "" %>'
 
   cf --version
@@ -25,9 +25,10 @@ export PATH=$PATH:/var/vcap/packages/cf-cli-6-linux/bin
   cf auth $CF_ADMIN_USERNAME $CF_ADMIN_PASSWORD
   set -x
 
-  instances_urls=$(cf curl /v2/service_plans/${DEDICATED_VM_PLAN_GUID}/service_instances | grep -E '"url"' | cut -d"\"" -f 4)
+  service_instances_url=$(cf curl /v2/service_plans?q=unique_id:${DEDICATED_VM_PLAN_ID} | grep service_instances_url | cut -d"\"" -f 4)
+  instances_urls=$(cf curl ${service_instances_url} | grep -E '"url"' | cut -d"\"" -f 4)
   for instance_url in $instances_urls; do
     cf curl -X DELETE ${instance_url}?purge=true
   done
 
-<!--<% end %>-->
+<% end %>
