@@ -1,0 +1,24 @@
+---
+name: cleanup-metadata-if-dedicated-disabled
+
+templates:
+  errand.sh.erb: bin/run
+
+packages:
+- cf-cli-6-linux
+
+properties:
+  cf.api_url:
+    description: 'Full URL of Cloud Foundry API'
+  cf.admin_username:
+    description: 'Username of the admin user'
+  cf.admin_password:
+    description: 'Password of the admin user'
+  cf.skip_ssl_validation:
+    description: 'Skip SSL certificate validation'
+    default: true
+  redis.broker.dedicated_node_count:
+    description: 'Number of provisioned dedicated instances'
+  redis.broker.dedicated_vm_plan_id:
+    description: Dedicated-VM plan id displayed in the catalog metadata
+    default: 74E8984C-5F8C-11E4-86BE-07807B3B2589

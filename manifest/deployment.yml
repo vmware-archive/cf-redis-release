@@ -49,6 +49,8 @@ instance_groups:
     release: cf-redis
   - name: remove-deprecated-functionality
     release: cf-redis
+  - name: cleanup-metadata-if-dedicated-disabled
+    release: cf-redis
 
 - instances: ((dedicated_node_count))
   name: dedicated-node
