@@ -130,7 +130,7 @@ Communicates to the CloudFoundry [Cloud Controller](https://docs.cloudfoundry.or
 which maintains the database for the [CF Marketplace](https://cli.cloudfoundry.org/en-US/cf/marketplace.html).
 This enables the service plans on the CF Marketplace so that App Developers can create and delete service instances of those plans.
 
-**Note:** As of v434.0.13, the broker-registrar will disable service access to the dedicate-vm service plan
+**Note:** As of v434.0.13, the broker-registrar will disable service access to the dedicated-vm service plan
 as the service plan is being deprecated.
 
 ### broker-deregistrar
@@ -147,6 +147,11 @@ Runs smoke tests which tests the lifecycle and functionality of the both the ded
 See the [Redis documentation](https://docs.pivotal.io/redis/smoke-tests.html) for more information.
 
 ### remove-deprecated-functionality
-Available as of v434.0.13. Communicates with the CF Cloud Controller to disable service access to the dedicate-vm service plan.
+Available as of v434.0.13. Communicates with the CF Cloud Controller to disable service access to the dedicated-vm service plan.
 This allows operators to remove the dedicated-vm service plan from the marketplace
 in order to prevent App Developers from creating new service instances in preparation for the deprecation of the dedicated-vm plan.
+
+### cleanup-metadata-if-dedicated-disabled
+Available as of v434.0.15. Communicates with the CF Cloud Controller to purge references to dedicated-vm service instances
+if no dedicated-vms have been provisioned. The purpose for this errand is to provide a smoother experience for migrating
+to On-Demand Instances given the Ops Manager tile deployment flow. Intended as a temporary errand during deprecation of dedicated-vms.
