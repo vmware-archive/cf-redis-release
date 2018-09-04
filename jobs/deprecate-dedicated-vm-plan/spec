@@ -1,5 +1,5 @@
 ---
-name: remove-deprecated-functionality
+name: deprecate-dedicated-vm-plan
 packages:
 - cf-cli-6-linux
 templates:

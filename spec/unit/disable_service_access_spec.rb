@@ -23,7 +23,7 @@ describe 'cf-redis-broker broker_registrar errand' do
   let(:broker_job_ctl_script) {
     File.read(
       File.expand_path(
-        '../../../jobs/remove-deprecated-functionality/templates/errand.sh.erb',
+        '../../../jobs/deprecate-dedicated-vm-plan/templates/errand.sh.erb',
         __FILE__
       )
     )
