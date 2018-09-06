@@ -1,6 +1,8 @@
 <%
   config = {
     'api' => p('cf.api_url'),
+    'org_name' => p('cf.org_name'),
+    'space_name' => p('cf.space_name'),
     'apps_domain' => p('cf.apps_domain'),
     'system_domain' => p('cf.system_domain'),
     'admin_user' => p('cf.admin_username'),
@@ -14,6 +16,13 @@
     },
     'skip_ssl_validation' => p('cf.skip_ssl_validation'),
     'create_permissive_security_group' => true,
+    'security_groups' => [
+      {
+        'protocol' => 'tcp',
+        'ports' => '32768-61000',
+        'destination' => link('redis_broker').instances.first.address
+      }
+    ]
   }
 
   if p('redis.broker.service_instance_limit').to_i > 0
@@ -29,6 +38,14 @@
 
   unless dedicated_node_addresses.empty?
     config['plan_names'].push('dedicated-vm')
+
+    dedicated_node_addresses.each do |node|
+      config['security_groups'].push({
+        'protocol' => 'tcp',
+        'ports' => '6379',
+        'destination' => node
+      })
+    end
   end
 %>
 

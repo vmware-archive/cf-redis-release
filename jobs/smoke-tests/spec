@@ -19,6 +19,12 @@ consumes:
 properties:
   cf.api_url:
     description: 'Full URL of Cloud Foundry API'
+  cf.org_name:
+    description: Org to be used from the smoke-tests
+    default: system
+  cf.space_name:
+    description: Space to be used from the smoke-tests
+    default: pivotal-services
   cf.apps_domain:
     description: Domain used by `cf push`ed apps
   cf.system_domain:
