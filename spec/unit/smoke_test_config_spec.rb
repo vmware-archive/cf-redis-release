@@ -60,7 +60,7 @@ RSpec.describe 'smoke-tests config' do
           'baseline_interval_milliseconds' => 500
         },
         'skip_ssl_validation' => false,
-        'create_permissive_security_group' => true,
+        'create_permissive_security_group' => false,
         'security_groups' => [
           {
             'protocol' => 'tcp',
