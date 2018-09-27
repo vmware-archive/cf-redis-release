@@ -63,6 +63,8 @@ instance_groups:
   jobs:
   - name: dedicated-node
     release: cf-redis
+  - name: bpm
+    release: bpm
   - name: syslog_forwarder
     release: syslog
     properties: *syslog-configuration
