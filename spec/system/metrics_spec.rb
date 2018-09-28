@@ -83,7 +83,7 @@ describe 'metrics', :skip_metrics => true do
   def loggregator_agent_id_from_job_index(job_name, job_index)
     job_ssh = Helpers::BOSH::SSH.new(bosh_manifest.deployment_name, job_name, job_index)
 
-    job_ssh.execute('sudo cat /var/vcap/jobs/loggregator_agent/bin/environment.sh | grep AGENT_INDEX | cut -d \" -f2')
+    job_ssh.execute('sudo cat /var/vcap/jobs/loggregator_agent/config/bpm.yml | grep AGENT_INDEX | cut -d \" -f2')
   end
 
   def firehose_out_file
