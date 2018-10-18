@@ -1,4 +1,5 @@
 ---
+director_uuid: ((director_uuid))
 name: ((deployment_name))
 
 instance_groups:
@@ -10,53 +11,27 @@ instance_groups:
   vm_type: ((default_vm_type))
   stemcell: default
   persistent_disk_type: ((default_persistent_disk_type))
+  properties:
+    route_registrar:
+      routes:
+      - health_check:
+          name: ((broker_name))
+          script_path: /var/vcap/jobs/cf-redis-broker/bin/health_check.sh
+        name: broker_0
+        port: 12350
+        registration_interval: 10s
+        tags:
+          component: redis-broker
+          env: production
+        uris:
+        - ((broker_name)).((system_domain))
   jobs:
   - name: cf-redis-broker
     release: cf-redis
-    properties:
-      broker:
-        name: ((broker_name))
-        host: ((broker_name)).((system_domain))
-        password: ((broker_password))
-        username: ((broker_username))
-      cf:
-        apps_domain: ((apps_domain))
-        system_domain: ((system_domain))
-      redis:
-        maxmemory: 262144000
-        config_command: configalias
-        save_command: anotherrandomstring
-        bg_save_command: yetanotherrandomstring
-        broker:
-          name: ((broker_name))
-          backend_port: 12345
-          network: ((default_network))
-          auth:
-            username: ((broker_username))
-            password: ((broker_password))
-          service_name: ((service_name))
-          service_id: ((service_id))
-          shared_vm_plan_id: ((shared_vm_plan_id))
-          dedicated_vm_plan_id: ((dedicated_vm_plan_id))
-          service_instance_limit: 5
   - name: route_registrar
     release: routing
     consumes:
       nats: {from: nats, deployment: "((cf_deployment_name))"}
-    properties:
-      route_registrar:
-        routes:
-          - health_check:
-              name: ((broker_name))
-              script_path: /var/vcap/jobs/cf-redis-broker/bin/health_check.sh
-            name: broker_0
-            port: 12350
-            registration_interval: 10s
-            tags:
-              component: redis-broker
-              env: production
-            uris:
-              - ((broker_name)).((system_domain))
   - name: bpm
     release: bpm
   - name: syslog_forwarder
@@ -68,83 +43,14 @@ instance_groups:
         transport: tcp
   - name: broker-registrar
     release: cf-redis
-    properties:
-      cf:
-        api_url: https://api.((system_domain))
-        skip_ssl_validation: true
-        admin_username: ((cf_username))
-        admin_password: ((cf_password))
-      broker:
-        name: ((broker_name))
-        host: ((broker_name)).((system_domain))
-        username: ((broker_username))
-        password: ((broker_password))
-      redis:
-        broker:
-          enable_service_access: true
-          service_name: ((service_name))
-          dedicated_node_count: ((dedicated_node_count))
-          service_instance_limit: 5
   - name: broker-deregistrar
     release: cf-redis
-    properties:
-      cf:
-        api_url: https://api.((system_domain))
-        skip_ssl_validation: true
-        admin_username: ((cf_username))
-        admin_password: ((cf_password))
-      broker:
-        name: ((broker_name))
-      redis:
-        broker:
-          service_name: ((service_name))
-          dedicated_node_count: ((dedicated_node_count))
-          service_instance_limit: 5
   - name: smoke-tests
     release: cf-redis
-    properties:
-      cf:
-        api_url: https://api.((system_domain))
-        skip_ssl_validation: true
-        admin_username: ((cf_username))
-        admin_password: ((cf_password))
-        apps_domain: ((apps_domain))
-        system_domain: ((system_domain))
-      redis:
-        broker:
-          service_name: ((service_name))
-          dedicated_node_count: ((dedicated_node_count))
-          service_instance_limit: 5
-      retry:
-        backoff: linear
-        baseline_interval_milliseconds: 1000
-        max_attempts: 10
   - name: deprecate-dedicated-vm-plan
     release: cf-redis
-    properties:
-      cf:
-        api_url: https://api.((system_domain))
-        skip_ssl_validation: true
-        admin_username: ((cf_username))
-        admin_password: ((cf_password))
-      redis:
-        broker:
-          service_name: ((service_name))
-      broker:
-        host: ((broker_name)).((system_domain))
-        username: ((broker_username))
-        password: ((broker_password))
   - name: cleanup-metadata-if-dedicated-disabled
     release: cf-redis
-    properties:
-      cf:
-        api_url: https://api.((system_domain))
-        skip_ssl_validation: true
-        admin_username: ((cf_username))
-        admin_password: ((cf_password))
-      redis:
-        broker:
-          dedicated_node_count: ((dedicated_node_count))
 
 - instances: ((dedicated_node_count))
   name: dedicated-node
@@ -157,24 +63,51 @@ instance_groups:
   jobs:
   - name: dedicated-node
     release: cf-redis
-    properties:
-      redis:
-        broker: # this actually is the _agent_ auth config
-          auth:
-            username: ((broker_username))
-            password: ((broker_password))
-        config_command: configalias
-        agent:
-          backend_port: 54321
   - name: bpm
     release: bpm
   - name: syslog_forwarder
     release: syslog
     properties: *syslog-configuration
 
-variables:
-- name: broker_password
-  type: password
+properties:
+  broker:
+    host: ((broker_name)).((system_domain))
+    name: ((broker_name))
+    password: ((broker_password))
+    username: ((broker_username))
+  cf:
+    admin_username: ((cf_username))
+    admin_password: ((cf_password))
+    api_url: https://api.((system_domain))
+    apps_domain: ((apps_domain))
+    system_domain: ((system_domain))
+  redis:
+    agent:
+      backend_port: 54321
+    bg_save_command: yetanotherrandomstring
+    broker:
+      auth:
+        password: ((broker_password))
+        username: ((broker_username))
+      backend_port: 12345
+      dedicated_vm_plan_id: ((dedicated_vm_plan_id))
+      enable_service_access: true
+      name: ((broker_name))
+      network: ((default_network))
+      route_name: ((broker_name))
+      service_id: ((service_id))
+      service_instance_limit: 5
+      dedicated_node_count: ((dedicated_node_count))
+      service_name: ((service_name))
+      shared_vm_plan_id: ((shared_vm_plan_id))
+      subdomain: ((broker_name))
+    config_command: configalias
+    maxmemory: 262144000
+    save_command: anotherrandomstring
+  retry:
+    backoff: linear
+    baseline_interval_milliseconds: 1000
+    max_attempts: 10
 
 releases:
 - name: cf-redis
