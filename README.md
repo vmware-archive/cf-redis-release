@@ -44,8 +44,6 @@ Populate a vars file (using `manifest/vars-lite.yml` as a template), save it
 to `secrets/vars.yml`. You will need values from both your cloud-config and
 secrets from your cf-deployment.
 
-There is another setup example in `scripts/deploy_to_bosh_lite` although the script itself requires access to a non-public AWS bucket.
-
 To deploy:
 
 ```shell
@@ -73,7 +71,7 @@ Cell and Diego Brain network(s)
     ```
 2. run the tests
     ```
-    bundle exec rspec spec`
+    bundle exec rspec spec
     ```
 
 ## Related Documentation
