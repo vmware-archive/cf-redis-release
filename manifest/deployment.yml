@@ -121,8 +121,30 @@ instance_groups:
         max_attempts: 10
   - name: deprecate-dedicated-vm-plan
     release: cf-redis
+    properties:
+      cf:
+        api_url: https://api.((system_domain))
+        skip_ssl_validation: true
+        admin_username: ((cf_username))
+        admin_password: ((cf_password))
+      redis:
+        broker:
+          service_name: ((service_name))
+      broker:
+        host: ((broker_name)).((system_domain))
+        username: ((broker_username))
+        password: ((broker_password))
   - name: cleanup-metadata-if-dedicated-disabled
     release: cf-redis
+    properties:
+      cf:
+        api_url: https://api.((system_domain))
+        skip_ssl_validation: true
+        admin_username: ((cf_username))
+        admin_password: ((cf_password))
+      redis:
+        broker:
+          dedicated_node_count: ((dedicated_node_count))
 
 - instances: ((dedicated_node_count))
   name: dedicated-node
@@ -167,7 +189,7 @@ releases:
 stemcells:
 - alias: default
   os: ((stemcell_os))
-  version: ((stemcell_version))
+  version: "((stemcell_version))"
 
 update:
   canaries: 1
