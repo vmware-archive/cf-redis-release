@@ -33,6 +33,7 @@ provides:
 consumes:
 - name: dedicated_node
   type: dedicated_node
+  optional: true
 
 properties:
   service-backup.source_folder:

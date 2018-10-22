@@ -15,6 +15,7 @@ consumes:
   type: redis_broker
 - name: dedicated_node
   type: dedicated_node
+  optional: true
 
 properties:
   cf.api_url:
