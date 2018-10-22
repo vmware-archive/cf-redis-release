@@ -2,8 +2,10 @@
 dedicated_node_addresses = p('redis.broker.dedicated_nodes').clone
 
 if dedicated_node_addresses.empty?
-  link('dedicated_node').instances.each do |instance|
-    dedicated_node_addresses.push(instance.address)
+  if_link('dedicated_node') do |dedicated_node|
+    dedicated_node.instances.each do |instance|
+      dedicated_node_addresses.push(instance.address)
+    end
   end
 end
 
