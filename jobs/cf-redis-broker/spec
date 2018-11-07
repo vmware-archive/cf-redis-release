@@ -175,6 +175,9 @@ properties:
   redis.broker.nginx.port:
     default: 12350
     description: "Port for nginx"
+  redis.broker.nginx.ip:
+    default: ""
+    description: "IP for nginx"
   redis.broker.nginx.bucket_size:
     default: 128
     description: server_names_hash_bucket_size for nginx

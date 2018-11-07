@@ -30,7 +30,12 @@ http {
   server_names_hash_bucket_size <%= p('redis.broker.nginx.bucket_size') %>;
 
   server {
+    <% if p('redis.broker.nginx.ip').empty? %>
     listen <%= p('redis.broker.nginx.port') %>;
+    <% else %>
+    listen <%= p('redis.broker.nginx.ip') %>:<%= p('redis.broker.nginx.port') %>;
+    <% end %>
+
     location / {
       proxy_pass         http://127.0.0.1:<%= p('redis.broker.backend_port') %>;
 
