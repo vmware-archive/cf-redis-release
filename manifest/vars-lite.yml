@@ -1,0 +1,27 @@
+---
+deployment_name:  # name of your cf-redis deployment e.g. `cf-redis`
+broker_name: cf-redis-broker
+service_name: p-redis
+dedicated_vm_plan_id:  # generate uuid, i.e. `uuidgen`
+service_id:  # generate different uuid, i.e. `uuidgen`
+shared_vm_plan_id:  # generate different uuid, i.e. `uuidgen`
+dedicated_node_count: 2
+dedicated_nodes_ips: # add a list of static ips from `default_network` in your
+                     # cloud-config with length `dedicated_node_count`
+director_uuid:  # UUID from `bosh environment`
+default_vm_type:  # some vm_type from your cloud-config
+default_persistent_disk_type: # some disk_type from your cloud-config
+default_network:  # some network from your cloud-config
+default_az:  # some az from your cloud-config
+stemcell_os: ubuntu-xenial
+stemcell_version: 97.latest
+cf_deployment_name:  # name of your cf deployment
+system_domain: bosh-lite.com
+apps_domain: bosh-lite.com
+broker_password:  # make one up
+broker_username:  # make one up
+cf_username: admin
+cf_password:  # `bosh int secrets/cf-creds.yml --path /cf_admin_password` where
+              # `secrets/cf-creds.yml` is cf's vars-store
+syslog_endpoint_host: 127.0.0.1
+syslog_endpoint_port: 1234

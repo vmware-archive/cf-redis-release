@@ -1,46 +1,82 @@
-def root_execute_on(ip, command)
-  root_prompt = '[sudo] password for vcap: '
-  root_prompt_length = root_prompt.length
+require 'net/http'
+require 'uri'
+require 'timeout'
 
-  output = ssh_gateway.execute_on(ip, command, root: true)
-  expect(output).not_to be_nil
-  expect(output).to start_with(root_prompt)
-  return output.slice(root_prompt_length, output.length - root_prompt_length)
-end
+module Helpers
+  module Utilities
+    def drop_log_lines_before(time, log_lines)
+      log_lines.lines.drop_while do |log_line|
+        log_is_earlier?(log_line, time)
+      end
+    end
 
-def log_is_earlier?(log_line, timestamp)
-  match = log_line.scan( /\{.*\}$/ ).first
+    private
 
-  return true if match.nil?
+    def log_is_earlier?(log_line, timestamp)
+      match = log_line.scan( /\{.*\}$/ ).first
 
-  begin
-    json_log = JSON.parse(match)
-  rescue JSON::ParserError
-    return true
+      return true if match.nil?
+
+      begin
+        json_log = JSON.parse(match)
+      rescue JSON::ParserError
+        return true
+      end
+
+      log_timestamp = json_log["timestamp"].to_i
+      log_timestamp < timestamp.to_i
+    end
+
+    class SyslogEndpointHelper
+      TEN_MILLISECONDS = 0.01
+      FIVE_MINUTES = 60 * 5
+
+      def initialize(syslog_host, syslog_port, gateway_executor)
+        @gateway_executor = gateway_executor
+      end
+
+      def get_line
+        @gateway_executor.exec!(Proc.new do |host, port|
+          Net::HTTP.get(URI.parse("http://#{host}:#{port}"))
+        end)
+      end
+
+      def drain
+        @gateway_executor.exec!(Proc.new do |host, port|
+          Net::HTTP.get(URI.parse("http://#{host}:#{port}/drain"))
+        end)
+      end
+    end
+
+    class GatewayExecutor
+      def initialize(host, port, gateway_opts = nil)
+        @host = host
+        @port = port
+        @gateway_opts = gateway_opts
+      end
+
+      def setup_gateway_forwarding
+        @_gateway ||= begin
+          gateway_private_key = @gateway_opts[:ssh_gateway_private_key]
+          opts = {}
+          if !gateway_private_key.nil?
+            opts[:keys] = [gateway_private_key]
+          else
+            opts[:password] = @gateway_opts[:ssh_gateway_password]
+          end
+          Net::SSH::Gateway.new(
+            @gateway_opts[:ssh_gateway_host],
+            @gateway_opts[:ssh_gateway_username],
+            opts
+          )
+        end
+        @_local_port ||= @_gateway.open(@host, @port)
+      end
+
+      def exec!(func)
+        return func.call(@host, @port) if @gateway_opts.nil?
+        func.call('127.0.0.1', setup_gateway_forwarding)
+      end
+    end
   end
-
-  log_timestamp = json_log["timestamp"].to_i
-  log_timestamp < timestamp.to_i
-end
-
-def drop_log_lines_before(time, log_lines)
-  log_lines.lines.drop_while do |log_line|
-    log_is_earlier?(log_line, @preprovision_timestamp)
-  end
-end
-
-def wait_for_process_start(process_name, vm_ip)
-  for _ in 0..18 do
-    puts "Waiting for #{process_name} to start"
-    sleep 5
-    return true if process_running?(process_name, vm_ip)
-  end
-
-  puts "Process #{process_name} did not start within 90 seconds"
-  return false
-end
-
-def process_running?(process_name, vm_ip)
-  monit_output = root_execute_on(vm_ip, "/var/vcap/bosh/bin/monit summary | grep #{process_name} | grep running")
-  !monit_output.strip.empty?
 end

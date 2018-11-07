@@ -3,16 +3,19 @@
 LOG_DIR=/var/vcap/sys/log/redis-agent
 DATA_DIR=/var/vcap/store/redis
 PIDFILE=/var/vcap/sys/run/redis-agent.pid
+JOB_CONFIG_DIR=/var/vcap/jobs/dedicated-node/config
 <% if_p('service-backup.source_folder') do %>
 BACKUP_SOURCE_DIR=<%= p('service-backup.source_folder') %>
 <% end %>
 
 <% if_p('redis-backup.stdout_filename') do %>
+mkdir -p $( dirname <%= p('redis-backup.stdout_filename') %> )
 touch <%= p('redis-backup.stdout_filename') %>
 chmod 666 <%= p('redis-backup.stdout_filename') %>
 <% end %>
 
 <% if_p('redis-backup.stderr_filename') do %>
+mkdir -p $( dirname <%= p('redis-backup.stderr_filename') %> )
 touch <%= p('redis-backup.stderr_filename') %>
 chmod 666 <%= p('redis-backup.stderr_filename') %>
 <% end %>
@@ -24,15 +27,16 @@ case $1 in
   start)
 
     mkdir -p $LOG_DIR $DATA_DIR $BACKUP_SOURCE_DIR
-    chown vcap:vcap $LOG_DIR $DATA_DIR $BACKUP_SOURCE_DIR
-
+    chown vcap:vcap $LOG_DIR $DATA_DIR $BACKUP_SOURCE_DIR ${JOB_CONFIG_DIR} ${JOB_CONFIG_DIR}/redis.conf
+    chmod 750 ${JOB_CONFIG_DIR}
+    chmod 640 ${JOB_CONFIG_DIR}/redis.conf
     cd $DATA_DIR
 
     echo $$ > $PIDFILE
-    exec chpst -u root:root /var/vcap/packages/cf-redis-broker/bin/agent \
-      -agentConfig=/var/vcap/jobs/dedicated-node/config/agent.yml \
-      > >(tee -a $LOG_DIR/redis-agent.stdout.log | logger -p local0.info ) \
-      2> >(tee -a $LOG_DIR/redis-agent.stderr.log | logger -p local0.err )
+    exec /var/vcap/packages/cf-redis-broker/bin/agent \
+      -agentConfig=${JOB_CONFIG_DIR}/agent.yml \
+      >> "${LOG_DIR}/redis-agent.stdout.log" \
+      2>> "${LOG_DIR}/redis-agent.stderr.log"
     ;;
 
   stop)

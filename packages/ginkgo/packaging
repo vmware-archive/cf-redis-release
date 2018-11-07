@@ -1,0 +1,4 @@
+#!/bin/bash -e
+
+cp -R ginkgo/* ${BOSH_INSTALL_TARGET}
+chmod +x ${BOSH_INSTALL_TARGET}/ginkgo

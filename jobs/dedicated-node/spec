@@ -6,19 +6,23 @@ templates:
   redis.conf.erb: config/redis.conf
   nginx.conf.erb: config/nginx.conf
 
-  redis_ctl.erb: bin/redis_ctl
+  start.erb: bin/start
+  drain.bash: bin/drain
   redis-agent_ctl.erb: bin/redis-agent_ctl
   nginx_ctl.erb: bin/nginx_ctl
 
   redis-agent.pem.erb: config/ssl/redis-agent.pem
   redis-agent.key.erb: config/ssl/redis-agent.key
-  drain-redis.sh: bin/drain
 
 packages:
 - redis
 - redis-common
 - cf-redis-nginx
 - cf-redis-broker
+
+provides:
+- name: dedicated_node
+  type: dedicated_node
 
 properties:
   service-backup.source_folder:
@@ -91,7 +95,7 @@ properties:
     description: The slave priority is an integer number published by Redis in the INFO output. It is used by Redis Sentinel in order to select a slave to promote into a master if the master is no longer working correctly.
 
   redis.security.require_pass:
-    description: Require clients to issue AUTH PASSWORD before processing any other commands.
+    description: Require clients to issue AUTH PASSWORD before processing any other commands. This will be overwritten everytime the broker allocates it as in use.
 
   redis.lua_time_limit:
     description: Max execution time of a Lua script in milliseconds.
@@ -119,8 +123,6 @@ properties:
     default: 10000
     description: Set the max number of connected clients at the same time
 
-  redis.broker.backend_host:
-    description: The port for the broker unicorn process to run on
   redis.broker.auth.username:
     default: admin
     description: The username for HTTP Basic Auth on the agent, also used for the broker

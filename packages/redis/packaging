@@ -1,11 +1,12 @@
 # abort script on any command that exits with a non zero value
 set -e
 
-REDIS_VERSION=3.2.1
+target_dir="redis_source"
+mkdir -p ${target_dir}
 
-tar xvf redis/redis-${REDIS_VERSION}.tar.gz
+tar xvf redis/redis-*.tar.gz -C ${target_dir} --strip-components 1
 
-cd redis-${REDIS_VERSION}
+cd ${target_dir}
 make
 
 BIN_TARGET=$BOSH_INSTALL_TARGET/bin

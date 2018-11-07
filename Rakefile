@@ -1,5 +1,5 @@
 desc 'run all the specs'
-task spec: %w(spec:system spec:unit)
+task spec: %w(spec:unit spec:system)
 
 desc 'Installs noaa'
 task :install_noaa do

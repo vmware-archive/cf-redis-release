@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-ruby '2.3.0'
+ruby '2.4.0'
 
 gem 'aws-sdk'
 gem 'bosh_cli'
@@ -9,12 +9,13 @@ gem 'rake'
 gem 'process_helper'
 
 group :test do
+  gem 'httparty'
   gem 'rspec'
   gem 'pry'
   gem 'pry-byebug'
   gem 'rspec-shell-expectations'
   gem 'rspec-instafail'
+  gem 'rspec-eventually'
 
-  gem 'hula', '0.8.9'
-  gem 'prof', '0.31.11'
+  gem 'prof', '0.38.0'
 end

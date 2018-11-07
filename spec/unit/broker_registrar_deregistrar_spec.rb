@@ -12,7 +12,10 @@ PROPERTIES = {
     "broker.password" => "password",
     "cf.skip_ssl_validation" => false,
     "redis.broker.enable_service_access" => true,
-    "redis.broker.service_access_orgs" => []
+    "redis.broker.service_access_orgs" => [],
+    "redis.broker.service_instance_limit" => 1,
+    "redis.broker.dedicated_node_count" => 1,
+    "redis.broker.enable_deprecate_dedicated_service_access" => false
 }
 
 shared_examples 'ssl validation is configurable' do
@@ -88,6 +91,17 @@ describe 'cf-redis-broker broker_registrar errand' do
     it 'configures sevice access for specified orgs' do
       expect(template_out_script).to include("cf enable-service-access -o #{org_1} $BROKER_SERVICE_NAME")
       expect(template_out_script).to include("cf enable-service-access -o #{org_2} $BROKER_SERVICE_NAME")
+    end
+  end
+  context 'when enable_deprecate_dedicated_service_access is true, dedicated service plan' do
+    let(:properties){
+      PROPERTIES.merge({
+        "redis.broker.enable_deprecate_dedicated_service_access" => true
+      })
+    }
+
+    it 'is disabled' do
+      expect(template_out_script).to include("cf disable-service-access $BROKER_SERVICE_NAME -p dedicated-vm")
     end
   end
 end

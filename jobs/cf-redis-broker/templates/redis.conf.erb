@@ -16,28 +16,6 @@
 # Note that Redis will write a pid file in /var/run/redis.pid when daemonized.
 daemonize yes
 
-# When running daemonized, Redis writes a pid file in /var/run/redis.pid by
-# default. You can specify a custom pid file location here.
-# SET PER PROCESS
-#pidfile /var/run/redis.pid
-
-# Accept connections on the specified port, default is 6379.
-# If port 0 is specified Redis will not listen on a TCP socket.
-#SET PER PROCESS
-#port 63790
-
-# If you want you can bind a single interface, if the bind option is not
-# specified all the interfaces will listen for incoming connections.
-#
-# bind 127.0.0.1
-
-# Specify the path for the unix socket that will be used to listen for
-# incoming connections. There is no default, so Redis will not listen
-# on a unix socket when not specified.
-#
-# unixsocket /tmp/redis.sock
-# unixsocketperm 755
-
 # Close the connection after a client is idle for N seconds (0 to disable)
 timeout <%= p('redis.client_timeout') %>
 
@@ -149,17 +127,6 @@ rdbchecksum <%= p('redis.snapshotting.rdb_checksum') %>
 # The filename where to dump the DB
 dbfilename dump.rdb
 
-# The working directory.
-#
-# The DB will be written inside this directory, with the filename specified
-# above using the 'dbfilename' configuration directive.
-#
-# The Append Only File will also be created inside this directory.
-#
-# Note that you must specify a directory here, not a file name.
-# SET PER PROCESS
-#dir ./
-
 ################################# REPLICATION #################################
 
 # Master-Slave replication. Use slaveof to make a Redis instance a copy of
@@ -250,52 +217,7 @@ repl-disable-tcp-nodelay <%= p('redis.replication.repl_disable_tcp_nodelay') %>
 # By default the priority is 100.
 slave-priority <%= p('redis.replication.slave_priority') %>
 
-################################## SECURITY ###################################
-
-# Require clients to issue AUTH <PASSWORD> before processing any other
-# commands.  This might be useful in environments in which you do not trust
-# others with access to the host running redis-server.
-#
-# This should stay commented out for backward compatibility and because most
-# people do not need auth (e.g. they run their own servers).
-#
-# Warning: since Redis is pretty fast an outside user can try up to
-# 150k passwords per second against a good box. This means that you should
-# use a very strong password otherwise it will be very easy to break.
-#
-# requirepass foobared
-
-# Command renaming.
-#
-# It is possible to change the name of dangerous commands in a shared
-# environment. For instance the CONFIG command may be renamed into something
-# hard to guess so that it will still be available for internal-use tools
-# but not available for general clients.
-#
-# Example:
-#
-# rename-command CONFIG b840fc02d524045429941cc15f59e41cb7be6c52
-#
-# It is also possible to completely kill a command by renaming it into
-# an empty string:
-#
-# rename-command CONFIG ""
-#
-# Please note that changing the name of commands that are logged into the
-# AOF file or transmitted to slaves may cause problems.
-
 ################################### LIMITS ####################################
-
-# Set the max number of connected clients at the same time. By default
-# this limit is set to 10000 clients, however if the Redis server is not
-# able to configure the process file limit to allow for the specified limit
-# the max number of allowed clients is set to the current file limit
-# minus 32 (as Redis reserves a few file descriptors for internal uses).
-#
-# Once the limit is reached Redis will close all the new connections sending
-# an error 'max number of clients reached'.
-#
-# maxclients 10000
 
 # Don't use more memory than the specified amount of bytes.
 # When the memory limit is reached Redis will try to remove keys
@@ -320,7 +242,7 @@ slave-priority <%= p('redis.replication.slave_priority') %>
 # limit for maxmemory so that there is some free RAM on the system for slave
 # output buffers (but this is not needed if the policy is 'noeviction').
 #
-maxmemory <%= properties.redis.maxmemory %>
+maxmemory <%= p('redis.maxmemory') %>
 
 # MAXMEMORY POLICY: how Redis will select what to remove when maxmemory
 # is reached. You can select among five behaviors:
@@ -443,6 +365,44 @@ no-appendfsync-on-rewrite no
 auto-aof-rewrite-percentage 100
 auto-aof-rewrite-min-size 64mb
 
+# An AOF file may be found to be truncated at the end during the Redis
+# startup process, when the AOF data gets loaded back into memory.
+# This may happen when the system where Redis is running
+# crashes, especially when an ext4 filesystem is mounted without the
+# data=ordered option (however this can't happen when Redis itself
+# crashes or aborts but the operating system still works correctly).
+#
+# Redis can either exit with an error when this happens, or load as much
+# data as possible (the default now) and start if the AOF file is found
+# to be truncated at the end. The following option controls this behavior.
+#
+# If aof-load-truncated is set to yes, a truncated AOF file is loaded and
+# the Redis server starts emitting a log to inform the user of the event.
+# Otherwise if the option is set to no, the server aborts with an error
+# and refuses to start. When the option is set to no, the user requires
+# to fix the AOF file using the "redis-check-aof" utility before to restart
+# the server.
+#
+# Note that if the AOF file will be found to be corrupted in the middle
+# the server will still exit with an error. This option only applies when
+# Redis will try to read more data from the AOF file but not enough bytes
+# will be found.
+aof-load-truncated yes
+
+# When rewriting the AOF file, Redis is able to use an RDB preamble in the
+# AOF file for faster rewrites and recoveries. When this option is turned
+# on the rewritten AOF file is composed of two different stanzas:
+#
+#   [RDB file][AOF tail]
+#
+# When loading Redis recognizes that the AOF file starts with the "REDIS"
+# string and loads the prefixed RDB file, and continues loading the AOF
+# tail.
+#
+# This is currently turned off by default in order to avoid the surprise
+# of a format change, but will at some point be used as the default.
+aof-use-rdb-preamble no
+
 ################################ LUA SCRIPTING  ###############################
 
 # Max execution time of a Lua script in milliseconds.
@@ -493,11 +453,36 @@ slowlog-max-len <%=  p('redis.slow_log.max_len') %>
 hash-max-ziplist-entries 512
 hash-max-ziplist-value 64
 
-# Similarly to hashes, small lists are also encoded in a special way in order
-# to save a lot of space. The special representation is only used when
-# you are under the following limits:
-list-max-ziplist-entries 512
-list-max-ziplist-value 64
+# Lists are also encoded in a special way to save a lot of space.
+# The number of entries allowed per internal list node can be specified
+# as a fixed maximum size or a maximum number of elements.
+# For a fixed maximum size, use -5 through -1, meaning:
+# -5: max size: 64 Kb  <-- not recommended for normal workloads
+# -4: max size: 32 Kb  <-- not recommended
+# -3: max size: 16 Kb  <-- probably not recommended
+# -2: max size: 8 Kb   <-- good
+# -1: max size: 4 Kb   <-- good
+# Positive numbers mean store up to _exactly_ that number of elements
+# per list node.
+# The highest performing option is usually -2 (8 Kb size) or -1 (4 Kb size),
+# but if your use case is unique, adjust the settings as necessary.
+list-max-ziplist-size -2
+
+# Lists may also be compressed.
+# Compress depth is the number of quicklist ziplist nodes from *each* side of
+# the list to *exclude* from compression.  The head and tail of the list
+# are always uncompressed for fast push/pop operations.  Settings are:
+# 0: disable all list compression
+# 1: depth 1 means "don't start compressing until after 1 node into the list,
+#    going from either the head or tail"
+#    So: [head]->node->node->...->node->[tail]
+#    [head], [tail] will always be uncompressed; inner nodes will compress.
+# 2: [head]->[next]->node->node->...->node->[prev]->[tail]
+#    2 here means: don't compress head or head->next or tail->prev or tail,
+#    but compress all nodes between them.
+# 3: [head]->[next]->[next]->node->node->...->node->[prev]->[prev]->[tail]
+# etc.
+list-compress-depth 0
 
 # Sets have a special encoding in just one case: when a set is composed
 # of just strings that happens to be integers in radix 10 in the range
@@ -511,6 +496,20 @@ set-max-intset-entries 512
 # elements of a sorted set are below the following limits:
 zset-max-ziplist-entries 128
 zset-max-ziplist-value 64
+
+# HyperLogLog sparse representation bytes limit. The limit includes the
+# 16 bytes header. When an HyperLogLog using the sparse representation crosses
+# this limit, it is converted into the dense representation.
+#
+# A value greater than 16000 is totally useless, since at that point the
+# dense representation is more memory efficient.
+#
+# The suggested value is ~ 3000 in order to have the benefits of
+# the space efficient encoding without slowing down too much PFADD,
+# which is O(N) with the sparse encoding. The value can be raised to
+# ~ 10000 when CPU is not a concern, but space is, and the data set is
+# composed of many HyperLogLogs with cardinality in the 0 - 15000 range.
+hll-sparse-max-bytes 3000
 
 # Active rehashing uses 1 millisecond every 100 milliseconds of CPU time in
 # order to help rehashing the main Redis hash table (the one mapping top-level
@@ -569,6 +568,20 @@ client-output-buffer-limit normal 0 0 0
 client-output-buffer-limit slave 256mb 64mb 60
 client-output-buffer-limit pubsub 32mb 8mb 60
 
+# Client query buffers accumulate new commands. They are limited to a fixed
+# amount by default in order to avoid that a protocol desynchronization (for
+# instance due to a bug in the client) will lead to unbound memory usage in
+# the query buffer. However you can configure it here if you have very special
+# needs, such us huge multi/exec requests or alike.
+#
+# client-query-buffer-limit 1gb
+
+# In the Redis protocol, bulk requests, that are, elements representing single
+# strings, are normally limited ot 512 mb. However you can change this limit
+# here.
+#
+# proto-max-bulk-len 512mb
+
 # Redis calls an internal function to perform many background tasks, like
 # closing connections of clients in timeot, purging expired keys that are
 # never requested, and so forth.
@@ -592,21 +605,96 @@ hz 10
 # big latency spikes.
 aof-rewrite-incremental-fsync yes
 
-################################## INCLUDES ###################################
-
-# Include one or more other config files here.  This is useful if you
-# have a standard template that goes to all Redis server but also need
-# to customize a few per-server settings.  Include files can include
-# other files, so use this wisely.
+# Redis LFU eviction (see maxmemory setting) can be tuned. However it is a good
+# idea to start with the default settings and only change them after investigating
+# how to improve the performances and how the keys LFU change over time, which
+# is possible to inspect via the OBJECT FREQ command.
 #
-# include /path/to/local.conf
-# include /path/to/other.conf
+# There are two tunable parameters in the Redis LFU implementation: the
+# counter logarithm factor and the counter decay time. It is important to
+# understand what the two parameters mean before changing them.
+#
+# The LFU counter is just 8 bits per key, it's maximum value is 255, so Redis
+# uses a probabilistic increment with logarithmic behavior. Given the value
+# of the old counter, when a key is accessed, the counter is incremented in
+# this way:
+#
+# 1. A random number R between 0 and 1 is extracted.
+# 2. A probability P is calculated as 1/(old_value*lfu_log_factor+1).
+# 3. The counter is incremented only if R < P.
+#
+# The default lfu-log-factor is 10. This is a table of how the frequency
+# counter changes with a different number of accesses with different
+# logarithmic factors:
+#
+# +--------+------------+------------+------------+------------+------------+
+# | factor | 100 hits   | 1000 hits  | 100K hits  | 1M hits    | 10M hits   |
+# +--------+------------+------------+------------+------------+------------+
+# | 0      | 104        | 255        | 255        | 255        | 255        |
+# +--------+------------+------------+------------+------------+------------+
+# | 1      | 18         | 49         | 255        | 255        | 255        |
+# +--------+------------+------------+------------+------------+------------+
+# | 10     | 10         | 18         | 142        | 255        | 255        |
+# +--------+------------+------------+------------+------------+------------+
+# | 100    | 8          | 11         | 49         | 143        | 255        |
+# +--------+------------+------------+------------+------------+------------+
+#
+# NOTE: The above table was obtained by running the following commands:
+#
+#   redis-benchmark -n 1000000 incr foo
+#   redis-cli object freq foo
+#
+# NOTE 2: The counter initial value is 5 in order to give new objects a chance
+# to accumulate hits.
+#
+# The counter decay time is the time, in minutes, that must elapse in order
+# for the key counter to be divided by two (or decremented if it has a value
+# less <= 10).
+#
+# The default value for the lfu-decay-time is 1. A Special value of 0 means to
+# decay the counter every time it happens to be scanned.
+#
+# lfu-log-factor 10
+# lfu-decay-time 1
+
+################################## SECURITY ###################################
+
+# Require clients to issue AUTH <PASSWORD> before processing any other
+# commands.  This might be useful in environments in which you do not trust
+# others with access to the host running redis-server.
+#
+# This should stay commented out for backward compatibility and because most
+# people do not need auth (e.g. they run their own servers).
+#
+# Warning: since Redis is pretty fast an outside user can try up to
+# 150k passwords per second against a good box. This means that you should
+# use a very strong password otherwise it will be very easy to break.
+#
+
+# Command renaming.
+#
+# It is possible to change the name of dangerous commands in a shared
+# environment. For instance the CONFIG command may be renamed into something
+# hard to guess so that it will still be available for internal-use tools
+# but not available for general clients.
+#
+# Example:
+#
+# rename-command CONFIG b840fc02d524045429941cc15f59e41cb7be6c52
+#
+# It is also possible to completely kill a command by renaming it into
+# an empty string:
+#
+# rename-command CONFIG ""
+#
+# Please note that changing the name of commands that are logged into the
+# AOF file or transmitted to slaves may cause problems.
 
 rename-command CONFIG "<%= p('redis.config_command') %>"
 rename-command SAVE "<%= p('redis.save_command') %>"
 rename-command BGSAVE "<%= p('redis.bg_save_command') %>"
+rename-command BGREWRITEAOF "<%= p('redis.bg_rewrite_aof_command') %>"
 
-rename-command BGREWRITEAOF ""
 rename-command DEBUG ""
 rename-command MONITOR ""
 rename-command SHUTDOWN ""

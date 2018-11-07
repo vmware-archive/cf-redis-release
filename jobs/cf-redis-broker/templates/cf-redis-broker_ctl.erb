@@ -7,19 +7,11 @@ BIN_DIR=/var/vcap/packages/cf-redis-broker/bin
 INSTANCE_LOG_DIR=<%= p('redis.log_directory') %>
 DATA_DIR=<%= p('redis.data_directory') %>
 PIDFILE_DIR=<%= p('redis.pidfile_directory') %>
-STATEFILE_DIR=`dirname <%= p('redis.statefile_path') %>`
+STATEFILE=`dirname <%= p('redis.statefile_path') %>`
+CONF_FILE=<%= p('redis.conf_path') %>
+CONF_DIR=<%= p('redis.conf_directory') %>
 <% if_p('service-backup.source_folder') do %>
 BACKUP_SOURCE_DIR=<%= p('service-backup.source_folder') %>
-<% end %>
-
-<% if_p('redis-backup.stdout_filename') do %>
-touch <%= p('redis-backup.stdout_filename') %>
-chmod 666 <%= p('redis-backup.stdout_filename') %>
-<% end %>
-
-<% if_p('redis-backup.stderr_filename') do %>
-touch <%= p('redis-backup.stderr_filename') %>
-chmod 666 <%= p('redis-backup.stderr_filename') %>
 <% end %>
 
 PIDFILE=$RUN_DIR/unicorn.pid
@@ -33,8 +25,12 @@ case $1 in
   start)
     pid_guard $PIDFILE "Redis Broker"
 
-    mkdir -p $RUN_DIR $LOG_DIR $DATA_DIR $INSTANCE_LOG_DIR $STATEFILE_DIR $BACKUP_LOG_DIR $BACKUP_TMP_DIR $PIDFILE_DIR $BACKUP_SOURCE_DIR
-    chown vcap:vcap $RUN_DIR $LOG_DIR $DATA_DIR $INSTANCE_LOG_DIR $STATEFILE_DIR $BACKUP_LOG_DIR $BACKUP_TMP_DIR $PIDFILE_DIR $BACKUP_SOURCE_DIR
+    mkdir -p $RUN_DIR $LOG_DIR $DATA_DIR $INSTANCE_LOG_DIR $STATEFILE $BACKUP_TMP_DIR $PIDFILE_DIR $BACKUP_SOURCE_DIR
+    chown vcap:vcap $RUN_DIR $LOG_DIR $DATA_DIR $INSTANCE_LOG_DIR $STATEFILE $BACKUP_TMP_DIR $PIDFILE_DIR $BACKUP_SOURCE_DIR $CONF_FILE $CONF_DIR
+    chmod 750 ${DATA_DIR}
+    chmod 750 ${CONF_DIR}
+    chmod 640 ${CONF_FILE}
+    chmod 750 ${PIDFILE_DIR}
 
     # Recommended for running redis on a VM in production (https://www.pivotaltracker.com/story/show/74949514)
     sysctl vm.overcommit_memory=1
@@ -43,16 +39,25 @@ case $1 in
     # This value is (maxclients + 32).
     ulimit -n 10032
 
+    if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
+    # bosh-lite is a read-only file system
+    set +e
+      echo never > /sys/kernel/mm/transparent_hugepage/enabled
+    set -e
+    fi
+
+    sysctl -w net.core.somaxconn=511
+
     export BROKER_CONFIG_PATH=$JOB_DIR/config/broker.yml
 
     chpst -u vcap:vcap $BIN_DIR/configmigrator \
-      > >(tee -a $LOG_DIR/cf-redis-configmigrator.stdout.log | logger -p local0.info ) \
-      2> >(tee -a $LOG_DIR/cf-redis-configmigrator.stderr.log | logger -p local0.err )
+      >> "${LOG_DIR}/cf-redis-configmigrator.stdout.log" \
+      2>> "${LOG_DIR}/cf-redis-configmigrator.stderr.log"
 
     echo $$ > $PIDFILE
     exec chpst -u vcap:vcap $BIN_DIR/broker \
-      > >(tee -a $LOG_DIR/cf-redis-broker.stdout.log | logger -p local0.info ) \
-      2> >(tee -a $LOG_DIR/cf-redis-broker.stderr.log | logger -p local0.err )
+      >> "${LOG_DIR}/cf-redis-broker.stdout.log" \
+      2>> "${LOG_DIR}/cf-redis-broker.stderr.log"
     ;;
 
   stop)

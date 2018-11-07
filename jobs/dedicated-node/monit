@@ -6,13 +6,13 @@ check process redis-agent
 
 check process redis
   with pidfile /var/vcap/sys/run/redis.pid
-  start program "/var/vcap/jobs/dedicated-node/bin/redis_ctl start"
-  stop program "/var/vcap/jobs/dedicated-node/bin/redis_ctl stop"
+  start program "/var/vcap/jobs/dedicated-node/bin/start"
+  stop program "/var/vcap/jobs/dedicated-node/bin/drain quickly"
   group vcap
-  depends on redis-agent, syslog-configurator
+  depends on redis-agent
 
 check process nginx
-  with pidfile /var/vcap/sys/run/dedicated-node/nginx.pid
+  with pidfile /var/vcap/sys/run/dedicated-node/nginx/nginx.pid
   start program "/var/vcap/jobs/dedicated-node/bin/nginx_ctl start"
   stop program "/var/vcap/jobs/dedicated-node/bin/nginx_ctl stop"
   group vcap

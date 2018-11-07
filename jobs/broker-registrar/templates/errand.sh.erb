@@ -3,24 +3,42 @@
 set -e
 set -x
 
-export PATH=$PATH:/var/vcap/packages/cf-cli/bin
+export PATH=$PATH:/var/vcap/packages/cf-cli-6-linux/bin
+
+<% if p("redis.broker.service_instance_limit") == 0 && p("redis.broker.dedicated_node_count") == 0 %>
+    echo "Exiting as there are no shared-vms allowed or dedicated nodes provisioned"
+    exit 0
+<% end %>
+
 
 CF_API_URL='<%= p("cf.api_url") %>'
+
+set +x
 CF_ADMIN_USERNAME='<%= p("cf.admin_username") %>'
 CF_ADMIN_PASSWORD='<%= p("cf.admin_password") %>'
+set -x
+
 CF_DIAL_TIMEOUT=30
 BROKER_NAME='<%= p("broker.name") %>'
 BROKER_SERVICE_NAME='<%= p("redis.broker.service_name") %>'
 BROKER_URL='<%= p("broker.protocol") %>://<%= p("broker.host") %>'
+
+set +x
 BROKER_USERNAME='<%= p("broker.username") %>'
 BROKER_PASSWORD='<%= p("broker.password") %>'
+set -x
+
 SKIP_SSL_VALIDATION='<%= p("cf.skip_ssl_validation") ? "--skip-ssl-validation" : "" %>'
 
 cf --version
 cf api $SKIP_SSL_VALIDATION $CF_API_URL
+
+set +x
 cf auth $CF_ADMIN_USERNAME $CF_ADMIN_PASSWORD
 cf create-service-broker $BROKER_NAME $BROKER_USERNAME $BROKER_PASSWORD $BROKER_URL || cf update-service-broker $BROKER_NAME $BROKER_USERNAME $BROKER_PASSWORD $BROKER_URL
-# disable-servic-access must happen in order to reset service-access. You can then reconfigure access accordingly.
+set -x
+
+# disable-service-access must happen in order to reset service-access. You can then reconfigure access accordingly.
 cf disable-service-access $BROKER_SERVICE_NAME
 
 <% if p("redis.broker.enable_service_access") %>
@@ -31,4 +49,10 @@ cf disable-service-access $BROKER_SERVICE_NAME
       cf enable-service-access -o <%= org %> $BROKER_SERVICE_NAME
     <% end %>
   <% end %>
+<% end %>
+
+<% if p("redis.broker.enable_deprecate_dedicated_service_access") %>
+  set +e
+  cf disable-service-access $BROKER_SERVICE_NAME -p dedicated-vm
+  set -e
 <% end %>

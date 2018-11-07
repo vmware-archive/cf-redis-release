@@ -1,29 +1,39 @@
 require 'logger'
 require 'system_spec_helper'
-
-require 'prof/external_spec/shared_examples/deployment'
-require 'prof/external_spec/shared_examples/service_broker'
+require 'rspec/eventually'
 
 describe 'logging' do
-  log = Logger.new(STDOUT)
+  SYSLOG_FILE = "/var/log/syslog"
 
-  let(:log_files_by_job) {
-    {
-      'cf-redis-broker' => [
-        'access.log',
-        'cf-redis-broker.stderr.log',
-        'cf-redis-broker.stdout.log',
-        'error.log',
-        'nginx.stderr.log',
-        'nginx.stdout.log',
-        'process-watcher.stderr.log',
-        'process-watcher.stdout.log',
-      ]
-    }
-  }
+  describe 'syslog-forwarding' do
+    let(:syslog_helper) { get_syslog_endpoint_helper }
 
-  it_behaves_like 'a deployment' # log files in /var/vcap/sys/log
-  it_behaves_like 'a service broker' # logs to syslog
+    before do
+      syslog_helper.drain
+    end
+
+    context 'cf-redis-broker' do
+      before do
+        broker_ssh.execute("sudo /var/vcap/bosh/bin/monit restart #{Helpers::Environment::BROKER_JOB_NAME}")
+        expect(broker_ssh.wait_for_process_start(Helpers::Environment::BROKER_JOB_NAME)).to be true
+      end
+
+      it 'forwards logs' do
+        expect { syslog_helper.get_line }.to eventually(include Helpers::Environment::BROKER_JOB_NAME).within 5
+      end
+    end
+
+    context 'dedicated-node' do
+      before do
+        dedicated_node_ssh.execute('sudo /var/vcap/bosh/bin/monit restart redis')
+        expect(dedicated_node_ssh.wait_for_process_start('redis')).to be true
+      end
+
+      it 'forwards logs' do
+        expect { syslog_helper.get_line }.to eventually(include Helpers::Environment::DEDICATED_NODE_JOB_NAME).within 5
+      end
+    end
+  end
 
   describe 'redis broker' do
     def service
@@ -33,29 +43,33 @@ describe 'logging' do
       )
     end
 
-    let(:shared_node_ip) { @binding.credentials[:host] }
-
     before(:all) do
-      @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @binding          = service_broker.bind_instance(@service_instance)
+      broker_ssh.execute("sudo /var/vcap/bosh/bin/monit restart #{Helpers::Environment::BROKER_JOB_NAME}")
+      expect(broker_ssh.wait_for_process_start(Helpers::Environment::BROKER_JOB_NAME)).to be true
     end
 
-    after(:all) do
-      service_broker.unbind_instance(@binding)
-      service_broker.deprovision_instance(@service_instance)
-    end
-
-    it 'logs broker startup to syslog' do
-      find_log_line_cmd = 'grep -c "redis-broker.Starting CF Redis broker" /var/log/syslog'
-
-      result = root_execute_on(shared_node_ip, find_log_line_cmd)
-      expect(result).not_to be_nil
-      redis_server_start_count = Integer(result.strip)
-      expect(redis_server_start_count).to be > 0
+    it 'allows log access via bosh' do
+      log_files_by_job = {
+        Helpers::Environment::BROKER_JOB_NAME => [
+          'access.log',
+          'cf-redis-broker.stderr.log',
+          'cf-redis-broker.stdout.log',
+          'error.log',
+          'nginx.stderr.log',
+          'nginx.stdout.log',
+          'process-watcher.stderr.log',
+          'process-watcher.stdout.log',
+        ]
+      }
+      log_files_by_job.each_pair do |job_name, log_files|
+        expect(bosh_director.job_logfiles(job_name)).to include(*log_files)
+      end
     end
   end
 
   describe 'dedicated redis process' do
+    REDIS_SERVER_STARTED_PATTERN = "Ready to accept connections"
+
     def service
       Prof::MarketplaceService.new(
         name: bosh_manifest.property('redis.broker.service_name'),
@@ -63,44 +77,31 @@ describe 'logging' do
       )
     end
 
-    let(:redis_server_start_pattern) { "Server started, Redis version" }
-    let(:redis_server_accept_conn_pattern) { "The server is now ready to accept connections on port #{@binding.credentials[:port]}" }
-    let(:dedicated_node_ip) { @binding.credentials[:host] }
-
     before(:all) do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @binding          = service_broker.bind_instance(@service_instance)
+      @binding = service_broker.bind_instance(@service_instance)
+      @redis_server_running_on_port_pattern = "Running mode=.*, port=#{@binding.credentials[:port]}"
 
-      host = @binding.credentials[:host]
-      log.info("Provisioned dedicated instance #{host} for tests")
+      @host = @binding.credentials[:host]
+      @log = Logger.new(STDOUT)
+      @log.info("Provisioned dedicated instance #{@host} for tests")
     end
 
     after(:all) do
-      host = @binding.credentials[:host]
       service_broker.unbind_instance(@binding)
       service_broker.deprovision_instance(@service_instance)
-      log.info("Deprovisioned dedicated instance #{host} for tests")
-    end
-
-    it 'logs to syslog' do
-      result = root_execute_on(dedicated_node_ip, "grep -c '#{redis_server_start_pattern}' /var/log/syslog")
-      redis_server_start_count = Integer(result.strip)
-      expect(redis_server_start_count).to be > 0
-
-      result = root_execute_on(dedicated_node_ip, "grep -c '#{redis_server_accept_conn_pattern}' /var/log/syslog")
-      redis_server_accept_conn_count = Integer(result.strip)
-      expect(redis_server_accept_conn_count).to be > 0
+      @log.info("Deprovisioned dedicated instance #{@host} for tests")
     end
 
     it 'logs to its local log file' do
-      local_log_file = "/var/vcap/sys/log/redis/redis.log"
-
-      result = ssh_gateway.execute_on(dedicated_node_ip, "grep -c '#{redis_server_start_pattern}' #{local_log_file}")
-      redis_server_start_count = Integer(result.strip)
-      expect(redis_server_start_count).to be > 0
-      result = ssh_gateway.execute_on(dedicated_node_ip, "grep -c '#{redis_server_accept_conn_pattern}' #{local_log_file}")
-      redis_server_accept_conn_count = Integer(result.strip)
-      expect(redis_server_accept_conn_count).to be > 0
+      redis_log_file = "/var/vcap/sys/log/redis/redis.log"
+      expect(count_from_log(dedicated_node_ssh, @redis_server_running_on_port_pattern, redis_log_file)).to be > 0
+      expect(count_from_log(dedicated_node_ssh, REDIS_SERVER_STARTED_PATTERN, redis_log_file)).to be > 0
     end
   end
+end
+
+def count_from_log(ssh_target, pattern, log_file)
+  output = ssh_target.execute(%Q{sudo grep -v grep #{log_file} | grep -c "#{pattern}"})
+  Integer(output.strip)
 end

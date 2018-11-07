@@ -10,3 +10,6 @@ rspec.xml
 /releases/**/*.tgz
 /releases/*.tgz
 vendor/*
+.envrc
+secrets/
+bosh_releases/

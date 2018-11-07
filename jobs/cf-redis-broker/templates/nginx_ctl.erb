@@ -1,22 +1,31 @@
 #!/bin/bash -e
 
 JOB_DIR=/var/vcap/jobs/cf-redis-broker
-RUN_DIR=/var/vcap/sys/run/cf-redis-broker
+RUN_DIR=/var/vcap/sys/run/cf-redis-broker/nginx
 LOG_DIR=/var/vcap/sys/log/cf-redis-broker/nginx
 PID_FILE=$RUN_DIR/nginx.pid
 
 source /var/vcap/packages/redis-common/utils.sh
 
+function chown_vcap_logs_if_exists() {
+  if [ "$(find $1 -name '*.log' | wc -l)" -gt 0 ]; then
+    chown vcap:vcap $1/*.log
+  fi
+}
+
 case $1 in
 
   start)
     mkdir -p $RUN_DIR $LOG_DIR $STORE_DIR
-
     echo $$ > $PID_FILE
 
-    exec /var/vcap/packages/cf-redis-nginx/sbin/nginx -c $JOB_DIR/config/nginx.conf \
-      > >(tee -a $LOG_DIR/nginx.stdout.log | logger -p local0.info) \
-      2> >(tee -a $LOG_DIR/nginx.stderr.log | logger -p local0.err)
+    chown vcap:vcap $RUN_DIR $LOG_DIR $STORE_DIR $PID_FILE
+    chown_vcap_logs_if_exists $LOG_DIR
+
+    exec chpst -u vcap:vcap /var/vcap/packages/cf-redis-nginx/sbin/nginx \
+      -c "${JOB_DIR}/config/nginx.conf" \
+      >> "${LOG_DIR}/nginx.stdout.log" \
+      2>> "${LOG_DIR}/nginx.stderr.log"
     ;;
 
   stop)

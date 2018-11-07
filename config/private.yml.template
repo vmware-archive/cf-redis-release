@@ -1,0 +1,4 @@
+blobstore:
+  options:
+    access_key_id: REPLACE_WITH_KEY_ID # AWS credentials required to upload blobs
+    secret_access_key: REPLACE_WITH_SECRET_ACCESS_KEY

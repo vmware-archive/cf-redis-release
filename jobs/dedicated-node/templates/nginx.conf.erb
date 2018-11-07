@@ -1,36 +1,43 @@
-user vcap;
 worker_processes 1;
 daemon off;
 
+# nginx will attempt to create a default log file at first, ignoring the below
+# confg. This might fail the first time and the first error can be ignored.
 error_log  /var/vcap/sys/log/nginx/error.log;
 
 <% if_p("syslog_aggregator.address", "syslog_aggregator.port") do %>
 error_log syslog:server=localhost,facility=local0,tag=CfRedisBrokerNginxError error;
 <% end %>
 
-pid        /var/vcap/sys/run/dedicated-node/nginx.pid;
+pid /var/vcap/sys/run/dedicated-node/nginx/nginx.pid;
 
 events {
   worker_connections  1024;
 }
 
 http {
+  client_body_temp_path /var/vcap/sys/run/dedicated-node/nginx/client_body_temp;
+  fastcgi_temp_path     /var/vcap/sys/run/dedicated-node/nginx/fastcgi_temp;
+  proxy_temp_path       /var/vcap/sys/run/dedicated-node/nginx/proxy_temp;
+  scgi_temp_path        /var/vcap/sys/run/dedicated-node/nginx/scgi_temp;
+  uwsgi_temp_path       /var/vcap/sys/run/dedicated-node/nginx/uwsgi_temp;
+
   server_tokens off;
 
   server {
-    listen 443 ssl;
+    listen 4443 ssl;
 
     location / {
       proxy_pass         http://127.0.0.1:<%= p('redis.agent.backend_port') %>;
 
-      proxy_set_header   Host             $host;
-      proxy_set_header   X-Real-IP        $remote_addr;
-      proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
+      proxy_set_header   Host              $host;
+      proxy_set_header   X-Real-IP         $remote_addr;
+      proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
       proxy_set_header   X-Forwarded-Proto $scheme;
     }
 
-    ssl_protocols TLSv1.1 TLSv1.2;  # don’t use SSLv3 ref: POODLE
-    ssl_ciphers 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!3DES:!MD5:!PSK';
+    ssl_protocols TLSv1.2;  # don’t use SSLv3 ref: POODLE
+    ssl_ciphers 'DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!3DES:!MD5:!PSK:!ADH:!SRP';
     ssl_prefer_server_ciphers on;
     ssl_certificate        /var/vcap/store/dedicated-node/nginx/redis-agent.pem;
     ssl_certificate_key    /var/vcap/store/dedicated-node/nginx/redis-agent.key;
@@ -40,5 +47,5 @@ http {
   access_log syslog:server=localhost,facility=local0,severity=debug,tag=CfRedisBrokerNginxAccess combined;
   <% end %>
 
-  access_log           /var/vcap/sys/log/nginx/access.log;
+  access_log /var/vcap/sys/log/nginx/access.log;
 }

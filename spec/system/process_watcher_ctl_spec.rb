@@ -1,48 +1,47 @@
 require 'system_spec_helper'
 require 'aws-sdk'
 
+PROCESS_WATCHER_PATH = '/var/vcap/sys/log/monit/process-watcher_ctl.err.log'
+
 describe 'process-watcher startup logging' do
-  let(:processWatcherPath) { '/var/vcap/sys/log/monit/process-watcher_ctl.err.log' }
-
-  before do
-    monitRestartProcessWatcherAndClearLogs()
-  end
-
   it 'does not log that another processmonitor process is running' do
-    log_output = root_execute_on(broker_host, "cat #{processWatcherPath}")
+    clear_log_and_restart_process_watcher
+    log_output = broker_ssh.execute("sudo cat #{PROCESS_WATCHER_PATH}")
     expect(log_output).not_to include "processmonitor already running"
+    clear_log_and_restart_process_watcher
   end
 
   context 'when a processmonitor process already exists' do
-    before do
-      startFakeProcessMonitor()
-      monitRestartProcessWatcherAndClearLogs()
-    end
-
-    after do
-      stopFakeProcessMonitor()
-      monitRestartProcessWatcherAndClearLogs()
-    end
-
     it 'logs that another processmonitor process is running' do
-      log_output = root_execute_on(broker_host, "cat #{processWatcherPath}")
+      fake_thread = start_fake_process_monitor
+      clear_log_and_restart_process_watcher
+
+      log_output = broker_ssh.execute("sudo cat #{PROCESS_WATCHER_PATH}")
       expect(log_output).to include 'processmonitor already running'
+
+      stop_fake_process_monitor(fake_thread)
+      clear_log_and_restart_process_watcher
     end
   end
 end
 
-def monitRestartProcessWatcherAndClearLogs()
-  root_execute_on(broker_host, '/var/vcap/bosh/bin/monit restart process-watcher')
-  expect(wait_for_process_start('process-watcher', broker_host)).to eq(true)
+def clear_log_and_restart_process_watcher
+  clear_process_watcher_logs
+  broker_ssh.execute('sudo /var/vcap/bosh/bin/monit restart process-watcher')
+  expect(broker_ssh.wait_for_process_start('process-watcher')).to eq(true)
 end
 
-def startFakeProcessMonitor()
-  @t = Thread.new{
-    ssh_gateway.execute_on(broker_host, 'bash -c "exec -a fakeprocessmonitor sleep 10000"')
-  }
+def clear_process_watcher_logs
+  broker_ssh.execute("sudo truncate -s 0 #{PROCESS_WATCHER_PATH}")
 end
 
-def stopFakeProcessMonitor()
-  ssh_gateway.execute_on(broker_host, 'kill `pidof fakeprocessmonitor`')
-  @t.kill
+def start_fake_process_monitor
+  Thread.new do
+    broker_ssh.execute('bash -c "exec -a fakeprocessmonitor sleep 10000"')
+  end
+end
+
+def stop_fake_process_monitor(fake_thread)
+  broker_ssh.execute('sudo kill `pidof fakeprocessmonitor`')
+  fake_thread.kill
 end

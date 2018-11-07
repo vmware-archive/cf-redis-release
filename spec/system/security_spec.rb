@@ -2,17 +2,16 @@ require 'system_spec_helper'
 
 require 'socket'
 require 'timeout'
-require 'prof/ssl/cipher_set'
 
 describe 'security' do
   describe 'the broker' do
     it 'uses latest version of nginx' do
-      output = ssh_gateway.execute_on(broker_host, '/var/vcap/packages/cf-redis-nginx/sbin/nginx -v').strip
+      output = broker_ssh.execute('/var/vcap/packages/cf-redis-nginx/sbin/nginx -v')
       expect(output).to eql('nginx version: nginx/1.8.0')
     end
 
     it 'does not listen publicly on the backend_port' do
-      netstat_output = ssh_gateway.execute_on(broker_host, "netstat -l | grep #{broker_backend_port}")
+      netstat_output = broker_ssh.execute("netstat -l | grep #{broker_backend_port}")
       expect(netstat_output.lines.count).to eq(1)
       expect(netstat_output).to include("localhost:#{broker_backend_port}")
     end
@@ -20,19 +19,54 @@ describe 'security' do
 
   describe 'the agents' do
     it 'uses latest version of nginx' do
-      output = ssh_gateway.execute_on(node_hosts.first, '/var/vcap/packages/cf-redis-nginx/sbin/nginx -v').strip
+      output = dedicated_node_ssh.execute('/var/vcap/packages/cf-redis-nginx/sbin/nginx -v')
       expect(output).to eql('nginx version: nginx/1.8.0')
     end
 
     it 'only supports HTTPS with restricted ciphers' do
-      agent_url = "https://#{node_hosts.first}"
-      expect(agent_url).to only_support_ssl_with_cipher_set(Prof::SSL::CipherSet::PIVOTAL_MODERN).with_proxy(environment.http_proxy)
+      supported_ciphers = ["DHE-RSA-AES128-GCM-SHA256", "DHE-RSA-AES256-GCM-SHA384", "ECDHE-RSA-AES128-GCM-SHA256", "ECDHE-RSA-AES256-GCM-SHA384"]
+      expect(get_allowed_ciphers).to contain_exactly(*supported_ciphers)
     end
 
     it 'does not listen publicly on the backend_port' do
-      netstat_output = ssh_gateway.execute_on(node_hosts.first, "netstat -l | grep #{agent_backend_port}")
+      netstat_output = dedicated_node_ssh.execute("netstat -l | grep #{agent_backend_port}")
       expect(netstat_output.lines.count).to eq(1)
       expect(netstat_output).to include("localhost:#{agent_backend_port}")
     end
   end
+end
+
+def get_allowed_ciphers
+  command = '
+    #!/bin/bash
+
+    SERVER=localhost:4443
+    ciphers=$(openssl ciphers "ALL:eNULL" | sed -e "s/:/ /g")
+
+    function test_cipher() {
+      echo -n | openssl s_client -cipher "$1" -connect $SERVER 2>&1
+    }
+
+    function cipher_is_allowed() {
+      result=$(test_cipher $cipher)
+
+      if [[ "$result" =~ "Cipher is ${cipher}" || "$result" =~ "Cipher    : ${cipher}" ]]; then
+        echo true
+      fi
+    }
+
+    function echo_cipher_if_allowed() {
+      if [[ "$(cipher_is_allowed $1)" = true ]]; then
+        echo $1
+      fi
+    }
+
+    for cipher in ${ciphers[@]}; do
+      echo_cipher_if_allowed $cipher
+    done
+  '
+
+  output = dedicated_node_ssh.execute(command)
+  expect(output.strip).not_to be_empty
+  output.split "\n"
 end

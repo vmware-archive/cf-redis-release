@@ -5,3 +5,4 @@ blobstore:
   provider: s3
   options:
     bucket_name: redis-broker-bosh-release-blobs
+    region: us-east-1

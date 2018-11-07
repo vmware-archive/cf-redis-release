@@ -7,12 +7,20 @@ source /var/vcap/packages/redis-common/utils.sh
 case $1 in
 
   start)
+    mkdir -p $(dirname $PIDFILE)
     echo $$ > $PIDFILE
-    while true; do sleep 10000; done
+    while true; do sleep 100; done
     ;;
 
   stop)
-    pkill redis-server
+    set +e
+      pkill redis-server
+      pkillExitCode=$?
+    set -e
+    # exit code 1 = nothing to kill, which is OK
+    if [ "${pkillExitCode}" -gt 1 ]; then
+      exit $pkillExitCode
+    fi
     kill_and_wait $PIDFILE 55
     ;;
 

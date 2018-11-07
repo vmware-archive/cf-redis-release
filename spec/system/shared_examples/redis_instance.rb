@@ -21,7 +21,7 @@ shared_examples_for 'a redis instance' do
             else
               expect {
                 service_client.run(command)
-              }.to raise_error(/unknown command '#{command}'/)
+              }.to raise_error(/unknown command `#{command}`/)
             end
           end
         end

@@ -13,13 +13,27 @@ templates:
   nginx.conf.erb: config/nginx.conf
   redis.conf.erb: config/redis.conf
 
-  drain.sh: bin/drain
+  drain.sh.erb: bin/drain
 
 packages:
 - cf-redis-broker
 - redis-common
 - cf-redis-nginx
 - redis
+
+provides:
+- name: redis_broker
+  type: redis_broker
+  properties:
+  - redis.broker.name
+  - redis.broker.nginx.port
+  - redis.broker.auth.username
+  - redis.broker.auth.password
+
+consumes:
+- name: dedicated_node
+  type: dedicated_node
+  optional: true
 
 properties:
   service-backup.source_folder:
@@ -40,6 +54,9 @@ properties:
   redis.conf_path:
     default: /var/vcap/jobs/cf-redis-broker/config/redis.conf
     description: The shared conf file for all Redis instances
+  redis.conf_directory:
+    default: /var/vcap/jobs/cf-redis-broker/config
+    description: The shared conf file directory
   redis.maxmemory:
     default: 524288000
     description: The maximum memory (in bytes) that Redis will use before evicting old data
@@ -51,6 +68,9 @@ properties:
   redis.bg_save_command:
     default: ""
     description: The name of the obfuscated redis BGSAVE command.
+  redis.bg_rewrite_aof_command:
+    default: "06368efbfc3749d09b6ec60a0b54e4b5"
+    description: The name of the obfuscated redis BGREWRITEAOF command.
   redis.client_timeout:
     default: 0
     description: Close the connection after a client is idle for N seconds (0 to disable)
@@ -152,11 +172,8 @@ properties:
   redis.broker.backend_port:
     default: 10005
     description: The port for the broker unicorn process to run on
-  redis.broker.backend_host:
-    default: localhost
-    description: The port for the broker unicorn process to run on
   redis.broker.nginx.port:
-    default: 80
+    default: 12350
     description: "Port for nginx"
   redis.broker.nginx.ip:
     default: ""
@@ -164,8 +181,6 @@ properties:
   redis.broker.nginx.bucket_size:
     default: 128
     description: server_names_hash_bucket_size for nginx
-  redis.broker.host:
-    description: "Host (DNS) or IP address used by the broker and bound applications to reach the service"
 
   redis.broker.dedicated_nodes:
     description: List of node IPs for the dedicated plan

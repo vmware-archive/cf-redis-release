@@ -1,7 +1,7 @@
 ---
 name: broker-registrar
 packages:
-- cf-cli
+- cf-cli-6-linux
 templates:
   errand.sh.erb: bin/run
 properties:
@@ -34,3 +34,10 @@ properties:
   redis.broker.service_access_orgs:
     description: 'Limit your service to only be accessible by the given org.'
     default: []
+  redis.broker.dedicated_node_count:
+    description: 'Number of provisioned dedicated instances'
+  redis.broker.service_instance_limit:
+    description: 'Number of shared vm instances allowed'
+  redis.broker.enable_deprecate_dedicated_service_access:
+    description: 'If set to true broker-registrar errand will disable access to dedicated-vm plan'
+    default: false

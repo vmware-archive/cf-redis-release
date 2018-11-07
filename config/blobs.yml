@@ -1,69 +1,32 @@
----
-ruby/ruby-2.0.0-p481.tar.gz:
-  object_id: d7ed90b9-0e26-4579-bc6f-5333222578a4
-  sha: dded7b7349d59feb83d4f774b2ddec23eeab7978
-  size: 13586757
-ruby/rubygems-2.1.11.tgz:
-  object_id: a043d80c-896d-4165-b81f-a922a7817a33
-  sha: ca3033432cae28deb7ced79cda271cb292b70e59
-  size: 367166
-ruby/yaml-0.1.5.tar.gz:
-  object_id: b31f889b-5ae8-42ac-b6f1-f66b7126c784
-  sha: 8b78cb9f759c7d80db8a7328c0ebecfe34fde737
-  size: 504897
-ruby/bundler-1.3.5.gem:
-  object_id: 67d8e9d8-a79a-4ebe-8061-9ac59d0224b5
-  sha: 2cad3052a59b83f1f616e8202f5c714e46bd8523
-  size: 268800
-nginx/pcre-8.34.tar.gz:
-  object_id: 2616f05d-ca34-4db5-a6d4-e1e7aba6799c
-  sha: d46e537337ee70df19084001a4b6815b3d69fe6c
-  size: 1933734
-nginx/nginx-1.7.9.tar.gz:
-  object_id: 67a972e2-f601-42f2-aff1-19e631d5fbb9
-  sha: 44ef4770db281cea26a1b2e66c0e34193e1d1f1f
-  size: 827263
 aws-cli/awscli-bundle.zip:
+  size: 5207424
   object_id: 0221dcb3-3ce0-44e6-8c4f-c5c2abf1b0eb
   sha: db33b4740a670c9fb3bc5515cd7f9861fa1b1b13
-  size: 5207424
-python/Python-2.7.8.tgz:
-  object_id: 449aacb5-8758-4fcc-8b0a-9ce7af700d64
-  sha: 511960dd78451a06c9df76509635aeec05b2051a
-  size: 14846119
-redis/redis-2.8.21.tar.gz:
-  object_id: 611cbde4-6516-4ddc-93bf-f02788888ff5
-  sha: 6798200d007451a960a0a72041699e12adf14ee3
-  size: 1272195
+ginkgo/ginkgo:
+  size: 10583320
+  object_id: 375645ba-af16-4ced-67aa-9f14a03f7c18
+  sha: e5697ace4ec310cc6bc1ac157b26dd254faa93ac
 nginx/nginx-1.8.0.tar.gz:
+  size: 832104
   object_id: 77904c0d-6bb2-4e3e-b981-16828770f7a2
   sha: 12bad312764feae50246685ab2e74512d1aa9b2f
-  size: 832104
-nginx/pcre-8.37-patch-CVE2015-3210.tar.gz:
-  object_id: feb600ac-a4c4-4f84-b87f-bc4268605a40
-  sha: 46e2839ab51af83e73c246e62d9abc3095ff5dd6
-  size: 4524683
+redis/redis-4.0.11.tar.gz:
+  size: 1739656
+  object_id: 3bce5585-a509-4f9e-7211-2c914ad5d2d4
+  sha: a13ccf0f7051f82dc1c979bd94f0b9a9ba039122
+ruby/bundler-1.3.5.gem:
+  size: 268800
+  object_id: 67d8e9d8-a79a-4ebe-8061-9ac59d0224b5
+  sha: 2cad3052a59b83f1f616e8202f5c714e46bd8523
 ruby/ruby-2.1.5.tar.gz:
+  size: 15127433
   object_id: 698d02c7-61f9-4d14-893a-f4a8f085fc92
   sha: 9c0a238bd7839a4b51871641945a3da90997b8c2
-  size: 15127433
-redis/redis-3.0.5.tar.gz:
-  object_id: 47795193-538a-4bf1-a229-51c61f74afcc
-  sha: ad3ee178c42bfcfd310c72bbddffbbe35db9b4a6
-  size: 1366160
-redis/redis-3.0.6.tar.gz:
-  object_id: 12fc413f-7eae-409f-93c0-1a6866b8bfdb
-  sha: 4b1c7b1201984bca8f7f9c6c58862f6928cf0a25
-  size: 1372648
-redis/redis-3.2.1.tar.gz:
-  object_id: 05e93526-7997-4421-83a7-f86c48f575a5
-  sha: 26c0fc282369121b4e278523fce122910b65fbbf
-  size: 1534696
-cf-cli/cf-cli_6.21.1_linux_x86-64.tgz:
-  object_id: 34b04b35-3928-4264-9a49-33b07af83a7e
-  sha: 7dc397d2a0d93887ef50bc1f852beb686563049e
-  size: 6543090
-go/go1.6.3.linux-amd64.tar.gz:
-  object_id: 74cc39df-3f3f-44dd-af2c-9a9f8255c0ac
-  sha: 5e916ba4dd8c2fc43beafca4c08b334c4d0686f3
-  size: 84856920
+ruby/rubygems-2.1.11.tgz:
+  size: 367166
+  object_id: a043d80c-896d-4165-b81f-a922a7817a33
+  sha: ca3033432cae28deb7ced79cda271cb292b70e59
+ruby/yaml-0.1.5.tar.gz:
+  size: 504897
+  object_id: b31f889b-5ae8-42ac-b6f1-f66b7126c784
+  sha: 8b78cb9f759c7d80db8a7328c0ebecfe34fde737

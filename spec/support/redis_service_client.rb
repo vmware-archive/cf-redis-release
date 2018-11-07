@@ -27,10 +27,6 @@ module Support
       end
     end
 
-    def aof_contents
-      ssh_gateway.execute_on(host, 'cat /var/vcap/store/redis/appendonly.aof').to_s
-    end
-
     def config
       Hash[client { |redis| redis.config('get', '*').each_slice(2).to_a }]
     end
@@ -47,6 +43,24 @@ module Support
       end
     end
 
+    def script_load(script)
+      client do |redis|
+        redis.script(:load, script)
+      end
+    end
+
+    def evalsha(*args)
+      client do |redis|
+        redis.evalsha(args)
+      end
+    end
+
+    def script_exists(sha)
+      client do |redis|
+        redis.script(:exists, sha)
+      end
+    end
+
     attr_reader :save_command, :config_command
 
     private
@@ -58,7 +72,7 @@ module Support
         options = credentials.merge(
           'host' => '127.0.0.1',
           'port' => forwarding_port,
-          'timeout' => 30,
+          'timeout' => 120,
           'reconnect_attempts' => 5
         )
 

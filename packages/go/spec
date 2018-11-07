@@ -1,5 +1,0 @@
----
-name: go
-
-files:
-- go/go1.6.3.linux-amd64.tar.gz
