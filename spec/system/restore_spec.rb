@@ -131,8 +131,9 @@ describe 'restore' do
     it_behaves_like 'it errors when passed an incorrect guid', 'dedicated-vm'
 
     context 'it can restore Redis' do
+      plan = 'dedicated-vm'
+
       before(:all) do
-        plan = 'dedicated-vm'
         @service_instance, @service_binding, vm_ip, @client = provision_and_build_service_client(plan)
 
         @node_ssh = instance_ssh(vm_ip)
