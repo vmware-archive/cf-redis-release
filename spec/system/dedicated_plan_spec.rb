@@ -40,12 +40,14 @@ describe 'dedicated plan' do
     before(:all) do
       @preprovision_timestamp = broker_ssh.execute("date +%s")
       @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @binding = service_broker.bind_instance(@service_instance)
+      @binding = service_broker.bind_instance(@service_instance, service.name, service.plan)
     end
 
     after(:all) do
-      service_broker.unbind_instance(@binding)
-      service_broker.deprovision_instance(@service_instance)
+      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+
+      service_broker.unbind_instance(@binding, service_plan)
+      service_broker.deprovision_instance(@service_instance, service_plan)
     end
 
     describe 'configuration' do
@@ -89,7 +91,9 @@ describe 'dedicated plan' do
     before(:all) do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
       @predeprovision_timestamp = broker_ssh.execute('date +%s')
-      service_broker.deprovision_instance(@service_instance)
+
+      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+      service_broker.deprovision_instance(@service_instance, service_plan)
     end
 
     it 'logs instance deprovisioning' do
@@ -129,7 +133,7 @@ describe 'dedicated plan' do
       @service_instances = allocate_all_instances!
       service_instance = @service_instances.pop
 
-      service_broker.bind_instance(service_instance) do |service_binding|
+      service_broker.bind_instance(service_instance, service.name, service.plan) do |service_binding|
         @old_credentials = service_binding.credentials
         @old_client = service_client_builder(service_binding)
 
@@ -152,18 +156,22 @@ describe 'dedicated plan' do
         expect(@old_client.config.fetch('maxmemory-policy')).to_not eql(@original_config_maxmem)
       end
 
-      service_broker.deprovision_instance(service_instance)
+
+      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+      service_broker.deprovision_instance(service_instance, service_plan)
 
       @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @service_binding = service_broker.bind_instance(@service_instance)
+      @service_binding = service_broker.bind_instance(@service_instance, service.name, service.plan)
     end
 
     after(:all) do
-      service_broker.unbind_instance(@service_binding)
-      service_broker.deprovision_instance(@service_instance)
+      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+
+      service_broker.unbind_instance(@service_binding, service_plan)
+      service_broker.deprovision_instance(@service_instance, service_plan)
 
       @service_instances.each do |service_instance|
-        service_broker.deprovision_instance(service_instance)
+        service_broker.deprovision_instance(service_instance, service_plan)
       end
     end
 
@@ -203,7 +211,7 @@ describe 'dedicated plan' do
   describe 'scripts running' do
     before(:all) do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @service_binding = service_broker.bind_instance(@service_instance)
+      @service_binding = service_broker.bind_instance(@service_instance, service.name, service.plan)
 
       new_client = service_client_builder(@service_binding)
       @infinite_loop_sha = new_client.script_load(LUA_INFINITE_LOOP)
@@ -213,8 +221,10 @@ describe 'dedicated plan' do
     end
 
     it 'successfully deprovisions' do
-      service_broker.unbind_instance(@service_binding)
-      service_broker.deprovision_instance(@service_instance)
+      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+
+      service_broker.unbind_instance(@service_binding, service_plan)
+      service_broker.deprovision_instance(@service_instance, service_plan)
     end
   end
 end

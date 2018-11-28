@@ -17,5 +17,5 @@ group :test do
   gem 'rspec-instafail'
   gem 'rspec-eventually'
 
-  gem 'prof', '0.38.0'
+  gem 'prof', '0.44.0'
 end

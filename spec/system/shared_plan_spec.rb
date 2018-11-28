@@ -27,7 +27,9 @@ describe 'shared plan' do
     end
 
     after(:all) do
-      service_broker.deprovision_instance(@service_instance)
+      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+
+      service_broker.deprovision_instance(@service_instance, service_plan)
     end
 
     it 'logs instance provisioning' do
@@ -47,7 +49,9 @@ describe 'shared plan' do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
 
       @predeprovision_timestamp = broker_ssh.execute("date +%s")
-      service_broker.deprovision_instance(@service_instance)
+      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+
+      service_broker.deprovision_instance(@service_instance, service_plan)
     end
 
     it 'logs instance deprovisioning' do
@@ -65,7 +69,7 @@ describe 'shared plan' do
   context 'when recreating vms' do
     before(:all) do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @service_binding  = service_broker.bind_instance(@service_instance)
+      @service_binding  = service_broker.bind_instance(@service_instance, service.name, service.plan)
 
       @service_client = service_client_builder(@service_binding)
       @service_client.write('test_key', 'test_value')
@@ -76,8 +80,10 @@ describe 'shared plan' do
     end
 
     after(:all) do
-      service_broker.unbind_instance(@service_binding)
-      service_broker.deprovision_instance(@service_instance)
+      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+
+      service_broker.unbind_instance(@service_binding, service_plan)
+      service_broker.deprovision_instance(@service_instance, service_plan)
     end
 
     it 'preserves data' do
@@ -105,12 +111,14 @@ describe 'shared plan' do
   describe 'redis configuration' do
     before(:all) do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @service_binding  = service_broker.bind_instance(@service_instance)
+      @service_binding  = service_broker.bind_instance(@service_instance, service.name, service.plan)
     end
 
     after(:all) do
-      service_broker.unbind_instance(@service_binding)
-      service_broker.deprovision_instance(@service_instance)
+      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+
+      service_broker.unbind_instance(@service_binding, service_plan)
+      service_broker.deprovision_instance(@service_instance, service_plan)
     end
 
     describe 'configuration' do
@@ -194,7 +202,7 @@ describe 'shared plan' do
   context 'when repeatedly draining a redis instance' do
     before(:all) do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @service_binding  = service_broker.bind_instance(@service_instance)
+      @service_binding  = service_broker.bind_instance(@service_instance, service.name, service.plan)
 
       ps_output = broker_ssh.execute('sudo ps aux | grep redis-serve[r]')
       expect(ps_output.strip).not_to be_empty
@@ -220,8 +228,10 @@ describe 'shared plan' do
 
       expect(broker_ssh.wait_for_process_start('process-watcher')).to eq(true)
 
-      service_broker.unbind_instance(@service_binding)
-      service_broker.deprovision_instance(@service_instance)
+      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+
+      service_broker.unbind_instance(@service_binding, service_plan)
+      service_broker.deprovision_instance(@service_instance, service_plan)
     end
 
     it 'successfuly drained the redis instance' do
@@ -233,7 +243,7 @@ describe 'shared plan' do
   describe 'process destroyer' do
     before do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @service_binding  = service_broker.bind_instance(@service_instance)
+      @service_binding  = service_broker.bind_instance(@service_instance, service.name, service.plan)
 
       ps_output = broker_ssh.execute('sudo ps aux | grep redis-serve[r]')
       expect(ps_output).not_to be_empty
@@ -244,8 +254,10 @@ describe 'shared plan' do
 
       expect(broker_ssh.wait_for_process_start('process-watcher')).to eq(true)
 
-      service_broker.unbind_instance(@service_binding)
-      service_broker.deprovision_instance(@service_instance)
+      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+
+      service_broker.unbind_instance(@service_binding, service_plan)
+      service_broker.deprovision_instance(@service_instance, service_plan)
     end
 
     it 'kills all redis-server processes when stopped' do

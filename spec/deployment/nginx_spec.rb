@@ -21,12 +21,14 @@ describe 'nginx' do
 
     before(:all) do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @binding = service_broker.bind_instance(@service_instance)
+      @binding = service_broker.bind_instance(@service_instance, service.name, service.plan)
     end
 
     after(:all) do
-      service_broker.unbind_instance(@binding)
-      service_broker.deprovision_instance(@service_instance)
+      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+
+      service_broker.unbind_instance(@binding, service_plan)
+      service_broker.deprovision_instance(@service_instance, service_plan)
     end
 
     it 'has the correct server_names_hash_bucket_size' do

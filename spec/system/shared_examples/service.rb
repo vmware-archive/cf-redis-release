@@ -17,12 +17,12 @@ end
 shared_examples_for 'a service that can be shared by multiple applications' do
   it 'allows two applications to share the same instance' do
     service_broker.provision_instance(service.name, service.plan) do |service_instance|
-      service_broker.bind_instance(service_instance) do |binding_1|
+      service_broker.bind_instance(service_instance, service.name, service.plan) do |binding_1|
         service_client_1 = service_client_builder(binding_1)
         service_client_1.write('shared_test_key', 'test_value')
         expect(service_client_1.read('shared_test_key')).to eq('test_value')
 
-        service_broker.bind_instance(service_instance) do |binding_2|
+        service_broker.bind_instance(service_instance, service.name, service.plan) do |binding_2|
           service_client_2 = service_client_builder(binding_2)
           expect(service_client_2.read('shared_test_key')).to eq('test_value')
         end
@@ -36,11 +36,11 @@ end
 shared_examples_for 'a service which preserves data across binding and unbinding' do
   it 'preserves data across binding and unbinding' do
     service_broker.provision_instance(service.name, service.plan) do |service_instance|
-      service_broker.bind_instance(service_instance) do |binding|
+      service_broker.bind_instance(service_instance, service.name, service.plan) do |binding|
         service_client_builder(binding).write('unbound_test_key', 'test_value')
       end
 
-      service_broker.bind_instance(service_instance) do |binding|
+      service_broker.bind_instance(service_instance, service.name, service.plan) do |binding|
         expect(service_client_builder(binding).read('unbound_test_key')).to eq('test_value')
       end
     end

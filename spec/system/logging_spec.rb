@@ -79,7 +79,7 @@ describe 'logging' do
 
     before(:all) do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @binding = service_broker.bind_instance(@service_instance)
+      @binding = service_broker.bind_instance(@service_instance, service.name, service.plan)
       @redis_server_running_on_port_pattern = "Running mode=.*, port=#{@binding.credentials[:port]}"
 
       @host = @binding.credentials[:host]
@@ -88,8 +88,10 @@ describe 'logging' do
     end
 
     after(:all) do
-      service_broker.unbind_instance(@binding)
-      service_broker.deprovision_instance(@service_instance)
+      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+
+      service_broker.unbind_instance(@binding, service_plan)
+      service_broker.deprovision_instance(@service_instance, service_plan)
       @log.info("Deprovisioned dedicated instance #{@host} for tests")
     end
 

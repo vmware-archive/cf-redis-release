@@ -15,7 +15,7 @@ shared_examples 'it errors when run as non-root user' do |plan|
   end
 
   after(:all) do
-    unbind_and_deprovision(@service_binding, @service_instance)
+    unbind_and_deprovision(@service_binding, @service_instance, plan)
   end
 
   it 'logs that restore should be run as root' do
@@ -36,7 +36,7 @@ shared_examples 'it errors when file is on wrong device' do |plan|
 
   after(:all) do
     @instance_ssh.execute('rm /tmp/moaning-dump.rdb')
-    unbind_and_deprovision(@service_binding, @service_instance)
+    unbind_and_deprovision(@service_binding, @service_instance, plan)
   end
 
   it 'logs that the file should be in /var/vcap/store' do
@@ -58,7 +58,7 @@ shared_examples 'it errors when passed an incorrect guid' do |plan|
 
   after(:all) do
     @instance_ssh.execute("rm /tmp/moaning-dump.rdb")
-    unbind_and_deprovision(@service_binding, @service_instance)
+    unbind_and_deprovision(@service_binding, @service_instance, plan)
   end
 
   it 'logs that the service instance provided does not exist' do
@@ -77,8 +77,9 @@ describe 'restore' do
     it_behaves_like 'it errors when passed an incorrect guid', 'shared-vm'
 
     context 'with multiple redis servers running' do
+      plan = 'shared-vm'
+
       before do
-        plan = 'shared-vm'
         @other_instance1, @other_binding1, _, other_client1 = provision_and_build_service_client(plan)
         expect(check_server_responding?(other_client1)).to be true
         @other_instance2, @other_binding2, _, other_client2 = provision_and_build_service_client(plan)
@@ -111,9 +112,9 @@ describe 'restore' do
 
       after do
         @check_response_thread.kill
-        unbind_and_deprovision(@service_binding, @service_instance)
-        unbind_and_deprovision(@other_binding1, @other_instance1)
-        unbind_and_deprovision(@other_binding2, @other_instance2)
+        unbind_and_deprovision(@service_binding, @service_instance, plan)
+        unbind_and_deprovision(@other_binding1, @other_instance1, plan)
+        unbind_and_deprovision(@other_binding2, @other_instance2, plan)
       end
 
       it 'keeps the broker and other redis servers alive while performing a restore' do
@@ -145,7 +146,7 @@ describe 'restore' do
       end
 
       after(:all) do
-        unbind_and_deprovision(@service_binding, @service_instance)
+        unbind_and_deprovision(@service_binding, @service_instance, plan)
       end
 
       it 'restores data to the instance' do
@@ -169,9 +170,12 @@ def provision_and_build_service_client(plan)
   return service_instance, service_binding, vm_ip, client
 end
 
-def unbind_and_deprovision(service_binding, service_instance)
-    service_broker.unbind_instance(service_binding)
-    service_broker.deprovision_instance(service_instance)
+def unbind_and_deprovision(service_binding, service_instance, plan)
+    service_name = bosh_manifest.property('redis.broker.service_name')
+    service_plan = service_broker.catalog.service_plan(service_name, plan)
+
+    service_broker.unbind_instance(service_binding, service_plan)
+    service_broker.deprovision_instance(service_instance, service_plan)
 end
 
 def broker_registered?
@@ -193,7 +197,7 @@ def broker_available?
     password: bosh_manifest.property("broker.password")
   }
 
-  response = HTTParty.get(uri, verify: false, basic_auth: auth)
+  response = HTTParty.get(uri, verify: false, headers: {"X-Broker-API-Version" => "2.13"}, basic_auth: auth)
 
   response.code == 200
 end
@@ -211,7 +215,7 @@ end
 def provision_and_bind(plan)
   service_name = bosh_manifest.property('redis.broker.service_name')
   service_instance = service_broker.provision_instance(service_name, plan)
-  service_binding  = service_broker.bind_instance(service_instance)
+  service_binding  = service_broker.bind_instance(service_instance, service_name, plan)
   return service_instance, service_binding
 end
 
