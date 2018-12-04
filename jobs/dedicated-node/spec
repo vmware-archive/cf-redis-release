@@ -6,6 +6,7 @@ templates:
   redis.conf.erb: config/redis.conf
   nginx.conf.erb: config/nginx.conf
 
+  pre-start.erb: bin/pre-start
   start.erb: bin/start
   drain.bash: bin/drain
   redis-agent_ctl.erb: bin/redis-agent_ctl
@@ -15,7 +16,8 @@ templates:
   redis-agent.key.erb: config/ssl/redis-agent.key
 
 packages:
-- redis
+- redis-4.0
+- redis-5.0
 - redis-common
 - cf-redis-nginx
 - cf-redis-broker
@@ -25,6 +27,10 @@ provides:
   type: dedicated_node
 
 properties:
+  redis.version:
+    description: "Version of Redis to use"
+    default: "5.0"
+
   service-backup.source_folder:
     description: The directory in which we store service backups
     default: ""

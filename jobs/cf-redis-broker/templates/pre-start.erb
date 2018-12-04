@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+ln -f -s /var/vcap/packages/redis-<%= p('redis.version') %> /var/vcap/packages/redis
+
 DATA_DIRECTORY=<%= p('redis.data_directory') %>
 
 if [ -d $DATA_DIRECTORY ]

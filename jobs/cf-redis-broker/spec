@@ -19,7 +19,8 @@ packages:
 - cf-redis-broker
 - redis-common
 - cf-redis-nginx
-- redis
+- redis-4.0
+- redis-5.0
 
 provides:
 - name: redis_broker
@@ -36,6 +37,10 @@ consumes:
   optional: true
 
 properties:
+  redis.version:
+    description: "Version of Redis to use"
+    default: "5.0"
+
   service-backup.source_folder:
     description: The directory in which we store service backups
     default: ""

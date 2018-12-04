@@ -1,0 +1,18 @@
+# abort script on any command that exits with a non zero value
+set -e
+
+target_dir="redis_source"
+mkdir -p ${target_dir}
+
+tar xvf redis/redis-5.0.*.tar.gz -C ${target_dir} --strip-components 1
+
+cd ${target_dir}
+make
+
+BIN_TARGET=$BOSH_INSTALL_TARGET/bin
+mkdir $BIN_TARGET
+cp src/redis-server ${BIN_TARGET}
+cp src/redis-cli ${BIN_TARGET}
+cp src/redis-benchmark ${BIN_TARGET}
+cp src/redis-check-aof ${BIN_TARGET}
+cp src/redis-check-rdb ${BIN_TARGET}

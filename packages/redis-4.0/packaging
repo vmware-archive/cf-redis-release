@@ -4,7 +4,7 @@ set -e
 target_dir="redis_source"
 mkdir -p ${target_dir}
 
-tar xvf redis/redis-*.tar.gz -C ${target_dir} --strip-components 1
+tar xvf redis/redis-4.0.*.tar.gz -C ${target_dir} --strip-components 1
 
 cd ${target_dir}
 make
