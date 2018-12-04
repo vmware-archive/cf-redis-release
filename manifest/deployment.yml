@@ -84,7 +84,6 @@ properties:
     apps_domain: ((apps_domain))
     system_domain: ((system_domain))
   redis:
-    version: 5.0
     agent:
       backend_port: 54321
     bg_save_command: yetanotherrandomstring
