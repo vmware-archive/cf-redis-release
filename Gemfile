@@ -9,6 +9,7 @@ gem 'rake'
 gem 'process_helper'
 
 group :test do
+  gem 'solargraph'
   gem 'httparty'
   gem 'rspec'
   gem 'pry'
