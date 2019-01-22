@@ -3,21 +3,15 @@ require 'support/redis_service_client'
 require 'system/shared_examples/redis_instance'
 require 'system/shared_examples/service'
 
+require 'ostruct'
+
 require 'prof/marketplace_service'
 
 describe 'shared plan' do
   def service
-    Prof::MarketplaceService.new(
-      name: bosh_manifest.property('redis.broker.service_name'),
-      plan: 'shared-vm'
-    )
-  end
-
-  before(:all) do
-    @service_broker_host = bosh_director.ips_for_job(
-      environment.bosh_service_broker_job_name,
-      bosh_manifest.deployment_name,
-    ).first
+    service = OpenStruct.new(
+      name: bosh_manifest.property('redis.broker.service_name'), 
+      plan: 'shared-vm')
   end
 
   describe 'redis provisioning' do
