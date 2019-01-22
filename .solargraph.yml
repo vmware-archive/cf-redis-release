@@ -1,6 +1,7 @@
 ---
 include:
 - "**/*.rb"
+exclude: []
 require: []
 domains: []
 reporters:
