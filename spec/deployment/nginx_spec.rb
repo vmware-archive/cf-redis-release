@@ -1,12 +1,13 @@
 require 'system_spec_helper'
+require 'helpers/service'
 
 describe 'nginx' do
   describe 'configuration' do
     CONFIG_PATH = "/var/vcap/jobs/cf-redis-broker/config/nginx.conf"
 
     def service
-      Prof::MarketplaceService.new(
-        name: bosh_manifest.property('redis.broker.service_name'),
+      Helpers::Service.new(
+        name: bosh_manifest.property('redis.broker.service_name'), 
         plan: 'shared-vm'
       )
     end

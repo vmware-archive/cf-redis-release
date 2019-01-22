@@ -2,16 +2,14 @@ require 'system_spec_helper'
 require 'support/redis_service_client'
 require 'system/shared_examples/redis_instance'
 require 'system/shared_examples/service'
-
-require 'ostruct'
-
-require 'prof/marketplace_service'
+require 'helpers/service'
 
 describe 'shared plan' do
   def service
-    service = OpenStruct.new(
+    Helpers::Service.new(
       name: bosh_manifest.property('redis.broker.service_name'), 
-      plan: 'shared-vm')
+      plan: 'shared-vm'
+    )
   end
 
   describe 'redis provisioning' do

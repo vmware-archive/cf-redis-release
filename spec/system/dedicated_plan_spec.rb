@@ -1,16 +1,14 @@
 require 'system_spec_helper'
 require 'system/shared_examples/redis_instance'
 require 'system/shared_examples/service'
-
-require 'prof/marketplace_service'
-require 'prof/service_instance'
+require 'helpers/service'
 
 LUA_INFINITE_LOOP = 'while true do end'
 
 describe 'dedicated plan' do
   def service
-    Prof::MarketplaceService.new(
-      name: bosh_manifest.property('redis.broker.service_name'),
+    Helpers::Service.new(
+      name: bosh_manifest.property('redis.broker.service_name'), 
       plan: 'dedicated-vm'
     )
   end

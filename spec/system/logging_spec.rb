@@ -1,6 +1,7 @@
 require 'logger'
 require 'system_spec_helper'
 require 'rspec/eventually'
+require 'helpers/service'
 
 describe 'logging' do
   SYSLOG_FILE = "/var/log/syslog"
@@ -37,8 +38,8 @@ describe 'logging' do
 
   describe 'redis broker' do
     def service
-      Prof::MarketplaceService.new(
-        name: bosh_manifest.property('redis.broker.service_name'),
+      Helpers::Service.new(
+        name: bosh_manifest.property('redis.broker.service_name'), 
         plan: 'shared-vm'
       )
     end
@@ -71,8 +72,8 @@ describe 'logging' do
     REDIS_SERVER_STARTED_PATTERN = "Ready to accept connections"
 
     def service
-      Prof::MarketplaceService.new(
-        name: bosh_manifest.property('redis.broker.service_name'),
+      Helpers::Service.new(
+        name: bosh_manifest.property('redis.broker.service_name'), 
         plan: 'dedicated-vm'
       )
     end
