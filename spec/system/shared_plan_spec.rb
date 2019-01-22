@@ -3,6 +3,7 @@ require 'support/redis_service_client'
 require 'system/shared_examples/redis_instance'
 require 'system/shared_examples/service'
 require 'helpers/service'
+require 'helpers/bosh2_cli'
 
 describe 'shared plan' do
   def service
@@ -10,6 +11,10 @@ describe 'shared plan' do
       name: bosh_manifest.property('redis.broker.service_name'), 
       plan: 'shared-vm'
     )
+  end
+
+  def bosh
+    Helpers::Bosh2.new()
   end
 
   describe 'redis provisioning' do
@@ -86,11 +91,11 @@ describe 'shared plan' do
   context 'when stopping the broker vm'  do
     before(:all) do
       @prestop_timestamp = broker_ssh.execute("date +%s")
-      bosh_director.stop(environment.bosh_service_broker_job_name, 0)
+      bosh.stop(bosh_manifest.deployment_name, environment.bosh_service_broker_job_name)
     end
 
     after(:all) do
-      bosh_director.start(environment.bosh_service_broker_job_name, 0)
+      bosh.start(bosh_manifest.deployment_name, environment.bosh_service_broker_job_name)
     end
 
     it 'logs redis broker shutdown' do
