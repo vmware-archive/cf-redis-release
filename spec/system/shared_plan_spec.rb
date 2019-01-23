@@ -72,8 +72,8 @@ describe 'shared plan' do
       @service_client.write('test_key', 'test_value')
       expect(@service_client.read('test_key')).to eq('test_value')
 
-      bosh_director.stop(environment.bosh_service_broker_job_name, 0)
-      bosh_director.recreate_all([environment.bosh_service_broker_job_name])
+      bosh.stop(bosh_manifest.deployment_name, environment.bosh_service_broker_job_name)
+      bosh.recreate(bosh_manifest.deployment_name, environment.bosh_service_broker_job_name)
     end
 
     after(:all) do

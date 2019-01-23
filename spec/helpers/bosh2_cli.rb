@@ -3,6 +3,7 @@ require 'pry'
 require 'open3'
 
 BOSH_CLI = ENV.fetch('BOSH_V2_CLI', 'bosh')
+MANIFEST_PATH = ENV.fetch('BOSH_MANIFEST')
 
 module Helpers
   class Bosh2
@@ -23,17 +24,12 @@ module Helpers
       output.split(' ')[index]
     end
 
-    def deploy(manifest)
-      Tempfile.open('manifest.yml') do |manifest_file|
-        manifest_file.write(manifest.to_yaml)
-        manifest_file.flush
-        output = ''
-        exit_code = ::Open3.popen3("#{@bosh_cli} deploy #{manifest_file.path}") do |_stdin, stdout, _stderr, wait_thr|
-          output << stdout.read
-          wait_thr.value
-        end
-        abort "Deployment failed\n#{output}" unless exit_code == 0
-      end
+    def deploy(deployment, manifest = MANIFEST_PATH)
+      execute("#{@bosh_cli} -d #{deployment} deploy #{manifest}")
+    end
+
+    def recreate(deployment, instance)
+      execute("#{@bosh_cli} -d #{deployment} recreate #{instance} --force")
     end
 
     def start(deployment, instance)
