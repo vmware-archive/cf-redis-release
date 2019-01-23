@@ -153,12 +153,12 @@ describe 'shared plan' do
   context 'when redis related properties changed in the manifest' do
     before do
       bosh_manifest.set_property('redis.config_command', 'configalias')
-      bosh_director.deploy
+      bosh.deploy(bosh_manifest.deployment_name)
     end
 
     after do
       bosh_manifest.set_property('redis.config_command', 'configalias')
-      bosh_director.deploy
+      bosh.deploy(bosh_manifest.deployment_name)
     end
 
     it 'updates existing instances' do
@@ -168,7 +168,7 @@ describe 'shared plan' do
         original_config_command = redis_client_1.config_command
 
         bosh_manifest.set_property('redis.config_command', 'newconfigalias')
-        bosh_director.deploy
+        bosh.deploy(bosh_manifest.deployment_name)
 
         redis_client_2 = service_client_builder(service_binding)
         new_config_command = redis_client_2.config_command
