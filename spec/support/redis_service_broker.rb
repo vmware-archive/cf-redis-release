@@ -1,4 +1,4 @@
-require 'hula/service_broker/service_instance'
+require 'helpers/service_instance'
 
 module Support
   class RedisServiceBroker
@@ -10,7 +10,7 @@ module Support
     def service_instances
       clusters = service_broker.debug.fetch(:allocated).fetch(:clusters)
       (clusters || []).map { |service_instance|
-        Hula::ServiceBroker::ServiceInstance.new(id: service_instance.fetch(:ID))
+        Helpers::ServiceInstance.new(id: service_instance.fetch(:ID))
       }
     end
 

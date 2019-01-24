@@ -19,11 +19,6 @@ module Helpers
       output
     end
 
-    def indexed_instance(instance, index)
-      output = execute("#{@bosh_cli} instances | grep #{instance} | cut -f1")
-      output.split(' ')[index]
-    end
-
     def deploy(deployment, manifest = MANIFEST_PATH)
       execute("#{@bosh_cli} -d #{deployment} deploy #{manifest}")
     end

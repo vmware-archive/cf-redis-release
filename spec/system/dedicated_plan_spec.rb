@@ -8,9 +8,13 @@ LUA_INFINITE_LOOP = 'while true do end'
 describe 'dedicated plan' do
   def service
     Helpers::Service.new(
-      name: bosh_manifest.property('redis.broker.service_name'), 
+      name: bosh_manifest.property('redis.broker.service_name'),
       plan: 'dedicated-vm'
     )
+  end
+
+  def bosh
+    Helpers::Bosh2.new()
   end
 
   let(:redis_config_command) { bosh_manifest.property('redis.config_command') }
@@ -106,23 +110,29 @@ describe 'dedicated plan' do
     end
   end
 
-  it 'retains data and keeps the same credentials after recreating the node' do
-    service_broker.provision_and_bind(service.name, service.plan) do |service_binding|
-      service_instance_host = service_binding.credentials.fetch(:host)
-      client = service_client_builder(service_binding)
+  describe 'recreating instance' do
+    before(:all) do
+      @service_instance = service_broker.provision_instance(service.name, service.plan)
+      @binding = service_broker.bind_instance(@service_instance, service.name, service.plan)
+      @client = service_client_builder(@binding)
+    end
 
-      # Write to dedicated node
-      client.write('test_key', 'test_value')
-      expect(client.read('test_key')).to eql('test_value')
+    after(:all) do
+      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
 
-      # Restart dedicated node
-      dedicated_node_index = bosh_director.ips_for_job(Helpers::Environment::DEDICATED_NODE_JOB_NAME, bosh_manifest.deployment_name).index(service_instance_host)
-      expect(dedicated_node_index).to_not be_nil
+      service_broker.unbind_instance(@binding, service_plan)
+      service_broker.deprovision_instance(@service_instance, service_plan)
+    end
 
-      Helpers::BOSH::Deployment.new(bosh_manifest.deployment_name).execute(%W(recreate -n #{Helpers::Environment::DEDICATED_NODE_JOB_NAME}/#{dedicated_node_index}))
+    it 'retains data and keeps the same credentials after recreating the node' do
+      @client.write('test_key', 'test_value')
+      expect(@client.read('test_key')).to eql('test_value')
 
-      # Ensure data is intact
-      expect(client.read('test_key')).to eq('test_value')
+      # Restart all dedicated nodes
+      bosh.recreate(bosh_manifest.deployment_name, 'dedicated-node')
+
+      # Ensure data is intact on node
+      expect(@client.read('test_key')).to eq('test_value')
     end
   end
 
