@@ -7,7 +7,7 @@ MANIFEST_PATH = ENV.fetch('BOSH_MANIFEST')
 
 module Helpers
   class Bosh2
-    def initialize()
+    def initialize
       @bosh_cli = "#{BOSH_CLI} -n"
 
       version = execute("#{@bosh_cli} --version")

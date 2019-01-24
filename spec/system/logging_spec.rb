@@ -51,15 +51,15 @@ describe 'logging' do
 
     it 'allows log access via bosh' do
       log_files_by_job = {
-        Helpers::Environment::BROKER_JOB_NAME => [
-          'access.log',
-          'cf-redis-broker.stderr.log',
-          'cf-redis-broker.stdout.log',
-          'error.log',
-          'nginx.stderr.log',
-          'nginx.stdout.log',
-          'process-watcher.stderr.log',
-          'process-watcher.stdout.log',
+        Helpers::Environment::BROKER_JOB_NAME => %w[
+          access.log
+          cf-redis-broker.stderr.log
+          cf-redis-broker.stdout.log
+          error.log
+          nginx.stderr.log
+          nginx.stdout.log
+          process-watcher.stderr.log
+          process-watcher.stdout.log
         ]
       }
       log_files_by_job.each_pair do |job_name, log_files|
@@ -69,11 +69,11 @@ describe 'logging' do
   end
 
   describe 'dedicated redis process' do
-    REDIS_SERVER_STARTED_PATTERN = "Ready to accept connections"
+    REDIS_SERVER_STARTED_PATTERN = 'Ready to accept connections'
 
     def service
       Helpers::Service.new(
-        name: bosh_manifest.property('redis.broker.service_name'), 
+        name: bosh_manifest.property('redis.broker.service_name'),
         plan: 'dedicated-vm'
       )
     end
@@ -81,7 +81,7 @@ describe 'logging' do
     before(:all) do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
       @binding = service_broker.bind_instance(@service_instance, service.name, service.plan)
-      @redis_server_running_on_port_pattern = "Running mode=.*, port=#{@binding.credentials[:port]}"
+      @redis_server_port_pattern = "Running mode=.*, port=#{@binding.credentials[:port]}"
 
       @host = @binding.credentials[:host]
       @log = Logger.new(STDOUT)
@@ -97,14 +97,14 @@ describe 'logging' do
     end
 
     it 'logs to its local log file' do
-      redis_log_file = "/var/vcap/sys/log/redis/redis.log"
-      expect(count_from_log(dedicated_node_ssh, @redis_server_running_on_port_pattern, redis_log_file)).to be > 0
+      redis_log_file = '/var/vcap/sys/log/redis/redis.log'
+      expect(count_from_log(dedicated_node_ssh, @redis_server_port_pattern, redis_log_file)).to be > 0
       expect(count_from_log(dedicated_node_ssh, REDIS_SERVER_STARTED_PATTERN, redis_log_file)).to be > 0
     end
   end
 end
 
 def count_from_log(ssh_target, pattern, log_file)
-  output = ssh_target.execute(%Q{sudo grep -v grep #{log_file} | grep -c "#{pattern}"})
+  output = ssh_target.execute(%(sudo grep -v grep #{log_file} | grep -c "#{pattern}"))
   Integer(output.strip)
 end

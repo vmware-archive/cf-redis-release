@@ -11,7 +11,7 @@ shared_examples 'it errors when run as non-root user' do |plan|
     @service_instance, @service_binding, vm_ip, client = provision_and_build_service_client(plan)
     @instance_ssh = instance_ssh(vm_ip)
 
-    expect(client.read("moaning")).to_not eq("myrtle")
+    expect(client.read('moaning')).to_not eq('myrtle')
   end
 
   after(:all) do
@@ -20,7 +20,9 @@ shared_examples 'it errors when run as non-root user' do |plan|
 
   it 'logs that restore should be run as root' do
     output = @instance_ssh.execute("#{RESTORE_BINARY} #{get_restore_args(plan, @service_instance.id, BACKUP_PATH)}")
-    expect(output).to include('Permission denied').or include('Operation not permitted').or include('No changes were performed')
+    expect(output).to include('Permission denied')
+      .or include('Operation not permitted')
+      .or include('No changes were performed')
     expect(broker_registered?).to be true
   end
 end
@@ -31,7 +33,7 @@ shared_examples 'it errors when file is on wrong device' do |plan|
     @instance_ssh = instance_ssh(vm_ip)
 
     @instance_ssh.copy(DUMP_FIXTURE_PATH, TEMP_COPY_PATH)
-    expect(client.read("moaning")).to_not eq("myrtle")
+    expect(client.read('moaning')).to_not eq('myrtle')
   end
 
   after(:all) do
@@ -53,11 +55,11 @@ shared_examples 'it errors when passed an incorrect guid' do |plan|
 
     @instance_ssh.copy(DUMP_FIXTURE_PATH, TEMP_COPY_PATH)
     @instance_ssh.execute("sudo mv #{TEMP_COPY_PATH} #{BACKUP_PATH}")
-    expect(client.read("moaning")).to_not eq("myrtle")
+    expect(client.read('moaning')).to_not eq('myrtle')
   end
 
   after(:all) do
-    @instance_ssh.execute("rm /tmp/moaning-dump.rdb")
+    @instance_ssh.execute('rm /tmp/moaning-dump.rdb')
     unbind_and_deprovision(@service_binding, @service_instance, plan)
   end
 
@@ -88,7 +90,7 @@ describe 'restore' do
         @service_instance, @service_binding, _, @client = provision_and_build_service_client(plan)
         broker_ssh.copy(DUMP_FIXTURE_PATH, TEMP_COPY_PATH)
         broker_ssh.execute("sudo mv #{TEMP_COPY_PATH} #{BACKUP_PATH}")
-        expect(@client.read("moaning")).to_not eq("myrtle")
+        expect(@client.read('moaning')).to_not eq('myrtle')
 
         @broker_has_stopped_responding = false
         @other_instances_have_stopped_responding = false
@@ -118,7 +120,7 @@ describe 'restore' do
       end
 
       it 'keeps the broker and other redis servers alive while performing a restore' do
-        expect(@client.read("moaning")).to eq("myrtle")
+        expect(@client.read('moaning')).to eq('myrtle')
         expect(@broker_has_stopped_responding).to be false
         expect(@other_instances_have_stopped_responding).to be false
       end
@@ -140,9 +142,9 @@ describe 'restore' do
 
         @node_ssh.copy(DUMP_FIXTURE_PATH, TEMP_COPY_PATH)
         @node_ssh.execute("sudo mv #{TEMP_COPY_PATH} #{BACKUP_PATH}")
-        expect(@client.read("moaning")).to_not eq("myrtle")
+        expect(@client.read('moaning')).to_not eq('myrtle')
 
-        @prerestore_timestamp = @node_ssh.execute("date +%s")
+        @prerestore_timestamp = @node_ssh.execute('date +%s')
         @node_ssh.execute("sudo #{RESTORE_BINARY} #{get_restore_args(plan, @service_instance.id, BACKUP_PATH)}")
       end
 
@@ -151,9 +153,9 @@ describe 'restore' do
       end
 
       it 'restores data to the instance' do
-        expect(@client.read("moaning")).to eq("myrtle")
+        expect(@client.read('moaning')).to eq('myrtle')
 
-        vm_log = @node_ssh.execute("sudo cat /var/vcap/sys/log/service-backup/restore.log")
+        vm_log = @node_ssh.execute('sudo cat /var/vcap/sys/log/service-backup/restore.log')
         contains_expected_log = drop_log_lines_before(@prerestore_timestamp, vm_log).any? do |line|
           line.include?('Redis data restore completed successfully')
         end
@@ -168,25 +170,25 @@ def provision_and_build_service_client(plan)
 
   vm_ip = service_binding.credentials[:host]
   client = service_client_builder(service_binding)
-  return service_instance, service_binding, vm_ip, client
+  [service_instance, service_binding, vm_ip, client]
 end
 
 def unbind_and_deprovision(service_binding, service_instance, plan)
-    service_name = bosh_manifest.property('redis.broker.service_name')
-    service_plan = service_broker.catalog.service_plan(service_name, plan)
+  service_name = bosh_manifest.property('redis.broker.service_name')
+  service_plan = service_broker.catalog.service_plan(service_name, plan)
 
-    service_broker.unbind_instance(service_binding, service_plan)
-    service_broker.deprovision_instance(service_instance, service_plan)
+  service_broker.unbind_instance(service_binding, service_plan)
+  service_broker.deprovision_instance(service_instance, service_plan)
 end
 
 def broker_registered?
-  15.times do |n|
+  15.times do
     return true if broker_available?
 
     sleep 1
   end
 
-  puts "Timed out waiting for broker to respond"
+  puts 'Timed out waiting for broker to respond'
   false
 end
 
@@ -194,11 +196,11 @@ def broker_available?
   uri = URI.parse('https://' + bosh_manifest.property('broker.host') + '/v2/catalog')
 
   auth = {
-    username: bosh_manifest.property("broker.username"),
-    password: bosh_manifest.property("broker.password")
+    username: bosh_manifest.property('broker.username'),
+    password: bosh_manifest.property('broker.password')
   }
 
-  response = HTTParty.get(uri, verify: false, headers: {"X-Broker-API-Version" => "2.13"}, basic_auth: auth)
+  response = HTTParty.get(uri, verify: false, headers: {'X-Broker-API-Version' => '2.13'}, basic_auth: auth)
 
   response.code == 200
 end
@@ -217,7 +219,7 @@ def provision_and_bind(plan)
   service_name = bosh_manifest.property('redis.broker.service_name')
   service_instance = service_broker.provision_instance(service_name, plan)
   service_binding  = service_broker.bind_instance(service_instance, service_name, plan)
-  return service_instance, service_binding
+  [service_instance, service_binding]
 end
 
 def check_server_responding?(client)

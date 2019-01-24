@@ -23,7 +23,7 @@ module Helpers
         return true
       end
 
-      log_timestamp = json_log["timestamp"].to_i
+      log_timestamp = json_log['timestamp'].to_i
       log_timestamp < timestamp.to_i
     end
 
@@ -75,6 +75,7 @@ module Helpers
 
       def exec!(func)
         return func.call(@host, @port) if @gateway_opts.nil?
+
         func.call('127.0.0.1', setup_gateway_forwarding)
       end
     end

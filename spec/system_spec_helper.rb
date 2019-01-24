@@ -15,15 +15,15 @@ module Helpers
     end
 
     def cf_username
-      ENV['CF_USERNAME'] || "admin"
+      ENV['CF_USERNAME'] || 'admin'
     end
 
     def cf_password
-      ENV['CF_PASSWORD'] || "admin"
+      ENV['CF_PASSWORD'] || 'admin'
     end
 
     def doppler_address
-      ENV['DOPPLER_ADDR'] || "wss://doppler.bosh-lite.com:4443"
+      ENV['DOPPLER_ADDR'] || 'wss://doppler.bosh-lite.com:4443'
     end
 
     def target_cf
@@ -48,20 +48,20 @@ module ExcludeHelper
   end
 
   def self.metrics_available?
-    0 != manifest.fetch('releases').select{|i| i["name"] == "service-metrics" }.length
+    !manifest.fetch('releases').select { |i| i['name'] == 'service-metrics' }.empty?
   end
 
   def self.service_backups_available?
-    0 != manifest.fetch('releases').select{|i| i["name"] == "service-backup"}.length
+    !manifest.fetch('releases').select { |i| i['name'] == 'service-backup' }.empty?
   end
 
   def self.warnings
     message = "\n"
-    if !metrics_available?
+    unless metrics_available?
       message += "INFO: Skipping metrics tests, metrics are not available in this manifest\n"
     end
 
-    if !service_backups_available?
+    unless service_backups_available?
       message += "INFO: Skipping service backups tests, service backups are not available in this manifest\n"
     end
 
@@ -69,7 +69,7 @@ module ExcludeHelper
   end
 end
 
-puts ExcludeHelper::warnings
+puts ExcludeHelper.warnings
 
 RSpec.configure do |config|
   config.include Helpers::Environment
@@ -79,23 +79,23 @@ RSpec.configure do |config|
   config.run_all_when_everything_filtered = true
   config.order = 'random'
   config.full_backtrace = true
-  config.filter_run_excluding :skip_metrics => !ExcludeHelper::metrics_available?
-  config.filter_run_excluding :skip_service_backups => !ExcludeHelper::service_backups_available?
+  config.filter_run_excluding skip_metrics: !ExcludeHelper.metrics_available?
+  config.filter_run_excluding skip_service_backups: !ExcludeHelper.service_backups_available?
 
   config.before(:all) do
     redis_service_broker.deprovision_service_instances!
 
-    if ExcludeHelper::service_backups_available?
-      destinations = bosh_manifest.property("service-backup.destinations")
-      aws_access_key_id = destinations[0]["config"]["access_key_id"]
-      secret_access_key = destinations[0]["config"]["secret_access_key"]
-      Aws.config.update({
+    if ExcludeHelper.service_backups_available?
+      destinations = bosh_manifest.property('service-backup.destinations')
+      aws_access_key_id = destinations[0]['config']['access_key_id']
+      secret_access_key = destinations[0]['config']['secret_access_key']
+      Aws.config.update(
         region: 'us-east-1',
         credentials: Aws::Credentials.new(
           aws_access_key_id,
           secret_access_key
         )
-      })
+      )
     end
   end
 end

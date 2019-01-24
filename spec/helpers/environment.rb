@@ -7,13 +7,9 @@ require 'helpers/utilities'
 
 class FilteredStderr < StringIO
   def write value
-    if value.include? "Object#timeout is deprecated"
-      return
-    end
+    return if value.include? 'Object#timeout is deprecated'
 
-    if value == "\n"
-      return
-    end
+    return if value == "\n"
 
     STDERR.write value
   end
@@ -95,8 +91,12 @@ module Helpers
 
     def get_syslog_endpoint_helper
       syslog_endpoint = URI.parse(ENV.fetch('SYSLOG_TEST_ENDPOINT'))
-      gateway_executor = Utilities::GatewayExecutor.new(syslog_endpoint.host, syslog_endpoint.port, get_jumpbox_gateway_options)
-      Utilities::SyslogEndpointHelper.new(syslog_endpoint.host, syslog_endpoint.port, gateway_executor)
+      gateway_executor = Utilities::GatewayExecutor.new(syslog_endpoint.host,
+                                                        syslog_endpoint.port,
+                                                        get_jumpbox_gateway_options)
+      Utilities::SyslogEndpointHelper.new(syslog_endpoint.host,
+                                          syslog_endpoint.port,
+                                          gateway_executor)
     end
 
     # net-ssh makes a deprecated call to `timeout`. We ignore these messages
@@ -105,24 +105,21 @@ module Helpers
     # stream.
     def ssh_gateway
       gateway = environment.ssh_gateway
+
       def gateway.execute_on(*args, &block)
-        begin
-          original_stderr = $stderr
-          $stderr = FilteredStderr.new
-          super
-        ensure
-          $stderr = original_stderr
-        end
+        original_stderr = $stderr
+        $stderr = FilteredStderr.new
+        super
+      ensure
+        $stderr = original_stderr
       end
 
       def gateway.scp_to(*args, &block)
-        begin
-          original_stderr = $stderr
-          $stderr = FilteredStderr.new
-          super
-        ensure
-          $stderr = original_stderr
-        end
+        original_stderr = $stderr
+        $stderr = FilteredStderr.new
+        super
+      ensure
+        $stderr = original_stderr
       end
 
       gateway
@@ -138,8 +135,8 @@ module Helpers
 
     def service_client_builder(binding)
       Support::RedisServiceClientBuilder.new(
-        ssh_gateway:    ssh_gateway,
-        save_command:   bosh_manifest.property('redis.save_command'),
+        ssh_gateway: ssh_gateway,
+        save_command: bosh_manifest.property('redis.save_command'),
         config_command: bosh_manifest.property('redis.config_command')
       ).build(binding)
     end

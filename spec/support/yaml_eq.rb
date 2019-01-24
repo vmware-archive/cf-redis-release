@@ -11,13 +11,13 @@ RSpec::Matchers.define :yaml_eq do |expected|
   end
 
   def spiff_diff(actual, expected)
-    actual_manifest = Tempfile.new("actual-manifest.yml")
-    File.open(actual_manifest, "w") do |file|
+    actual_manifest = Tempfile.new('actual-manifest.yml')
+    File.open(actual_manifest, 'w') do |file|
       file.print actual
     end
 
-    expected_manifest = Tempfile.new("expected-manifest.yml")
-    File.open(expected_manifest, "w") do |file|
+    expected_manifest = Tempfile.new('expected-manifest.yml')
+    File.open(expected_manifest, 'w') do |file|
       file.print expected
     end
 
@@ -25,7 +25,7 @@ RSpec::Matchers.define :yaml_eq do |expected|
     puts `spiff diff #{expected_manifest.path} #{actual_manifest.path}`
   end
 
-  def object_eq(actual, expected, path=[])
+  def object_eq(actual, expected, path = [])
     return if actual == expected
 
     @error_message ||= []
@@ -57,7 +57,7 @@ RSpec::Matchers.define :yaml_eq do |expected|
     end
   end
 
-  def compare_arrays(actual, expected, path, context=actual)
+  def compare_arrays(actual, expected, path, context = actual)
     if expected.size != actual.size
       @error_message <<  "Extra/missing elements in #{path}:"
       @error_message <<  "\tactual=#{actual.size} expected=#{expected.size}"

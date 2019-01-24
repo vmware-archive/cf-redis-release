@@ -10,10 +10,10 @@ module Support
 
     def build(binding)
       RedisServiceClient.new(
-        binding:        binding,
-        save_command:   save_command,
+        binding: binding,
+        save_command: save_command,
         config_command: config_command,
-        ssh_gateway:    ssh_gateway
+        ssh_gateway: ssh_gateway
       )
     end
 

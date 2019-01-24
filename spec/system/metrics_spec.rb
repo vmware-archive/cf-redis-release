@@ -8,8 +8,8 @@ describe 'metrics', :skip_metrics => true do
     @outFile = Tempfile.new('smetrics')
     @pid = spawn(
       {
-        "DOPPLER_ADDR" => doppler_address,
-        "CF_ACCESS_TOKEN" => cf_auth_token
+        'DOPPLER_ADDR' => doppler_address,
+        'CF_ACCESS_TOKEN' => cf_auth_token
       },
       'firehose',
       [:out, :err] => [@outFile.path, 'w']
@@ -17,16 +17,15 @@ describe 'metrics', :skip_metrics => true do
   end
 
   after do
-    Process.kill("INT", @pid)
+    Process.kill('INT', @pid)
     @outFile.unlink
   end
 
   describe 'broker metrics' do
-    ["/p-redis/service-broker/dedicated_vm_plan/total_instances",
-     "/p-redis/service-broker/dedicated_vm_plan/available_instances",
-     "/p-redis/service-broker/shared_vm_plan/available_instances",
-     "/p-redis/service-broker/shared_vm_plan/total_instances",
-    ].each do |metric_name|
+    %w[/p-redis/service-broker/dedicated_vm_plan/total_instances
+       /p-redis/service-broker/dedicated_vm_plan/available_instances
+       /p-redis/service-broker/shared_vm_plan/available_instances
+       /p-redis/service-broker/shared_vm_plan/total_instances].each do |metric_name|
       it "contains #{metric_name} metric for redis broker" do
         assert_metric(metric_name, Helpers::Environment::BROKER_JOB_NAME, 0)
       end
@@ -34,17 +33,15 @@ describe 'metrics', :skip_metrics => true do
   end
 
   describe 'redis metrics' do
-    ["/p-redis/info/cpu/used_cpu_sys",
-     "/p-redis/info/memory/used_memory",
-     "/p-redis/info/memory/maxmemory",
-     "/p-redis/info/stats/total_commands_processed",
-     "/p-redis/info/stats/total_connections_received",
-     "/p-redis/info/memory/mem_fragmentation_ratio",
-     "/p-redis/info/stats/evicted_keys",
-     "/p-redis/info/server/uptime_in_seconds",
-     "/p-redis/info/server/uptime_in_days",
-     "/p-redis/info/persistence/rdb_last_bgsave_status",
-    ].each do |metric_name|
+    %w[/p-redis/info/cpu/used_cpu_sys
+       /p-redis/info/memory/used_memory
+       /p-redis/info/memory/maxmemory
+       /p-redis/info/stats/total_commands_processed
+       /p-redis/info/stats/total_connections_received
+       /p-redis/info/memory/mem_fragmentation_ratio
+       /p-redis/info/stats/evicted_keys /p-redis/info/server/uptime_in_seconds
+       /p-redis/info/server/uptime_in_days
+       /p-redis/info/persistence/rdb_last_bgsave_status].each do |metric_name|
       it "contains #{metric_name} metric for all dedicated nodes" do
         @number_of_nodes.times do |idx|
           assert_metric(metric_name, Helpers::Environment::DEDICATED_NODE_JOB_NAME, idx)
@@ -58,7 +55,7 @@ describe 'metrics', :skip_metrics => true do
 
     expect(metric).to match(/value:\d/)
     expect(metric).to include("origin:\"#{@origin_tag}\"")
-    expect(metric).to include(%Q{deployment:"#{bosh_manifest.deployment_name}"})
+    expect(metric).to include(%Q(deployment:"#{bosh_manifest.deployment_name}"))
     expect(metric).to include('eventType:ValueMetric')
     expect(metric).to match(/timestamp:\d/)
     expect(metric).to match(/index:"[\dabcdef-]*"/)
@@ -68,16 +65,14 @@ describe 'metrics', :skip_metrics => true do
   def find_metric(metric_name, job_name, job_index)
     job_id = loggregator_agent_id_from_job_index(job_name, job_index)
     60.times do
-      File.open(firehose_out_file, "r") do |file|
+      File.open(firehose_out_file, 'r') do |file|
         regex = /(?=.*job:"#{job_name}")(?=.*index:"#{job_id}")(?=.*name:"#{metric_name}")/
         matches = file.readlines.grep(regex)
-        if matches.size > 0
-          return matches[0]
-        end
+        return matches[0] unless matches.empty?
       end
       sleep 1
     end
-    fail("metric '#{metric_name}' for job '#{job_name}' with index '#{job_id}' not found")
+    raise("metric '#{metric_name}' for job '#{job_name}' with index '#{job_id}' not found")
   end
 
   def loggregator_agent_id_from_job_index(job_name, job_index)

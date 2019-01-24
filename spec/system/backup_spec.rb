@@ -5,30 +5,30 @@ require 'digest'
 require 'json'
 
 describe 'backups', :skip_service_backups => true do
-  MANUAL_BACKUP_CONFIG = "/var/vcap/jobs/service-backup/config/backup.yml"
+  MANUAL_BACKUP_CONFIG = '/var/vcap/jobs/service-backup/config/backup.yml'
   DUMP_FILE_PATTERN = /\d{8}T\d{6}Z-.*_redis_backup.rdb/
 
-  let(:destinations) { bosh_manifest.property("service-backup.destinations") }
-  let(:source_folder) { bosh_manifest.property("service-backup.source_folder") }
-  let(:cron_schedule) { bosh_manifest.property("service-backup.cron_schedule") }
-  let(:manual_cleanup_command) { bosh_manifest.property("service-backup.cleanup_executable") }
-  let(:manual_snapshot_command) { bosh_manifest.property("service-backup.source_executable") }
-  let(:manual_snapshot_log_file_path) { "/var/vcap/sys/log/service-backup/redis-backup.out.log" }
-  let(:service_identifier_executable) { bosh_manifest.property("service-backup.service_identifier_executable") }
+  let(:destinations) { bosh_manifest.property('service-backup.destinations') }
+  let(:source_folder) { bosh_manifest.property('service-backup.source_folder') }
+  let(:cron_schedule) { bosh_manifest.property('service-backup.cron_schedule') }
+  let(:manual_cleanup_command) { bosh_manifest.property('service-backup.cleanup_executable') }
+  let(:manual_snapshot_command) { bosh_manifest.property('service-backup.source_executable') }
+  let(:manual_snapshot_log_file_path) { '/var/vcap/sys/log/service-backup/redis-backup.out.log' }
+  let(:service_identifier_executable) { bosh_manifest.property('service-backup.service_identifier_executable') }
   let(:service_name) { bosh_manifest.property('redis.broker.service_name') }
   let(:s3_config) do
     destinations.select do |destination|
-      destination["type"] == "s3"
-    end.first["config"]
+      destination['type'] == 's3'
+    end.first['config']
   end
 
-  shared_examples "backups are enabled" do
+  shared_examples 'backups are enabled' do
     describe 'service backups' do
       context 'configuration' do
         let(:service_backup_config) do
-          with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
-            configCmd = "sudo cat #{MANUAL_BACKUP_CONFIG}"
-            YAML.load(vm_execute.call(configCmd).gsub(/"/, ''))
+          with_remote_execution(service_name, service_plan) do |vm_execute|
+            config_cmd = "sudo cat #{MANUAL_BACKUP_CONFIG}"
+            YAML.load(vm_execute.call(config_cmd).gsub(/"/, ''))
           end
         end
 
@@ -51,21 +51,21 @@ describe 'backups', :skip_service_backups => true do
         context 'destinations' do
           context 's3' do
             it 'is configured correctly' do
-              with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
+              with_remote_execution(service_name, service_plan) do |service_binding|
                 with_redis_under_stress(service_binding) do
                   expected_backup_config = {
-                    "type" => "s3",
+                    "type" => 's3',
                     "config" => {
-                      "endpoint_url" => s3_config["endpoint_url"],
-                      "access_key_id" => s3_config["access_key_id"],
-                      "secret_access_key" => s3_config["secret_access_key"],
-                      "bucket_name" => s3_config["bucket_name"],
-                      "bucket_path" => s3_config["bucket_path"],
-                      "region" => "",
+                      "endpoint_url" => s3_config['endpoint_url'],
+                      "access_key_id" => s3_config['access_key_id'],
+                      "secret_access_key" => s3_config['secret_access_key'],
+                      "bucket_name" => s3_config['bucket_name'],
+                      "bucket_path" => s3_config['bucket_path'],
+                      "region" => ''
                     }
                   }
 
-                  expect(service_backup_config["destinations"]).to include(expected_backup_config)
+                  expect(service_backup_config['destinations']).to include(expected_backup_config)
                 end
               end
             end
@@ -135,7 +135,7 @@ describe 'backups', :skip_service_backups => true do
     end
   end
 
-  shared_examples "data and broker state is backed up" do
+  shared_examples 'data and broker state is backed up' do
     describe 'end to end' do
       let(:s3_client) { Aws::S3::Client.new }
 
@@ -161,7 +161,9 @@ describe 'backups', :skip_service_backups => true do
           s3_statefile_contents = get_raw_file_contents s3_statefile
           expect{JSON.parse(s3_statefile_contents)}.to_not raise_error
           statefile_json = JSON.parse(s3_statefile_contents)
-          expect(statefile_json.keys).to contain_exactly('available_instances', 'allocated_instances', 'instance_bindings')
+          expect(statefile_json.keys).to contain_exactly('available_instances',
+                                                         'allocated_instances',
+                                                         'instance_bindings')
 
           assert_statefile_is_valid
 
@@ -172,7 +174,7 @@ describe 'backups', :skip_service_backups => true do
     end
   end
 
-  shared_examples "only data is backed up" do
+  shared_examples 'only data is backed up' do
     describe 'end to end' do
       let(:s3_client) { Aws::S3::Client.new }
 
@@ -204,8 +206,8 @@ describe 'backups', :skip_service_backups => true do
     end
   end
 
-  describe "instance identifier" do
-    context "with a provisioned dedicated-vm plan" do
+  describe 'instance identifier' do
+    context 'with a provisioned dedicated-vm plan' do
       let(:service_plan) { 'dedicated-vm' }
 
       it 'returns the correct instance ID' do
@@ -216,10 +218,10 @@ describe 'backups', :skip_service_backups => true do
       end
     end
 
-    context "with provisioned shared-vm plan" do
+    context 'with provisioned shared-vm plan' do
       let(:service_plan) { 'shared-vm' }
 
-      it "returns the correct instance IDs" do
+      it 'returns the correct instance IDs' do
         with_remote_execution(service_name, service_plan) do |_, service_binding1|
           with_remote_execution(service_name, service_plan) do |vm_execute, service_binding2|
             instance_ids = vm_execute.call("sudo #{service_identifier_executable}")
@@ -231,19 +233,19 @@ describe 'backups', :skip_service_backups => true do
     end
   end
 
-  context "shared vm plan" do
+  context 'shared vm plan' do
     let(:service_plan) { 'shared-vm' }
     it_behaves_like 'backups are enabled'
     it_behaves_like 'data and broker state is backed up'
   end
 
-  context "dedicated vm plan" do
+  context 'dedicated vm plan' do
     let(:service_plan) { 'dedicated-vm' }
     it_behaves_like 'backups are enabled'
     it_behaves_like 'only data is backed up'
   end
 
-  def with_remote_execution(service_name, service_plan, &block)
+  def with_remote_execution(service_name, service_plan)
     service_broker.provision_and_bind(service_name, service_plan) do |service_binding|
       host = service_binding.credentials[:host]
       instance_ssh = instance_ssh(host)
@@ -251,7 +253,7 @@ describe 'backups', :skip_service_backups => true do
       vm_execute = Proc.new do |command|
         instance_ssh.execute(command)
       end
-      block.call(vm_execute, service_binding)
+      yield vm_execute, service_binding
     end
   end
 
@@ -265,7 +267,7 @@ describe 'backups', :skip_service_backups => true do
           counter += 1
         end
       rescue Exception => e
-        puts "Caught exception while running repeated action",
+        puts 'Caught exception while running repeated action',
           e.message,
           e.backtrace
       end
@@ -305,31 +307,31 @@ describe 'backups', :skip_service_backups => true do
     find_s3_file /\d{8}T\d{6}Z_.+_statefile.md5/
   end
 
-  def find_s3_file (file_pattern)
-    s3_backup_file_meta = s3_client.list_objects(bucket: s3_config["bucket_name"]).contents.
+  def find_s3_file(file_pattern)
+    s3_backup_file_meta = s3_client.list_objects(bucket: s3_config['bucket_name']).contents.
       find_all { |object| object.key.include? "backup/#{Time.now.strftime("%Y/%m/%d")}" }.
       find { |object| object.key =~ file_pattern }
     return nil if s3_backup_file_meta.nil?
-    s3_client.get_object(bucket: s3_config["bucket_name"], key: s3_backup_file_meta.key).body
+    s3_client.get_object(bucket: s3_config['bucket_name'], key: s3_backup_file_meta.key).body
   end
 
   def clean_s3_bucket
-    Aws::S3::Bucket.new(name: s3_config["bucket_name"], client: s3_client).clear!
+    Aws::S3::Bucket.new(name: s3_config['bucket_name'], client: s3_client).clear!
   end
 
-  def get_raw_file_contents s3_file
+  def get_raw_file_contents(s3_file)
     expect(s3_file).not_to be_nil
     expect(s3_file.size).to be > 0
-    s3_file_contents = s3_file.string
+    s3_file.string
   end
 
-  def get_utf8_file_contents s3_file
+  def get_utf8_file_contents(s3_file)
     expect(s3_file).not_to be_nil
     expect(s3_file.size).to be > 0
-    s3_file_contents = s3_file.read.encode('UTF-8', 'UTF-8', :invalid => :replace)
+    s3_file.read.encode('UTF-8', 'UTF-8', :invalid => :replace)
   end
 
-  def assert_manual_backup_succeeds (vm, service_binding)
+  def assert_manual_backup_succeeds(vm, service_binding)
     cmd_result = vm.call("sudo /var/vcap/packages/service-backup/bin/manual-backup #{MANUAL_BACKUP_CONFIG}")
     expect(cmd_result).to_not be_empty
 

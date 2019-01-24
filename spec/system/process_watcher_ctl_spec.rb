@@ -7,7 +7,7 @@ describe 'process-watcher startup logging' do
   it 'does not log that another processmonitor process is running' do
     clear_log_and_restart_process_watcher
     log_output = broker_ssh.execute("sudo cat #{PROCESS_WATCHER_PATH}")
-    expect(log_output).not_to include "processmonitor already running"
+    expect(log_output).not_to include 'processmonitor already running'
     clear_log_and_restart_process_watcher
   end
 

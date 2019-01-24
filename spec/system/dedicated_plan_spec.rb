@@ -14,7 +14,7 @@ describe 'dedicated plan' do
   end
 
   def bosh
-    Helpers::Bosh2.new()
+    Helpers::Bosh2.new
   end
 
   let(:redis_config_command) { bosh_manifest.property('redis.config_command') }
@@ -40,7 +40,7 @@ describe 'dedicated plan' do
 
   describe 'redis provisioning' do
     before(:all) do
-      @preprovision_timestamp = broker_ssh.execute("date +%s")
+      @preprovision_timestamp = broker_ssh.execute('date +%s')
       @service_instance = service_broker.provision_instance(service.name, service.plan)
       @binding = service_broker.bind_instance(@service_instance, service.name, service.plan)
     end
@@ -60,7 +60,7 @@ describe 'dedicated plan' do
 
       it 'has the correct maxclients' do
         client = service_client_builder(@binding)
-        expect(client.config['maxclients']).to eq("10000")
+        expect(client.config['maxclients']).to eq('10000')
       end
 
       it 'runs correct version of redis' do
@@ -81,8 +81,8 @@ describe 'dedicated plan' do
       vm_log = broker_ssh.execute('sudo cat /var/vcap/sys/log/cf-redis-broker/cf-redis-broker.stdout.log')
       contains_expected_log = drop_log_lines_before(@preprovision_timestamp, vm_log).any? do |line|
         line.include?('Successfully provisioned Redis instance') &&
-        line.include?('dedicated-vm') &&
-        line.include?(@service_instance.id)
+          line.include?('dedicated-vm') &&
+          line.include?(@service_instance.id)
       end
 
       expect(contains_expected_log).to be true
@@ -102,8 +102,8 @@ describe 'dedicated plan' do
       vm_log = broker_ssh.execute('sudo cat /var/vcap/sys/log/cf-redis-broker/cf-redis-broker.stdout.log')
       contains_expected_log = drop_log_lines_before(@predeprovision_timestamp, vm_log).any? do |line|
         line.include?('Successfully deprovisioned Redis instance') &&
-        line.include?('dedicated-vm') &&
-        line.include?(@service_instance.id)
+          line.include?('dedicated-vm') &&
+          line.include?(@service_instance.id)
       end
 
       expect(contains_expected_log).to be true
@@ -126,6 +126,7 @@ describe 'dedicated plan' do
 
     it 'retains data and keeps the same credentials after recreating the node' do
       @client.write('test_key', 'test_value')
+      # Check if data has been written
       expect(@client.read('test_key')).to eql('test_value')
 
       # Restart all dedicated nodes
@@ -150,7 +151,11 @@ describe 'dedicated plan' do
 
         host = service_binding.credentials[:host]
         _, instance_id = Helpers::BOSH::Deployment.new(bosh_manifest.deployment_name).instance(host)
-        @node_ssh = Helpers::BOSH::SSH.new(bosh_manifest.deployment_name, Helpers::Environment::DEDICATED_NODE_JOB_NAME, instance_id)
+        @node_ssh = Helpers::BOSH::SSH.new(
+          bosh_manifest.deployment_name, 
+          Helpers::Environment::DEDICATED_NODE_JOB_NAME, 
+          instance_id
+        )
 
         aof_contents = @node_ssh.execute('sudo cat /var/vcap/store/redis/appendonly.aof')
         expect(aof_contents).to include('test_value')

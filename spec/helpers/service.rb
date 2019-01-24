@@ -1,5 +1,4 @@
 module Helpers
-
   class Service
     def initialize(name:, plan:)
       @name = name
@@ -8,5 +7,4 @@ module Helpers
 
     attr_reader :name, :plan
   end
-
 end

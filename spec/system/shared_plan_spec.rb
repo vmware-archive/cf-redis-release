@@ -14,7 +14,7 @@ describe 'shared plan' do
   end
 
   def bosh
-    Helpers::Bosh2.new()
+    Helpers::Bosh2.new
   end
 
   describe 'redis provisioning' do
@@ -33,8 +33,8 @@ describe 'shared plan' do
       vm_log = broker_ssh.execute('sudo cat /var/vcap/sys/log/cf-redis-broker/cf-redis-broker.stdout.log')
       contains_expected_log = drop_log_lines_before(@preprovision_timestamp, vm_log).any? do |line|
         line.include?('Successfully provisioned Redis instance') &&
-        line.include?('shared-vm') &&
-        line.include?(@service_instance.id)
+          line.include?('shared-vm') &&
+          line.include?(@service_instance.id)
       end
 
       expect(contains_expected_log).to be true
@@ -45,7 +45,7 @@ describe 'shared plan' do
     before(:all) do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
 
-      @predeprovision_timestamp = broker_ssh.execute("date +%s")
+      @predeprovision_timestamp = broker_ssh.execute('date +%s')
       service_plan = service_broker.catalog.service_plan(service.name, service.plan)
 
       service_broker.deprovision_instance(@service_instance, service_plan)
@@ -55,8 +55,8 @@ describe 'shared plan' do
       vm_log = broker_ssh.execute('sudo cat /var/vcap/sys/log/cf-redis-broker/cf-redis-broker.stdout.log')
       contains_expected_log = drop_log_lines_before(@predeprovision_timestamp, vm_log).any? do |line|
         line.include?('Successfully deprovisioned Redis instance') &&
-        line.include?('shared-vm') &&
-        line.include?(@service_instance.id)
+          line.include?('shared-vm') &&
+          line.include?(@service_instance.id)
       end
 
       expect(contains_expected_log).to be true
@@ -90,7 +90,7 @@ describe 'shared plan' do
 
   context 'when stopping the broker vm'  do
     before(:all) do
-      @prestop_timestamp = broker_ssh.execute("date +%s")
+      @prestop_timestamp = broker_ssh.execute('date +%s')
       bosh.stop(bosh_manifest.deployment_name, environment.bosh_service_broker_job_name)
     end
 
@@ -121,7 +121,7 @@ describe 'shared plan' do
     describe 'configuration' do
       it 'has the correct maxclients' do
         service_client = service_client_builder(@service_binding)
-        expect(service_client.config.fetch('maxclients')).to eq("10000")
+        expect(service_client.config.fetch('maxclients')).to eq('10000')
       end
 
       it 'has the correct maxmemory' do
@@ -163,17 +163,17 @@ describe 'shared plan' do
 
     it 'updates existing instances' do
       service_broker.provision_and_bind(service.name, service.plan) do |service_binding|
-        redis_client_1 = service_client_builder(service_binding)
-        redis_client_1.write('test', 'foobar')
-        original_config_command = redis_client_1.config_command
+        redis_client1 = service_client_builder(service_binding)
+        redis_client1.write('test', 'foobar')
+        original_config_command = redis_client1.config_command
 
         bosh_manifest.set_property('redis.config_command', 'newconfigalias')
         bosh.deploy(bosh_manifest.deployment_name)
 
-        redis_client_2 = service_client_builder(service_binding)
-        new_config_command = redis_client_2.config_command
+        redis_client2 = service_client_builder(service_binding)
+        new_config_command = redis_client2.config_command
         expect(original_config_command).to_not eq(new_config_command)
-        expect(redis_client_2.read('test')).to eq('foobar')
+        expect(redis_client2.read('test')).to eq('foobar')
       end
     end
   end

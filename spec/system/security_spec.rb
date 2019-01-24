@@ -24,7 +24,10 @@ describe 'security' do
     end
 
     it 'only supports HTTPS with restricted ciphers' do
-      supported_ciphers = ["DHE-RSA-AES128-GCM-SHA256", "DHE-RSA-AES256-GCM-SHA384", "ECDHE-RSA-AES128-GCM-SHA256", "ECDHE-RSA-AES256-GCM-SHA384"]
+      supported_ciphers = %w[DHE-RSA-AES128-GCM-SHA256
+                             DHE-RSA-AES256-GCM-SHA384
+                             ECDHE-RSA-AES128-GCM-SHA256
+                             ECDHE-RSA-AES256-GCM-SHA384]
       expect(get_allowed_ciphers).to contain_exactly(*supported_ciphers)
     end
 
