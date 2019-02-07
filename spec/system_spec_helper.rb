@@ -74,7 +74,6 @@ puts ExcludeHelper.warnings
 RSpec.configure do |config|
   config.include Helpers::Environment
   config.include Helpers::Utilities
-  config.include Prof::Matchers
   config.filter_run :focus
   config.run_all_when_everything_filtered = true
   config.order = 'random'
