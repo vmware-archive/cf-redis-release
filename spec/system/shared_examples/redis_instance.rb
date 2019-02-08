@@ -12,7 +12,7 @@ shared_examples_for 'a redis instance' do
     end
 
     describe 'redis admin commands' do
-      it 'disables them if necesary' do
+      it 'disables them if necessary' do
         service_broker.provision_and_bind(service.name, service.plan) do |binding|
           service_client = service_client_builder(binding)
           admin_command_availability.each do |command, available|

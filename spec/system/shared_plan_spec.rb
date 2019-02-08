@@ -8,18 +8,14 @@ require 'helpers/bosh2_cli'
 describe 'shared plan' do
   def service
     Helpers::Service.new(
-      name: bosh_manifest.property('redis.broker.service_name'), 
+      name: test_manifest['properties']['redis']['broker']['service_name'],
       plan: 'shared-vm'
     )
   end
 
-  def bosh
-    Helpers::Bosh2.new
-  end
-
   describe 'redis provisioning' do
     before(:all) do
-      @preprovision_timestamp = broker_ssh.execute('date +%s')
+      @preprovision_timestamp = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'date +%s')
       @service_instance       = service_broker.provision_instance(service.name, service.plan)
     end
 
@@ -30,7 +26,7 @@ describe 'shared plan' do
     end
 
     it 'logs instance provisioning' do
-      vm_log = broker_ssh.execute('sudo cat /var/vcap/sys/log/cf-redis-broker/cf-redis-broker.stdout.log')
+      vm_log = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo cat /var/vcap/sys/log/cf-redis-broker/cf-redis-broker.stdout.log')
       contains_expected_log = drop_log_lines_before(@preprovision_timestamp, vm_log).any? do |line|
         line.include?('Successfully provisioned Redis instance') &&
           line.include?('shared-vm') &&
@@ -45,14 +41,14 @@ describe 'shared plan' do
     before(:all) do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
 
-      @predeprovision_timestamp = broker_ssh.execute('date +%s')
+      @predeprovision_timestamp = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'date +%s')
       service_plan = service_broker.catalog.service_plan(service.name, service.plan)
 
       service_broker.deprovision_instance(@service_instance, service_plan)
     end
 
     it 'logs instance deprovisioning' do
-      vm_log = broker_ssh.execute('sudo cat /var/vcap/sys/log/cf-redis-broker/cf-redis-broker.stdout.log')
+      vm_log = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo cat /var/vcap/sys/log/cf-redis-broker/cf-redis-broker.stdout.log')
       contains_expected_log = drop_log_lines_before(@predeprovision_timestamp, vm_log).any? do |line|
         line.include?('Successfully deprovisioned Redis instance') &&
           line.include?('shared-vm') &&
@@ -72,8 +68,8 @@ describe 'shared plan' do
       @service_client.write('test_key', 'test_value')
       expect(@service_client.read('test_key')).to eq('test_value')
 
-      bosh.stop(bosh_manifest.deployment_name, environment.bosh_service_broker_job_name)
-      bosh.recreate(bosh_manifest.deployment_name, environment.bosh_service_broker_job_name)
+      bosh.stop(deployment_name, environment.bosh_service_broker_job_name)
+      bosh.recreate(deployment_name, environment.bosh_service_broker_job_name)
     end
 
     after(:all) do
@@ -90,16 +86,16 @@ describe 'shared plan' do
 
   context 'when stopping the broker vm'  do
     before(:all) do
-      @prestop_timestamp = broker_ssh.execute('date +%s')
-      bosh.stop(bosh_manifest.deployment_name, environment.bosh_service_broker_job_name)
+      @prestop_timestamp = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'date +%s')
+      bosh.stop(deployment_name, environment.bosh_service_broker_job_name)
     end
 
     after(:all) do
-      bosh.start(bosh_manifest.deployment_name, environment.bosh_service_broker_job_name)
+      bosh.start(deployment_name, environment.bosh_service_broker_job_name)
     end
 
     it 'logs redis broker shutdown' do
-      expect(broker_ssh.eventually_contains_shutdown_log(@prestop_timestamp)).to be true
+      expect(bosh.eventually_contains_shutdown_log(deployment_name, Helpers::Environment::BROKER_JOB_NAME, @prestop_timestamp)).to be true
     end
   end
 
@@ -125,7 +121,7 @@ describe 'shared plan' do
       end
 
       it 'has the correct maxmemory' do
-        maxmemory = bosh_manifest.property('redis.maxmemory')
+        maxmemory = test_manifest['properties']['redis']['maxmemory']
         service_client = service_client_builder(@service_binding)
         expect(service_client.config.fetch('maxmemory').to_i).to eq(maxmemory)
       end
@@ -138,12 +134,12 @@ describe 'shared plan' do
 
     describe 'pidfiles' do
       it 'do not appear in persistent storage' do
-        persisted_pids = broker_ssh.execute('sudo find /var/vcap/store/ -name "redis-server.pid" 2>/dev/null')
+        persisted_pids = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo find /var/vcap/store/ -name "redis-server.pid" 2>/dev/null')
         expect(persisted_pids.strip).to be_empty, "Actual output of find was: #{persisted_pids}"
       end
 
       it 'appear in ephemeral storage' do
-        ephemeral_pids = broker_ssh.execute('sudo find /var/vcap/sys/run/shared-instance-pidfiles/ -name *.pid 2>/dev/null')
+        ephemeral_pids = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo find /var/vcap/sys/run/shared-instance-pidfiles/ -name *.pid 2>/dev/null')
         expect(ephemeral_pids.strip).to_not be_empty
         expect(ephemeral_pids.lines.length).to eq(1), "Actual output of find was: #{ephemeral_pids}"
       end
@@ -152,13 +148,15 @@ describe 'shared plan' do
 
   context 'when redis related properties changed in the manifest' do
     before do
-      bosh_manifest.set_property('redis.config_command', 'configalias')
-      bosh.deploy(bosh_manifest.deployment_name)
+      bosh.redeploy(deployment_name) do |manifest|
+        manifest['properties']['redis']['config_command'] = 'configalias'
+      end
     end
 
     after do
-      bosh_manifest.set_property('redis.config_command', 'configalias')
-      bosh.deploy(bosh_manifest.deployment_name)
+      bosh.redeploy(deployment_name) do |manifest|
+        manifest['properties']['redis']['config_command'] = 'configalias'
+      end
     end
 
     it 'updates existing instances' do
@@ -167,8 +165,9 @@ describe 'shared plan' do
         redis_client1.write('test', 'foobar')
         original_config_command = redis_client1.config_command
 
-        bosh_manifest.set_property('redis.config_command', 'newconfigalias')
-        bosh.deploy(bosh_manifest.deployment_name)
+        bosh.redeploy(deployment_name) do |manifest|
+          manifest['properties']['redis']['config_command'] = 'newconfigalias'
+        end
 
         redis_client2 = service_client_builder(service_binding)
         new_config_command = redis_client2.config_command
@@ -201,29 +200,29 @@ describe 'shared plan' do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
       @service_binding  = service_broker.bind_instance(@service_instance, service.name, service.plan)
 
-      ps_output = broker_ssh.execute('sudo ps aux | grep redis-serve[r]')
+      ps_output = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo ps aux | grep redis-serve[r]')
       expect(ps_output.strip).not_to be_empty
       expect(ps_output.lines.length).to eq(1)
 
       drain_command = 'sudo /var/vcap/jobs/cf-redis-broker/bin/drain'
-      broker_ssh.execute(drain_command)
+      bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, drain_command)
       sleep 1
 
-      ps_output = broker_ssh.execute('sudo ps aux | grep redis-serve[r]')
+      ps_output = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo ps aux | grep redis-serve[r]')
       expect(ps_output.strip).to be_empty
 
-      broker_ssh.execute('sudo /var/vcap/bosh/bin/monit restart process-watcher')
+      bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo /var/vcap/bosh/bin/monit restart process-watcher')
 
-      expect(broker_ssh.wait_for_process_start('process-watcher')).to eq(true)
+      expect(bosh.wait_for_process_start(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'process-watcher')).to eq(true)
 
-      broker_ssh.execute(drain_command)
+      bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, drain_command)
       sleep 1
     end
 
     after(:all) do
-      broker_ssh.execute('sudo /var/vcap/bosh/bin/monit restart process-watcher')
+      bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo /var/vcap/bosh/bin/monit restart process-watcher')
 
-      expect(broker_ssh.wait_for_process_start('process-watcher')).to eq(true)
+      expect(bosh.wait_for_process_start(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'process-watcher')).to eq(true)
 
       service_plan = service_broker.catalog.service_plan(service.name, service.plan)
 
@@ -232,7 +231,7 @@ describe 'shared plan' do
     end
 
     it 'successfuly drained the redis instance' do
-      ps_output = broker_ssh.execute('sudo ps aux | grep redis-serve[r]')
+      ps_output = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo ps aux | grep redis-serve[r]')
       expect(ps_output.strip).to be_empty
     end
   end
@@ -242,14 +241,14 @@ describe 'shared plan' do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
       @service_binding  = service_broker.bind_instance(@service_instance, service.name, service.plan)
 
-      ps_output = broker_ssh.execute('sudo ps aux | grep redis-serve[r]')
+      ps_output = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo ps aux | grep redis-serve[r]')
       expect(ps_output).not_to be_empty
     end
 
     after do
-      broker_ssh.execute('sudo /var/vcap/bosh/bin/monit restart process-watcher')
+      bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo /var/vcap/bosh/bin/monit restart process-watcher')
 
-      expect(broker_ssh.wait_for_process_start('process-watcher')).to eq(true)
+      expect(bosh.wait_for_process_start(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'process-watcher')).to eq(true)
 
       service_plan = service_broker.catalog.service_plan(service.name, service.plan)
 
@@ -258,11 +257,11 @@ describe 'shared plan' do
     end
 
     it 'kills all redis-server processes when stopped' do
-      broker_ssh.execute('sudo /var/vcap/bosh/bin/monit stop process-destroyer')
+      bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo /var/vcap/bosh/bin/monit stop process-destroyer')
 
-      broker_ssh.wait_for_process_stop('process-destroyer')
+      bosh.wait_for_process_stop(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'process-destroyer')
 
-      ps_output = broker_ssh.execute('sudo ps aux | grep redis-serve[r]')
+      ps_output = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo ps aux | grep redis-serve[r]')
       expect(ps_output).to be_empty
     end
   end

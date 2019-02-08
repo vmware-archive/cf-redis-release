@@ -1,12 +1,19 @@
 require 'yaml'
 require 'helpers/environment'
 require 'helpers/utilities'
-require 'helpers/bosh_cli_wrapper'
 require 'prof/external_spec/spec_helper'
 require 'prof/matchers/only_support_ssl_with_cipher_set'
 require 'aws-sdk'
 
 ROOT = File.expand_path('..', __dir__)
+
+def test_manifest
+  @test_manifest ||= YAML.load_file(ENV.fetch('BOSH_MANIFEST'))
+end
+
+def deployment_name
+  test_manifest.fetch('name')
+end
 
 module Helpers
   module Environment
@@ -43,16 +50,12 @@ module Helpers
 end
 
 module ExcludeHelper
-  def self.manifest
-    @bosh_manifest ||= YAML.load(File.read(ENV['BOSH_MANIFEST']))
-  end
-
   def self.metrics_available?
-    !manifest.fetch('releases').select { |i| i['name'] == 'service-metrics' }.empty?
+    !test_manifest.fetch('releases').select { |i| i['name'] == 'service-metrics' }.empty?
   end
 
   def self.service_backups_available?
-    !manifest.fetch('releases').select { |i| i['name'] == 'service-backup' }.empty?
+    !test_manifest.fetch('releases').select { |i| i['name'] == 'service-backup' }.empty?
   end
 
   def self.warnings
@@ -85,7 +88,7 @@ RSpec.configure do |config|
     redis_service_broker.deprovision_service_instances!
 
     if ExcludeHelper.service_backups_available?
-      destinations = bosh_manifest.property('service-backup.destinations')
+      destinations = test_manifest['properties']['service-backup']['destinations']
       aws_access_key_id = destinations[0]['config']['access_key_id']
       secret_access_key = destinations[0]['config']['secret_access_key']
       Aws.config.update(

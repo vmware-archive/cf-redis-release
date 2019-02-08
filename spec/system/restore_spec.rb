@@ -88,8 +88,8 @@ describe 'restore' do
         expect(check_server_responding?(other_client2)).to be true
 
         @service_instance, @service_binding, _, @client = provision_and_build_service_client(plan)
-        broker_ssh.copy(DUMP_FIXTURE_PATH, TEMP_COPY_PATH)
-        broker_ssh.execute("sudo mv #{TEMP_COPY_PATH} #{BACKUP_PATH}")
+        bosh.scp(deployment_name, Helpers::Environment::BROKER_JOB_NAME, DUMP_FIXTURE_PATH, TEMP_COPY_PATH)
+        bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, "sudo mv #{TEMP_COPY_PATH} #{BACKUP_PATH}")
         expect(@client.read('moaning')).to_not eq('myrtle')
 
         @broker_has_stopped_responding = false
@@ -109,7 +109,7 @@ describe 'restore' do
           end
         end
 
-        broker_ssh.execute("sudo #{RESTORE_BINARY} #{get_restore_args(plan, @service_instance.id, BACKUP_PATH)}")
+        bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, "sudo #{RESTORE_BINARY} #{get_restore_args(plan, @service_instance.id, BACKUP_PATH)}")
       end
 
       after do
@@ -174,7 +174,7 @@ def provision_and_build_service_client(plan)
 end
 
 def unbind_and_deprovision(service_binding, service_instance, plan)
-  service_name = bosh_manifest.property('redis.broker.service_name')
+  service_name = test_manifest['properties']['redis']['broker']['service_name']
   service_plan = service_broker.catalog.service_plan(service_name, plan)
 
   service_broker.unbind_instance(service_binding, service_plan)
@@ -193,11 +193,11 @@ def broker_registered?
 end
 
 def broker_available?
-  uri = URI.parse('https://' + bosh_manifest.property('broker.host') + '/v2/catalog')
+  uri = URI.parse('https://' + test_manifest['properties']['broker']['host'] + '/v2/catalog')
 
   auth = {
-    username: bosh_manifest.property('broker.username'),
-    password: bosh_manifest.property('broker.password')
+    username: test_manifest['properties']['broker']['username'],
+    password: test_manifest['properties']['broker']['password']
   }
 
   response = HTTParty.get(uri, verify: false, headers: {'X-Broker-API-Version' => '2.13'}, basic_auth: auth)
@@ -216,7 +216,7 @@ def get_restore_args(plan, instance_id, source_rdb)
 end
 
 def provision_and_bind(plan)
-  service_name = bosh_manifest.property('redis.broker.service_name')
+  service_name = test_manifest['properties']['redis']['broker']['service_name']
   service_instance = service_broker.provision_instance(service_name, plan)
   service_binding  = service_broker.bind_instance(service_instance, service_name, plan)
   [service_instance, service_binding]

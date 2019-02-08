@@ -15,8 +15,8 @@ describe 'logging' do
 
     context 'cf-redis-broker' do
       before do
-        broker_ssh.execute("sudo /var/vcap/bosh/bin/monit restart #{Helpers::Environment::BROKER_JOB_NAME}")
-        expect(broker_ssh.wait_for_process_start(Helpers::Environment::BROKER_JOB_NAME)).to be true
+        bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, "sudo /var/vcap/bosh/bin/monit restart #{Helpers::Environment::BROKER_JOB_NAME}")
+        expect(bosh.wait_for_process_start(deployment_name, Helpers::Environment::BROKER_JOB_NAME, Helpers::Environment::BROKER_JOB_NAME)).to be true
       end
 
       it 'forwards logs' do
@@ -26,8 +26,8 @@ describe 'logging' do
 
     context 'dedicated-node' do
       before do
-        dedicated_node_ssh.execute('sudo /var/vcap/bosh/bin/monit restart redis')
-        expect(dedicated_node_ssh.wait_for_process_start('redis')).to be true
+        bosh.ssh(deployment_name, "#{Helpers::Environment::DEDICATED_NODE_JOB_NAME}/0", 'sudo /var/vcap/bosh/bin/monit restart redis')
+        expect(bosh.wait_for_process_start(deployment_name, "#{Helpers::Environment::DEDICATED_NODE_JOB_NAME}/0", ('redis'))).to be true
       end
 
       it 'forwards logs' do
@@ -39,19 +39,18 @@ describe 'logging' do
   describe 'redis broker' do
     def service
       Helpers::Service.new(
-        name: bosh_manifest.property('redis.broker.service_name'), 
+        name: test_manifest['properties']['redis']['broker']['service_name'],
         plan: 'shared-vm'
       )
     end
 
     before(:all) do
-      broker_ssh.execute("sudo /var/vcap/bosh/bin/monit restart #{Helpers::Environment::BROKER_JOB_NAME}")
-      expect(broker_ssh.wait_for_process_start(Helpers::Environment::BROKER_JOB_NAME)).to be true
+      bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, "sudo /var/vcap/bosh/bin/monit restart #{Helpers::Environment::BROKER_JOB_NAME}")
+      expect(bosh.wait_for_process_start(deployment_name, Helpers::Environment::BROKER_JOB_NAME, Helpers::Environment::BROKER_JOB_NAME)).to be true
     end
 
     it 'allows log access via bosh' do
-      log_files_by_job = {
-        Helpers::Environment::BROKER_JOB_NAME => %w[
+      expected_log_files = %w[
           access.log
           cf-redis-broker.stderr.log
           cf-redis-broker.stdout.log
@@ -61,10 +60,9 @@ describe 'logging' do
           process-watcher.stderr.log
           process-watcher.stdout.log
         ]
-      }
-      log_files_by_job.each_pair do |job_name, log_files|
-        expect(bosh_director.job_logfiles(job_name)).to include(*log_files)
-      end
+
+      log_paths = bosh.log_files(deployment_name, Helpers::Environment::BROKER_JOB_NAME)
+      expect(log_paths.map(&:basename).map(&:to_s)).to include(*expected_log_files)
     end
   end
 
@@ -73,7 +71,7 @@ describe 'logging' do
 
     def service
       Helpers::Service.new(
-        name: bosh_manifest.property('redis.broker.service_name'),
+        name: test_manifest['properties']['redis']['broker']['service_name'],
         plan: 'dedicated-vm'
       )
     end
@@ -98,13 +96,21 @@ describe 'logging' do
 
     it 'logs to its local log file' do
       redis_log_file = '/var/vcap/sys/log/redis/redis.log'
-      expect(count_from_log(dedicated_node_ssh, @redis_server_port_pattern, redis_log_file)).to be > 0
-      expect(count_from_log(dedicated_node_ssh, REDIS_SERVER_STARTED_PATTERN, redis_log_file)).to be > 0
+      expect(count_from_log(
+                 deployment_name,
+                 "#{Helpers::Environment::DEDICATED_NODE_JOB_NAME}/0",
+                 @redis_server_port_pattern,
+                 redis_log_file)).to be > 0
+      expect(count_from_log(
+                 deployment_name,
+                 "#{Helpers::Environment::DEDICATED_NODE_JOB_NAME}/0",
+                 REDIS_SERVER_STARTED_PATTERN,
+                 redis_log_file)).to be > 0
     end
   end
 end
 
-def count_from_log(ssh_target, pattern, log_file)
-  output = ssh_target.execute(%(sudo grep -v grep #{log_file} | grep -c "#{pattern}"))
+def count_from_log(deployment_name, instance, pattern, log_file)
+  output = bosh.ssh(deployment_name, instance, %(sudo grep -v grep #{log_file} | grep -c "#{pattern}"))
   Integer(output.strip)
 end

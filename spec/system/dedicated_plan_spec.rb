@@ -8,7 +8,7 @@ LUA_INFINITE_LOOP = 'while true do end'
 describe 'dedicated plan' do
   def service
     Helpers::Service.new(
-      name: bosh_manifest.property('redis.broker.service_name'),
+      name: test_manifest['properties']['redis']['broker']['service_name'],
       plan: 'dedicated-vm'
     )
   end
@@ -17,7 +17,7 @@ describe 'dedicated plan' do
     Helpers::Bosh2.new
   end
 
-  let(:redis_config_command) { bosh_manifest.property('redis.config_command') }
+  let(:redis_config_command) { test_manifest['properties']['redis']['config_command'] }
 
   it_behaves_like 'a persistent cloud foundry service'
 
@@ -40,7 +40,7 @@ describe 'dedicated plan' do
 
   describe 'redis provisioning' do
     before(:all) do
-      @preprovision_timestamp = broker_ssh.execute('date +%s')
+      @preprovision_timestamp = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'date +%s')
       @service_instance = service_broker.provision_instance(service.name, service.plan)
       @binding = service_broker.bind_instance(@service_instance, service.name, service.plan)
     end
@@ -78,7 +78,7 @@ describe 'dedicated plan' do
     end
 
     it 'logs instance provisioning' do
-      vm_log = broker_ssh.execute('sudo cat /var/vcap/sys/log/cf-redis-broker/cf-redis-broker.stdout.log')
+      vm_log = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo cat /var/vcap/sys/log/cf-redis-broker/cf-redis-broker.stdout.log')
       contains_expected_log = drop_log_lines_before(@preprovision_timestamp, vm_log).any? do |line|
         line.include?('Successfully provisioned Redis instance') &&
           line.include?('dedicated-vm') &&
@@ -92,14 +92,14 @@ describe 'dedicated plan' do
   describe 'redis deprovisioning' do
     before(:all) do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @predeprovision_timestamp = broker_ssh.execute('date +%s')
+      @predeprovision_timestamp = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'date +%s')
 
       service_plan = service_broker.catalog.service_plan(service.name, service.plan)
       service_broker.deprovision_instance(@service_instance, service_plan)
     end
 
     it 'logs instance deprovisioning' do
-      vm_log = broker_ssh.execute('sudo cat /var/vcap/sys/log/cf-redis-broker/cf-redis-broker.stdout.log')
+      vm_log = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo cat /var/vcap/sys/log/cf-redis-broker/cf-redis-broker.stdout.log')
       contains_expected_log = drop_log_lines_before(@predeprovision_timestamp, vm_log).any? do |line|
         line.include?('Successfully deprovisioned Redis instance') &&
           line.include?('dedicated-vm') &&
@@ -130,7 +130,7 @@ describe 'dedicated plan' do
       expect(@client.read('test_key')).to eql('test_value')
 
       # Restart all dedicated nodes
-      bosh.recreate(bosh_manifest.deployment_name, 'dedicated-node')
+      bosh.recreate(deployment_name, 'dedicated-node')
 
       # Ensure data is intact on node
       expect(@client.read('test_key')).to eq('test_value')
@@ -150,14 +150,11 @@ describe 'dedicated plan' do
         expect(@old_client.read('test_key')).to eq('test_value')
 
         host = service_binding.credentials[:host]
-        _, instance_id = Helpers::BOSH::Deployment.new(bosh_manifest.deployment_name).instance(host)
-        @node_ssh = Helpers::BOSH::SSH.new(
-          bosh_manifest.deployment_name, 
-          Helpers::Environment::DEDICATED_NODE_JOB_NAME, 
-          instance_id
-        )
+        _, @instance_id = Helpers::BOSH::Deployment.new(deployment_name).instance(host)
 
-        aof_contents = @node_ssh.execute('sudo cat /var/vcap/store/redis/appendonly.aof')
+        aof_contents = bosh.ssh(deployment_name,
+                                "#{Helpers::Environment::DEDICATED_NODE_JOB_NAME}/#{@instance_id}",
+                                'sudo cat /var/vcap/store/redis/appendonly.aof')
         expect(aof_contents).to include('test_value')
 
         @script_sha = @old_client.script_load('return 1')
@@ -189,7 +186,9 @@ describe 'dedicated plan' do
     end
 
     it 'cleans the aof file' do
-      aof_contents = @node_ssh.execute('sudo cat /var/vcap/store/redis/appendonly.aof')
+      aof_contents = bosh.ssh(deployment_name,
+                              "#{Helpers::Environment::DEDICATED_NODE_JOB_NAME}/#{@instance_id}",
+                              'sudo cat /var/vcap/store/redis/appendonly.aof')
       expect(aof_contents).to_not include('test_value')
     end
 
@@ -243,6 +242,8 @@ describe 'dedicated plan' do
 end
 
 def allocate_all_instances!
-  max_instances = bosh_manifest.job(Helpers::Environment::DEDICATED_NODE_JOB_NAME).instances
+  max_instances = test_manifest['instance_groups'].select do |instance_group|
+    instance_group['name'] == Helpers::Environment::DEDICATED_NODE_JOB_NAME
+  end.first['instances']
   max_instances.times.map { service_broker.provision_instance(service.name, service.plan) }
 end

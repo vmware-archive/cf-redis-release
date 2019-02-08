@@ -6,7 +6,7 @@ require 'helpers/bosh_cli_wrapper'
 require 'helpers/utilities'
 
 class FilteredStderr < StringIO
-  def write value
+  def write(value)
     return if value.include? 'Object#timeout is deprecated'
 
     return if value == "\n"
@@ -61,32 +61,20 @@ module Helpers
     end
 
     def redis_service_broker
-      Support::RedisServiceBroker.new(service_broker, bosh_manifest.property('redis.broker.service_name'))
+      Support::RedisServiceBroker.new(service_broker, test_manifest['properties']['redis']['broker']['service_name'])
     end
 
     def service_broker
       environment.service_broker
     end
 
-    def bosh_manifest
-      environment.bosh_manifest
-    end
-
-    def bosh_director
-      environment.bosh_director
-    end
-
-    def broker_ssh
-      BOSH::SSH.new(bosh_manifest.deployment_name, BROKER_JOB_NAME, 0)
-    end
-
-    def dedicated_node_ssh
-      BOSH::SSH.new(bosh_manifest.deployment_name, DEDICATED_NODE_JOB_NAME, 0)
+    def bosh
+      Helpers::Bosh2.new
     end
 
     def instance_ssh(host_ip)
-      instance_group, instance_id = BOSH::Deployment.new(bosh_manifest.deployment_name).instance(host_ip)
-      BOSH::SSH.new(bosh_manifest.deployment_name, instance_group, instance_id)
+      instance_group, instance_id = BOSH::Deployment.new(deployment_name).instance(host_ip)
+      BOSH::SSH.new(deployment_name, instance_group, instance_id)
     end
 
     def get_syslog_endpoint_helper
@@ -126,18 +114,18 @@ module Helpers
     end
 
     def broker_backend_port
-      bosh_manifest.property('redis').fetch('broker').fetch('backend_port')
+      test_manifest['properties']['redis'].fetch('broker').fetch('backend_port')
     end
 
     def agent_backend_port
-      bosh_manifest.property('redis').fetch('agent').fetch('backend_port')
+      test_manifest['properties']['redis'].fetch('agent').fetch('backend_port')
     end
 
     def service_client_builder(binding)
       Support::RedisServiceClientBuilder.new(
         ssh_gateway: ssh_gateway,
-        save_command: bosh_manifest.property('redis.save_command'),
-        config_command: bosh_manifest.property('redis.config_command')
+        save_command: bosh.manifest(deployment_name)['properties']['redis']['save_command'],
+        config_command: bosh.manifest(deployment_name)['properties']['redis']['config_command']
       ).build(binding)
     end
 

@@ -9,16 +9,16 @@ describe 'nginx' do
 
     def service
       Helpers::Service.new(
-        name: bosh_manifest.property('redis.broker.service_name'),
+        name: test_manifest['properties']['redis']['broker']['service_name'],
         plan: 'shared-vm'
       )
     end
 
     let(:bucket_size) do
-      if bosh_manifest.property('redis.broker').dig('nginx', 'bucket_size').nil?
+      if test_manifest['properties']['redis']['broker'].dig('nginx', 'bucket_size').nil?
         128
       else
-        bosh_manifest.property('redis.broker').dig('nginx', 'bucket_size')
+        test_manifest['properties']['redis']['broker'].dig('nginx', 'bucket_size')
       end
     end
 
@@ -37,7 +37,7 @@ describe 'nginx' do
     it 'has the correct server_names_hash_bucket_size' do
       expect(bucket_size).to be > 0
       command = %(sudo grep "server_names_hash_bucket_size #{bucket_size}" #{CONFIG_PATH})
-      result = dedicated_node_ssh.execute(command)
+      result = bosh.ssh(deployment_name, "#{Helpers::Environment::DEDICATED_NODE_JOB_NAME}/0", command)
       expect(result.strip).not_to be_empty
     end
   end

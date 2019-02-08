@@ -55,9 +55,7 @@ shared_examples_for 'a service which preserves data when recreating the broker V
       expect(service_client.read('test_key')).to eq('test_value')
 
       [environment.bosh_service_broker_job_name].each do |job_name|
-        bosh_manifest.job(job_name).instances do |instance|
-          Helpers::BOSH::Deployment.new(bosh_manifest.deployment_name).execute(%W[recreate -n #{job_name}/#{instance.id}])
-        end
+        bosh.recreate(deployment_name, job_name)
       end
 
       expect(service_client.read('test_key')).to eq('test_value')

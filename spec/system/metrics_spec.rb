@@ -3,8 +3,10 @@ require 'system_spec_helper'
 describe 'metrics', :skip_metrics => true do
 
   before do
-    @number_of_nodes = bosh_manifest.job(Helpers::Environment::DEDICATED_NODE_JOB_NAME).instances
-    @origin_tag = bosh_manifest.property('service_metrics.origin')
+    @number_of_nodes = test_manifest['instance_groups'].select do |instance_group|
+      instance_group['name'] == Helpers::Environment::DEDICATED_NODE_JOB_NAME
+    end.first['instances']
+    @origin_tag = test_manifest['properties']['service_metrics']['origin']
     @outFile = Tempfile.new('smetrics')
     @pid = spawn(
       {
@@ -55,7 +57,7 @@ describe 'metrics', :skip_metrics => true do
 
     expect(metric).to match(/value:\d/)
     expect(metric).to include("origin:\"#{@origin_tag}\"")
-    expect(metric).to include(%Q(deployment:"#{bosh_manifest.deployment_name}"))
+    expect(metric).to include(%Q(deployment:"#{deployment_name}"))
     expect(metric).to include('eventType:ValueMetric')
     expect(metric).to match(/timestamp:\d/)
     expect(metric).to match(/index:"[\dabcdef-]*"/)
@@ -76,9 +78,9 @@ describe 'metrics', :skip_metrics => true do
   end
 
   def loggregator_agent_id_from_job_index(job_name, job_index)
-    job_ssh = Helpers::BOSH::SSH.new(bosh_manifest.deployment_name, job_name, job_index)
-
-    job_ssh.execute('sudo cat /var/vcap/jobs/loggregator_agent/config/bpm.yml | grep AGENT_INDEX | cut -d \" -f2')
+    bosh.ssh(deployment_name,
+             "#{job_name}/#{job_index}",
+             'sudo cat /var/vcap/jobs/loggregator_agent/config/bpm.yml | grep AGENT_INDEX | cut -d \" -f2')
   end
 
   def firehose_out_file

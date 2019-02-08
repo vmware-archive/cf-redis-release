@@ -8,14 +8,14 @@ describe 'backups', :skip_service_backups => true do
   MANUAL_BACKUP_CONFIG = '/var/vcap/jobs/service-backup/config/backup.yml'
   DUMP_FILE_PATTERN = /\d{8}T\d{6}Z-.*_redis_backup.rdb/
 
-  let(:destinations) { bosh_manifest.property('service-backup.destinations') }
-  let(:source_folder) { bosh_manifest.property('service-backup.source_folder') }
-  let(:cron_schedule) { bosh_manifest.property('service-backup.cron_schedule') }
-  let(:manual_cleanup_command) { bosh_manifest.property('service-backup.cleanup_executable') }
-  let(:manual_snapshot_command) { bosh_manifest.property('service-backup.source_executable') }
+  let(:destinations) { test_manifest['properties']['service-backup']['destinations'] }
+  let(:source_folder) { test_manifest['properties']['service-backup']['source_folder'] }
+  let(:cron_schedule) { test_manifest['properties']['service-backup']['cron_schedule'] }
+  let(:manual_cleanup_command) { test_manifest['properties']['service-backup']['cleanup_executable'] }
+  let(:manual_snapshot_command) { test_manifest['properties']['service-backup']['source_executable'] }
   let(:manual_snapshot_log_file_path) { '/var/vcap/sys/log/service-backup/redis-backup.out.log' }
-  let(:service_identifier_executable) { bosh_manifest.property('service-backup.service_identifier_executable') }
-  let(:service_name) { bosh_manifest.property('redis.broker.service_name') }
+  let(:service_identifier_executable) { test_manifest['properties']['service-backup']['service_identifier_executable'] }
+  let(:service_name) { test_manifest['properties']['redis']['broker']['service_name'] }
   let(:s3_config) do
     destinations.select do |destination|
       destination['type'] == 's3'

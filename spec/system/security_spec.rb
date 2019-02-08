@@ -6,12 +6,12 @@ require 'timeout'
 describe 'security' do
   describe 'the broker' do
     it 'uses latest version of nginx' do
-      output = broker_ssh.execute('/var/vcap/packages/cf-redis-nginx/sbin/nginx -v')
+      output = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, '/var/vcap/packages/cf-redis-nginx/sbin/nginx -v')
       expect(output).to eql('nginx version: nginx/1.8.0')
     end
 
     it 'does not listen publicly on the backend_port' do
-      netstat_output = broker_ssh.execute("netstat -l | grep #{broker_backend_port}")
+      netstat_output = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, "netstat -l | grep #{broker_backend_port}")
       expect(netstat_output.lines.count).to eq(1)
       expect(netstat_output).to include("localhost:#{broker_backend_port}")
     end
@@ -19,7 +19,7 @@ describe 'security' do
 
   describe 'the agents' do
     it 'uses latest version of nginx' do
-      output = dedicated_node_ssh.execute('/var/vcap/packages/cf-redis-nginx/sbin/nginx -v')
+      output = bosh.ssh(deployment_name, "#{Helpers::Environment::DEDICATED_NODE_JOB_NAME}/0", '/var/vcap/packages/cf-redis-nginx/sbin/nginx -v')
       expect(output).to eql('nginx version: nginx/1.8.0')
     end
 
@@ -32,7 +32,7 @@ describe 'security' do
     end
 
     it 'does not listen publicly on the backend_port' do
-      netstat_output = dedicated_node_ssh.execute("netstat -l | grep #{agent_backend_port}")
+      netstat_output = bosh.ssh(deployment_name, "#{Helpers::Environment::DEDICATED_NODE_JOB_NAME}/0", "netstat -l | grep #{agent_backend_port}")
       expect(netstat_output.lines.count).to eq(1)
       expect(netstat_output).to include("localhost:#{agent_backend_port}")
     end
@@ -69,7 +69,7 @@ def get_allowed_ciphers
     done
   '
 
-  output = dedicated_node_ssh.execute(command)
+  output = bosh.ssh(deployment_name, "#{Helpers::Environment::DEDICATED_NODE_JOB_NAME}/0", command)
   expect(output.strip).not_to be_empty
   output.split "\n"
 end
