@@ -65,7 +65,7 @@ module Helpers
 
     def log_files(deployment, instance)
       tmpdir = Dir.tmpdir
-      execute("#{@bosh_cli} -d #{deployment} logs #{instance} --dir=#{tmpdir}")
+      execute("#{@bosh_cli} -d #{deployment} logs #{instance} --dir=#{tmpdir} #{@ssh_gw_args}")
 
       tarball = Dir[File.join(tmpdir, instance.to_s + '*.tgz')].last
       output = execute("tar tf #{tarball}")
