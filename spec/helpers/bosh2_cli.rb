@@ -12,7 +12,7 @@ module Helpers
 
     def initialize
       @bosh_cli = "#{BOSH_CLI} -n"
-      @ssh_gw_args="--gw-user #{ENV.fetch('JUMPBOX_USERNAME')} --gw-host #{ENV.fetch('JUMPBOX_HOST')} --gw-private-key #{ENV.fetch('JUMPBOX_PRIVATE_KEY_PATH')}"
+      @ssh_gw_args="--gw-user=#{ENV.fetch('JUMPBOX_USERNAME')} --gw-host=#{ENV.fetch('JUMPBOX_HOST')} --gw-private-key=#{ENV.fetch('JUMPBOX_PRIVATE_KEY_PATH')}"
 
       version = execute("#{@bosh_cli} --version")
       raise 'BOSH CLI >= v2 required' if version.start_with?('version 1.')
@@ -55,17 +55,17 @@ module Helpers
     end
 
     def ssh(deployment, instance, command)
-      output = execute("#{@bosh_cli} -d #{deployment} --json ssh #{instance} --command='#{command}' #{@ssh_gw_args}")
+      output = execute("#{@bosh_cli} -d #{deployment} --json ssh --command='#{command}' #{@ssh_gw_args} #{instance}")
       extract_stdout(output)
     end
 
     def scp(deployment, instance, local_path, remote_path)
-      execute("#{@bosh_cli} -d #{deployment} scp #{local_path} #{instance}:#{remote_path} #{@ssh_gw_args}")
+      execute("#{@bosh_cli} -d #{deployment} scp #{@ssh_gw_args} #{local_path} #{instance}:#{remote_path}")
     end
 
     def log_files(deployment, instance)
       tmpdir = Dir.tmpdir
-      execute("#{@bosh_cli} -d #{deployment} logs #{instance} --dir=#{tmpdir} #{@ssh_gw_args}")
+      execute("#{@bosh_cli} -d #{deployment} logs --dir=#{tmpdir} #{@ssh_gw_args} #{instance}")
 
       tarball = Dir[File.join(tmpdir, instance.to_s + '*.tgz')].last
       output = execute("tar tf #{tarball}")
