@@ -68,7 +68,7 @@ module Helpers
       execute("#{@bosh_cli} -d #{deployment} logs --dir=#{tmpdir} #{@ssh_gw_args} #{instance}")
 
       tarball = Dir[File.join(tmpdir, instance.to_s + '*.tgz')].last
-      output = execute("tar tf #{tarball}")
+      output = execute("tar -tf #{tarball}")
       lines = output.split(/\n+/)
       file_paths = lines.map { |f| Pathname.new(f) }
       file_paths.select { |f| f.extname == '.log' }
