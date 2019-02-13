@@ -289,7 +289,7 @@ GEM
     rack-test (1.1.0)
       rack (>= 1.0, < 3)
     rainbow (3.0.0)
-    rake (12.3.1)
+    rake (12.3.2)
     rbvmomi (2.0.0)
       builder (~> 3.0)
       json (>= 1.8)
