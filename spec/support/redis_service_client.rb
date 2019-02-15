@@ -77,7 +77,7 @@ module Support
         )
 
         client = Redis.new(options).tap do |redis|
-          redis.client.instance_variable_set(:@command_map, config: config_command, save: save_command)
+          redis._client.instance_variable_set(:@command_map, config: config_command, save: save_command)
         end
 
         return yield client
