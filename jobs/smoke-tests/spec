@@ -32,8 +32,16 @@ properties:
     description: Domain shared by the UAA and CF API eg 'bosh-lite.com'
   cf.admin_username:
     description: 'Username of the admin user'
+    default: ''
   cf.admin_password:
     description: 'Password of the admin user'
+    default: ''
+  cf.admin_client:
+    description: 'Username of the admin client'
+    default: ''
+  cf.admin_client_secret:
+    description: 'Secret of the admin client'
+    default: ''
   cf.skip_ssl_validation:
     description: 'Skip SSL certificate validation'
     default: true
@@ -56,6 +64,3 @@ properties:
   retry.baseline_interval_milliseconds:
     description: The baseline to use in the backoff algorithm. For constant backoff, it is equal to the duration between consecutive retries.
     default: 500
-  smoke_tests.use_client:
-    description: Use a client rather than a user in smoke-tests
-    default: false

@@ -49,6 +49,10 @@ RSpec.describe 'smoke-tests config' do
         'apps_domain' => 'an-apps-domain',
         'admin_user' => 'a-username',
         'admin_password' => 'a-password',
+        'admin_client' => '',
+        'admin_client_secret' => '',
+        'existing_client' => '',
+        'existing_client_secret' => '',
         'use_existing_user' => false,
         'use_existing_organization' => true,
         'existing_organization' => 'an-org-name',
@@ -76,15 +80,19 @@ RSpec.describe 'smoke-tests config' do
 
   it 'allows the use of client and client secret' do
     manifest = generate_manifest(MINIMUM_MANIFEST) do |m|
-      m['instance_groups'].first['jobs'].first['properties']['smoke_tests'] = {'use_client' => true}
+      m['instance_groups'].first['jobs'].first['properties']['cf']['admin_username'] = ''
+      m['instance_groups'].first['jobs'].first['properties']['cf']['admin_password'] = ''
+      m['instance_groups'].first['jobs'].first['properties']['cf']['admin_client'] = 'a-client'
+      m['instance_groups'].first['jobs'].first['properties']['cf']['admin_client_secret'] = 'a-client-secret'
     end
+
     actual_template = render_template(TEMPLATE_PATH, JOB_NAME, manifest, LINKS)
     expect(JSON.parse(actual_template)['admin_user']).to eq('')
     expect(JSON.parse(actual_template)['admin_password']).to eq('')
-    expect(JSON.parse(actual_template)['admin_client']).to eq('a-username')
-    expect(JSON.parse(actual_template)['admin_client_secret']).to eq('a-password')
-    expect(JSON.parse(actual_template)['existing_client']).to eq('a-username')
-    expect(JSON.parse(actual_template)['existing_client_secret']).to eq('a-password')
+    expect(JSON.parse(actual_template)['admin_client']).to eq('a-client')
+    expect(JSON.parse(actual_template)['admin_client_secret']).to eq('a-client-secret')
+    expect(JSON.parse(actual_template)['existing_client']).to eq('a-client')
+    expect(JSON.parse(actual_template)['existing_client_secret']).to eq('a-client-secret')
   end
 
   it 'allows the service name to be configured' do

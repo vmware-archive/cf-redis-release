@@ -4,6 +4,10 @@
     'apps_domain' => p('cf.apps_domain'),
     'admin_user' => p('cf.admin_username'),
     'admin_password' => p('cf.admin_password'),
+    'admin_client' => p('cf.admin_client'),
+    'admin_client_secret' => p('cf.admin_client_secret'),
+    'existing_client' => p('cf.admin_client'),
+    'existing_client_secret' => p('cf.admin_client_secret'),
     'use_existing_user' => false,
     'use_existing_organization' => true,
     'existing_organization' => p('cf.org_name'),
@@ -26,15 +30,6 @@
       }
     ]
   }
-
-  if p('smoke_tests.use_client')
-    config['admin_user'] = ''
-    config['admin_password'] = ''
-    config['admin_client'] = p('cf.admin_username')
-    config['admin_client_secret'] = p('cf.admin_password')
-    config['existing_client'] = p('cf.admin_username')
-    config['existing_client_secret'] = p('cf.admin_password')
-  end
 
   if p('redis.broker.service_instance_limit').to_i > 0
     config['plan_names'].push('shared-vm')
