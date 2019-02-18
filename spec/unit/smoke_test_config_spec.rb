@@ -46,12 +46,15 @@ RSpec.describe 'smoke-tests config' do
       actual_template = render_template(TEMPLATE_PATH, JOB_NAME, manifest, LINKS)
       expect(JSON.parse(actual_template)).to eq({
         'api' => 'a-cf-url',
-        'org_name' => 'an-org-name',
-        'space_name' => 'a-space-name',
         'apps_domain' => 'an-apps-domain',
-        'system_domain' => 'a-system-domain',
         'admin_user' => 'a-username',
         'admin_password' => 'a-password',
+        'use_existing_user' => false,
+        'use_existing_organization' => true,
+        'existing_organization' => 'an-org-name',
+        'use_existing_space' => false,
+        'skip_ssl_validation' => false,
+        'name_prefix' => "cf-redis-smoke-tests",
         'service_name' => 'p-redis',
         'plan_names' => [],
         'retry' => {
@@ -59,7 +62,6 @@ RSpec.describe 'smoke-tests config' do
           'backoff' => 'constant',
           'baseline_interval_milliseconds' => 500
         },
-        'skip_ssl_validation' => false,
         'create_permissive_security_group' => false,
         'security_groups' => [
           {
@@ -70,6 +72,19 @@ RSpec.describe 'smoke-tests config' do
         ]
       })
     end
+  end
+
+  it 'allows the use of client and client secret' do
+    manifest = generate_manifest(MINIMUM_MANIFEST) do |m|
+      m['instance_groups'].first['jobs'].first['properties']['smoke_tests']['use_client'] = true
+    end
+    actual_template = render_template(TEMPLATE_PATH, JOB_NAME, manifest, LINKS)
+    expect(JSON.parse(actual_template)['admin_user']).to eq('')
+    expect(JSON.parse(actual_template)['admin_password']).to eq('')
+    expect(JSON.parse(actual_template)['admin_client']).to eq('a-username')
+    expect(JSON.parse(actual_template)['admin_client_secret']).to eq('a-password')
+    expect(JSON.parse(actual_template)['existing_client']).to eq('a-username')
+    expect(JSON.parse(actual_template)['existing_client_secret']).to eq('a-password')
   end
 
   it 'allows the service name to be configured' do
