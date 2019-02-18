@@ -76,7 +76,7 @@ RSpec.describe 'smoke-tests config' do
 
   it 'allows the use of client and client secret' do
     manifest = generate_manifest(MINIMUM_MANIFEST) do |m|
-      m['instance_groups'].first['jobs'].first['properties']['smoke_tests']['use_client'] = true
+      m['instance_groups'].first['jobs'].first['properties']['smoke_tests'] = {'use_client' => true}
     end
     actual_template = render_template(TEMPLATE_PATH, JOB_NAME, manifest, LINKS)
     expect(JSON.parse(actual_template)['admin_user']).to eq('')
