@@ -1,12 +1,15 @@
 <%
   config = {
     'api' => p('cf.api_url'),
-    'org_name' => p('cf.org_name'),
-    'space_name' => p('cf.space_name'),
     'apps_domain' => p('cf.apps_domain'),
-    'system_domain' => p('cf.system_domain'),
     'admin_user' => p('cf.admin_username'),
     'admin_password' => p('cf.admin_password'),
+    'use_existing_user' => false,
+    'use_existing_organization' => true,
+    'existing_organization' => p('cf.org_name'),
+    'use_existing_space' => false,
+    'skip_ssl_validation' => p('cf.skip_ssl_validation'),
+    'name_prefix' => "cf-redis-smoke-tests",
     'service_name' => p('redis.broker.service_name'),
     'plan_names' => [],
     'retry' => {
@@ -14,7 +17,6 @@
       'backoff' => p('retry.backoff'),
       'baseline_interval_milliseconds' => p('retry.baseline_interval_milliseconds')
     },
-    'skip_ssl_validation' => p('cf.skip_ssl_validation'),
     'create_permissive_security_group' => false,
     'security_groups' => [
       {
@@ -24,6 +26,15 @@
       }
     ]
   }
+
+  if p('smoke_tests.use_client')
+    config['admin_user'] = ''
+    config['admin_password'] = ''
+    config['admin_client'] = p('cf.admin_username')
+    config['admin_client_secret'] = p('cf.admin_password')
+    config['existing_client'] = p('cf.admin_username')
+    config['existing_client_secret'] = p('cf.admin_password')
+  end
 
   if p('redis.broker.service_instance_limit').to_i > 0
     config['plan_names'].push('shared-vm')

@@ -56,3 +56,6 @@ properties:
   retry.baseline_interval_milliseconds:
     description: The baseline to use in the backoff algorithm. For constant backoff, it is equal to the duration between consecutive retries.
     default: 500
+  smoke_tests.use_client:
+    description: Use a client rather than a user in smoke-tests
+    default: false
