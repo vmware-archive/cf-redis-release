@@ -9,8 +9,16 @@ properties:
     description: 'Full URL of Cloud Foundry API'
   cf.admin_username:
     description: 'Username of the admin user'
+    default: ''
   cf.admin_password:
     description: 'Password of the admin user'
+    default: ''
+  cf.admin_client:
+    description: 'Id of the admin client'
+    default: ''
+  cf.admin_client_secret:
+    description: 'Secret of the admin client'
+    default: ''
   cf.skip_ssl_validation:
     description: 'Skip SSL certificate validation'
     default: true

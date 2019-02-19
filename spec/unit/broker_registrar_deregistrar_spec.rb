@@ -4,6 +4,8 @@ PROPERTIES = {
     "cf.api_url" => "http://api.my-cf.com",
     "cf.admin_username" => "admin",
     "cf.admin_password" => "password",
+    "cf.admin_client" => "",
+    "cf.admin_client_secret" => "",
     "redis.broker.service_name" => "redis-service",
     "broker.name" => "dave",
     "broker.protocol" => "https",
@@ -40,6 +42,55 @@ shared_examples 'ssl validation is configurable' do
   end
 end
 
+shared_examples 'user or client can be configured' do
+  context 'when user it configured' do
+    let(:properties) {
+      PROPERTIES.merge({
+        "cf.admin_username" => "user",
+        "cf.admin_password" => "password",
+        "cf.admin_client" => "",
+        "cf.admin_client_secret" => "",
+      })
+    }
+
+    it 'does not skip ssl validation' do
+      expect(template_out_script).to include("cf auth user password")
+    end
+  end
+
+  context 'when user it configured' do
+    let(:properties) {
+      PROPERTIES.merge({
+        "cf.admin_username" => "",
+        "cf.admin_password" => "",
+        "cf.admin_client" => "client",
+        "cf.admin_client_secret" => "secret",
+      })
+    }
+
+    it 'does not skip ssl validation' do
+      expect(template_out_script).to include("cf auth client secret --client-credentials")
+    end
+  end
+
+  context 'when neither user nor client is configured' do
+    let(:properties) {
+      PROPERTIES.merge({
+        "cf.admin_username" => "",
+        "cf.admin_password" => "",
+        "cf.admin_client" => "",
+        "cf.admin_client_secret" => "",
+      })
+    }
+
+    it 'raises an error' do
+      expect {
+        template_out_script
+      }.to raise_error("Either cf.admin_client and cf.admin_client credentials or cf.admin_username and cf.admin_password must be provided")
+    end
+  end
+end
+
 describe 'cf-redis-broker broker_registrar errand' do
   let(:properties) { PROPERTIES }
 
@@ -53,6 +104,8 @@ describe 'cf-redis-broker broker_registrar errand' do
   }
 
   it_behaves_like 'ssl validation is configurable'
+
+  it_behaves_like 'user or client can be configured'
 
   it 'does not raise an error' do
     expect {
@@ -126,6 +179,8 @@ describe 'cf-redis-broker broker_deregistrar errand' do
   end
 
   it_behaves_like 'ssl validation is configurable'
+
+  it_behaves_like 'user or client can be configured'
 end
 
 def p(property_name)

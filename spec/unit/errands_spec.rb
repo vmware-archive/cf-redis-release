@@ -12,6 +12,8 @@ describe 'errands spec' do
         "cf" => {
           "admin_username" => "admin",
           "admin_password" => "adminpassword",
+          "admin_client" => "",
+          "admin_client_secret" => "",
           "api_url" => "http://api.bosh-lite.com",
           "skip_ssl_validation" => true
         },

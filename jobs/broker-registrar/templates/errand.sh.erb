@@ -12,10 +12,20 @@ export PATH=$PATH:/var/vcap/packages/cf-cli-6-linux/bin
 
 
 CF_API_URL='<%= p("cf.api_url") %>'
+SKIP_SSL_VALIDATION='<%= p("cf.skip_ssl_validation") ? "--skip-ssl-validation" : "" %>'
+
+cf --version
+cf api $SKIP_SSL_VALIDATION $CF_API_URL
 
 set +x
-CF_ADMIN_USERNAME='<%= p("cf.admin_username") %>'
-CF_ADMIN_PASSWORD='<%= p("cf.admin_password") %>'
+<% if p("cf.admin_client") != "" && p("cf.admin_client_secret") != "" %>
+cf auth <%= p("cf.admin_client") %> <%= p("cf.admin_client_secret") %> --client-credentials
+<% elsif p("cf.admin_username") != "" && p("cf.admin_password") != "" %>
+cf auth <%= p("cf.admin_username") %> <%= p("cf.admin_password") %>
+<% else
+    raise "Either cf.admin_client and cf.admin_client credentials or cf.admin_username and cf.admin_password must be provided"
+%>
+<% end %>
 set -x
 
 CF_DIAL_TIMEOUT=30
@@ -28,13 +38,7 @@ BROKER_USERNAME='<%= p("broker.username") %>'
 BROKER_PASSWORD='<%= p("broker.password") %>'
 set -x
 
-SKIP_SSL_VALIDATION='<%= p("cf.skip_ssl_validation") ? "--skip-ssl-validation" : "" %>'
-
-cf --version
-cf api $SKIP_SSL_VALIDATION $CF_API_URL
-
 set +x
-cf auth $CF_ADMIN_USERNAME $CF_ADMIN_PASSWORD
 cf create-service-broker $BROKER_NAME $BROKER_USERNAME $BROKER_PASSWORD $BROKER_URL || cf update-service-broker $BROKER_NAME $BROKER_USERNAME $BROKER_PASSWORD $BROKER_URL
 set -x
 
