@@ -14,10 +14,10 @@ redis/redis-4.0.13.tar.gz:
   size: 1740715
   object_id: 74b4bae5-ea2e-4bd5-63ce-6d073eed30e4
   sha: 06be60d880fe151bc13e04eef4f863f943e1649c
-redis/redis-5.0.2.tar.gz:
-  size: 1952989
-  object_id: c271cfc5-46cd-4d8d-7265-c0d717d6ffc2
-  sha: 0dd182d33f55b8f7460a6c1822614573aece696c
+redis/redis-5.0.3.tar.gz:
+  size: 1959445
+  object_id: 6fc9d819-e040-4c8e-6a78-9d6a50162ba7
+  sha: a43c24ea6365482323b78e21752d610756efcc39
 ruby/bundler-1.3.5.gem:
   size: 268800
   object_id: 67d8e9d8-a79a-4ebe-8061-9ac59d0224b5
