@@ -10,10 +10,10 @@ nginx/nginx-1.8.0.tar.gz:
   size: 832104
   object_id: 77904c0d-6bb2-4e3e-b981-16828770f7a2
   sha: 12bad312764feae50246685ab2e74512d1aa9b2f
-redis/redis-4.0.11.tar.gz:
-  size: 1739656
-  object_id: 3bce5585-a509-4f9e-7211-2c914ad5d2d4
-  sha: a13ccf0f7051f82dc1c979bd94f0b9a9ba039122
+redis/redis-4.0.13.tar.gz:
+  size: 1740715
+  object_id: 74b4bae5-ea2e-4bd5-63ce-6d073eed30e4
+  sha: 06be60d880fe151bc13e04eef4f863f943e1649c
 redis/redis-5.0.2.tar.gz:
   size: 1952989
   object_id: c271cfc5-46cd-4d8d-7265-c0d717d6ffc2
