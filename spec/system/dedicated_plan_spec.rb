@@ -150,10 +150,10 @@ describe 'dedicated plan' do
         expect(@old_client.read('test_key')).to eq('test_value')
 
         host = service_binding.credentials[:host]
-        _, @instance_id = Helpers::BOSH::Deployment.new(deployment_name).instance(host)
 
-        aof_contents = bosh.ssh(deployment_name,
-                                "#{Helpers::Environment::DEDICATED_NODE_JOB_NAME}/#{@instance_id}",
+        @instance = bosh.instance(deployment_name, host)
+
+        aof_contents = bosh.ssh(deployment_name, @instance,
                                 'sudo cat /var/vcap/store/redis/appendonly.aof')
         expect(aof_contents).to include('test_value')
 
@@ -186,8 +186,7 @@ describe 'dedicated plan' do
     end
 
     it 'cleans the aof file' do
-      aof_contents = bosh.ssh(deployment_name,
-                              "#{Helpers::Environment::DEDICATED_NODE_JOB_NAME}/#{@instance_id}",
+      aof_contents = bosh.ssh(deployment_name, @instance,
                               'sudo cat /var/vcap/store/redis/appendonly.aof')
       expect(aof_contents).to_not include('test_value')
     end

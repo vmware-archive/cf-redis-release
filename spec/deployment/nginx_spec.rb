@@ -3,6 +3,10 @@
 require 'system_spec_helper'
 require 'helpers/service'
 
+def bosh
+  Helpers::Bosh2.new
+end
+
 describe 'nginx' do
   describe 'configuration' do
     CONFIG_PATH = '/var/vcap/jobs/cf-redis-broker/config/nginx.conf'

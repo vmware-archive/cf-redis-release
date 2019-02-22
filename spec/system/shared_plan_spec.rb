@@ -5,6 +5,10 @@ require 'system/shared_examples/service'
 require 'helpers/service'
 require 'helpers/bosh2_cli'
 
+def bosh
+  Helpers::Bosh2.new
+end
+
 describe 'shared plan' do
   def service
     Helpers::Service.new(
@@ -134,8 +138,8 @@ describe 'shared plan' do
 
     describe 'pidfiles' do
       it 'do not appear in persistent storage' do
-        persisted_pids = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo find /var/vcap/store/ -name "redis-server.pid" 2>/dev/null')
-        expect(persisted_pids.strip).to be_empty, "Actual output of find was: #{persisted_pids}"
+        output = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo find /var/vcap/store/ -name "redis-server.pid" 2>/dev/null')
+        expect(output).to be_empty
       end
 
       it 'appear in ephemeral storage' do
@@ -151,29 +155,34 @@ describe 'shared plan' do
       bosh.redeploy(deployment_name) do |manifest|
         manifest['properties']['redis']['config_command'] = 'configalias'
       end
+
+      @service_instance = service_broker.provision_instance(service.name, service.plan)
+      @service_binding  = service_broker.bind_instance(@service_instance, service.name, service.plan)
+
+      redis_client1 = service_client_builder(@service_binding)
+      redis_client1.write('test', 'foobar')
+      @original_config_command = redis_client1.config_command
     end
 
     after do
       bosh.redeploy(deployment_name) do |manifest|
         manifest['properties']['redis']['config_command'] = 'configalias'
       end
+
+      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+      service_broker.unbind_instance(@service_binding, service_plan)
+      service_broker.deprovision_instance(@service_instance, service_plan)
     end
 
     it 'updates existing instances' do
-      service_broker.provision_and_bind(service.name, service.plan) do |service_binding|
-        redis_client1 = service_client_builder(service_binding)
-        redis_client1.write('test', 'foobar')
-        original_config_command = redis_client1.config_command
-
-        bosh.redeploy(deployment_name) do |manifest|
-          manifest['properties']['redis']['config_command'] = 'newconfigalias'
-        end
-
-        redis_client2 = service_client_builder(service_binding)
-        new_config_command = redis_client2.config_command
-        expect(original_config_command).to_not eq(new_config_command)
-        expect(redis_client2.read('test')).to eq('foobar')
+      bosh.redeploy(deployment_name) do |manifest|
+        manifest['properties']['redis']['config_command'] = 'newconfigalias'
       end
+
+      redis_client2 = service_client_builder(@service_binding)
+      new_config_command = redis_client2.config_command
+      expect(new_config_command).to_not eq(@original_config_command)
+      expect(redis_client2.read('test')).to eq('foobar')
     end
   end
 
@@ -208,7 +217,7 @@ describe 'shared plan' do
       bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, drain_command)
       sleep 1
 
-      ps_output = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo ps aux | grep redis-serve[r]')
+      ps_output, = bosh.ssh_with_error(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo ps aux | grep redis-serve[r]')
       expect(ps_output.strip).to be_empty
 
       bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo /var/vcap/bosh/bin/monit restart process-watcher')
@@ -231,7 +240,7 @@ describe 'shared plan' do
     end
 
     it 'successfuly drained the redis instance' do
-      ps_output = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo ps aux | grep redis-serve[r]')
+      ps_output, = bosh.ssh_with_error(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo ps aux | grep redis-serve[r]')
       expect(ps_output.strip).to be_empty
     end
   end
@@ -261,8 +270,9 @@ describe 'shared plan' do
 
       bosh.wait_for_process_stop(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'process-destroyer')
 
-      ps_output = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo ps aux | grep redis-serve[r]')
-      expect(ps_output).to be_empty
+      output, _, status = bosh.ssh_with_error(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo ps aux | grep redis-serve[r]')
+      expect(status.exitstatus).to eql 1
+      expect(output).to be_empty
     end
   end
 end

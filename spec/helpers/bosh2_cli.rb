@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'yaml'
 require 'pry'
 require 'open3'
@@ -7,24 +9,36 @@ BOSH_CLI = ENV.fetch('BOSH_V2_CLI', 'bosh')
 MANIFEST_PATH = ENV.fetch('BOSH_MANIFEST')
 
 module Helpers
+  class ExecuteError < StandardError
+  end
+
   class Bosh2
     include Utilities
 
     def initialize
       @bosh_cli = "#{BOSH_CLI} -n"
-      @ssh_gw_args="--gw-user=#{ENV.fetch('JUMPBOX_USERNAME')} --gw-host=#{ENV.fetch('JUMPBOX_HOST')} --gw-private-key=#{ENV.fetch('JUMPBOX_PRIVATE_KEY_PATH')}"
+      @ssh_gw_args = "--gw-user=#{ENV.fetch('JUMPBOX_USERNAME')} --gw-host=#{ENV.fetch('JUMPBOX_HOST')} --gw-private-key=#{ENV.fetch('JUMPBOX_PRIVATE_KEY_PATH')}"
 
-      version = execute("#{@bosh_cli} --version")
+      version = execute_successfully("#{@bosh_cli} --version")
       raise 'BOSH CLI >= v2 required' if version.start_with?('version 1.')
     end
 
-    def execute(command)
-      output, = Open3.capture2(command)
-      output
+    def execute_successfully(command)
+      stdout, stderr, status = Open3.capture3(command)
+
+      unless status.success?
+        raise ExecuteError, "command, #{command}, output: #{stdout} failed with: #{stderr}"
+      end
+
+      stdout
+    end
+
+    def execute_with_error(command)
+      Open3.capture3(command)
     end
 
     def deploy(deployment, manifest = MANIFEST_PATH)
-      execute("#{@bosh_cli} -d #{deployment} deploy #{manifest}")
+      execute_successfully("#{@bosh_cli} -d #{deployment} deploy #{manifest}")
     end
 
     def redeploy(deployment)
@@ -38,55 +52,71 @@ module Helpers
     end
 
     def manifest(deployment)
-      manifest = execute("#{@bosh_cli} -d #{deployment} manifest")
+      manifest = execute_successfully("#{@bosh_cli} -d #{deployment} manifest")
       YAML.safe_load(manifest)
     end
 
     def recreate(deployment, instance)
-      execute("#{@bosh_cli} -d #{deployment} recreate #{instance} --force")
+      execute_successfully("#{@bosh_cli} -d #{deployment} recreate #{instance} --force")
     end
 
     def start(deployment, instance)
-      execute("#{@bosh_cli} -d #{deployment} start #{instance}")
+      execute_successfully("#{@bosh_cli} -d #{deployment} start #{instance}")
     end
 
     def stop(deployment, instance)
-      execute("#{@bosh_cli} -d #{deployment} stop #{instance}")
+      execute_successfully("#{@bosh_cli} -d #{deployment} stop #{instance}")
     end
 
     def ssh(deployment, instance, command)
-      output = execute("#{@bosh_cli} -d #{deployment} --json ssh --command='#{command}' #{@ssh_gw_args} #{instance}")
+      output = execute_successfully("#{@bosh_cli} -d #{deployment} --json ssh --command='#{command}' #{@ssh_gw_args} #{instance}")
       extract_stdout(output)
     end
 
+    def ssh_with_error(deployment, instance, command)
+      stdout, stderr, status = execute_with_error("#{@bosh_cli} -d #{deployment} --json ssh --command='#{command}' #{@ssh_gw_args} #{instance}")
+      [extract_stdout(stdout), stderr, status]
+    end
+
     def scp(deployment, instance, local_path, remote_path)
-      execute("#{@bosh_cli} -d #{deployment} scp #{@ssh_gw_args} #{local_path} #{instance}:#{remote_path}")
+      execute_successfully("#{@bosh_cli} -d #{deployment} scp #{@ssh_gw_args} #{local_path} #{instance}:#{remote_path}")
     end
 
     def log_files(deployment, instance)
       tmpdir = Dir.tmpdir
-      execute("#{@bosh_cli} -d #{deployment} logs --dir=#{tmpdir} #{@ssh_gw_args} #{instance}")
+      execute_successfully("#{@bosh_cli} -d #{deployment} logs --dir=#{tmpdir} #{@ssh_gw_args} #{instance}")
 
       tarball = Dir[File.join(tmpdir, deployment.to_s + '.' + instance.to_s + '*.tgz')].last
-      output = execute("tar -tf #{tarball}")
+      output = execute_successfully("tar -tf #{tarball}")
       lines = output.split(/\n+/)
-      file_paths = lines.map { |f| Pathname.new(f) }
-      file_paths.select { |f| f.extname == '.log' }
+      file_paths = lines.map {|f| Pathname.new(f)}
+      file_paths.select {|f| f.extname == '.log'}
+    end
+
+    def instance(deployment, host)
+      output = execute_successfully("#{@bosh_cli} -d #{deployment} instances --json")
+
+      result = JSON.parse(output)
+      table = result.fetch('Tables').first
+      rows = table.fetch('Rows')
+      match = rows.find {|row| row.fetch('ips') == host}
+      return nil if match.nil?
+
+      match.fetch('instance')
     end
 
     def wait_for_process_start(deployment, instance, process_name)
       18.times do
         sleep 5
-
-        monit_output = ssh(
-            deployment,
-            instance,
-            "sudo /var/vcap/bosh/bin/monit summary | grep #{process_name} | grep running")
-        return true if !monit_output.strip.empty?
+        monit_output, = ssh_with_error(
+          deployment,
+          instance,
+          "sudo /var/vcap/bosh/bin/monit summary | grep #{process_name} | grep running")
+        return true unless monit_output.strip.empty?
       end
 
       puts "Process #{process_name} did not start within 90 seconds"
-      return false
+      false
     end
 
     def wait_for_process_stop(deployment, instance, process_name)
@@ -94,15 +124,16 @@ module Helpers
         puts "Waiting for #{process_name} to stop"
         sleep 5
 
-        monit_output = ssh(
-            deployment,
-            instance,
-            %Q{sudo /var/vcap/bosh/bin/monit summary | grep #{process_name} | grep "not monitored"})
-        return true if !monit_output.strip.empty?
+        monit_output, = ssh_with_error(
+          deployment,
+          instance,
+          %(sudo /var/vcap/bosh/bin/monit summary | grep #{process_name} | grep "not monitored"))
+
+        return true unless monit_output.strip.empty?
       end
 
       puts "Process #{process_name} did not stop within 60 seconds"
-      return false
+      false
     end
 
     def eventually_contains_shutdown_log(deployment, instance, prestop_timestamp)
@@ -116,7 +147,7 @@ module Helpers
         sleep 5
       end
 
-      puts "Broker did not log shutdown within 60 seconds"
+      puts 'Broker did not log shutdown within 60 seconds'
       false
     end
 
@@ -128,9 +159,7 @@ module Helpers
 
       blocks = result.fetch('Blocks')
       blocks.each_with_index do |line, index|
-        if line.include? 'stdout |'
-          stdout << blocks[index + 1].rstrip
-        end
+        stdout << blocks[index + 1].rstrip if line.include? 'stdout |'
       end
 
       stdout.join("\n")

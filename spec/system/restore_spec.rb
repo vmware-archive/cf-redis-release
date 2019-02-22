@@ -6,10 +6,14 @@ DUMP_FIXTURE_PATH = 'spec/fixtures/moaning-dump.rdb'
 BACKUP_PATH = '/var/vcap/store/dump.rdb'
 TEMP_COPY_PATH = '/tmp/moaning-dump.rdb'
 
+def bosh
+  Helpers::Bosh2.new
+end
+
 shared_examples 'it errors when run as non-root user' do |plan|
   before(:all) do
     @service_instance, @service_binding, vm_ip, client = provision_and_build_service_client(plan)
-    @instance_ssh = instance_ssh(vm_ip)
+    @instance = bosh.instance(deployment_name, vm_ip)
 
     expect(client.read('moaning')).to_not eq('myrtle')
   end
@@ -19,7 +23,7 @@ shared_examples 'it errors when run as non-root user' do |plan|
   end
 
   it 'logs that restore should be run as root' do
-    output = @instance_ssh.execute("#{RESTORE_BINARY} #{get_restore_args(plan, @service_instance.id, BACKUP_PATH)}")
+    output, = bosh.ssh_with_error(deployment_name, @instance, "#{RESTORE_BINARY} #{get_restore_args(plan, @service_instance.id, BACKUP_PATH)}")
     expect(output).to include('Permission denied')
       .or include('Operation not permitted')
       .or include('No changes were performed')
@@ -30,19 +34,19 @@ end
 shared_examples 'it errors when file is on wrong device' do |plan|
   before(:all) do
     @service_instance, @service_binding, vm_ip, client = provision_and_build_service_client(plan)
-    @instance_ssh = instance_ssh(vm_ip)
+    @instance = bosh.instance(deployment_name, vm_ip)
 
-    @instance_ssh.copy(DUMP_FIXTURE_PATH, TEMP_COPY_PATH)
+    bosh.scp(deployment_name, @instance, DUMP_FIXTURE_PATH, TEMP_COPY_PATH)
     expect(client.read('moaning')).to_not eq('myrtle')
   end
 
   after(:all) do
-    @instance_ssh.execute('rm /tmp/moaning-dump.rdb')
+    bosh.ssh(deployment_name, @instance, 'rm /tmp/moaning-dump.rdb')
     unbind_and_deprovision(@service_binding, @service_instance, plan)
   end
 
   it 'logs that the file should be in /var/vcap/store' do
-    output = @instance_ssh.execute("sudo #{RESTORE_BINARY} #{get_restore_args(plan, @service_instance.id, TEMP_COPY_PATH)}")
+     output, = bosh.ssh_with_error(deployment_name, @instance, "sudo #{RESTORE_BINARY} #{get_restore_args(plan, @service_instance.id, TEMP_COPY_PATH)}")
     expect(output).to include 'Please move your rdb file to inside /var/vcap/store'
     expect(broker_registered?).to be true
   end
@@ -51,20 +55,20 @@ end
 shared_examples 'it errors when passed an incorrect guid' do |plan|
   before(:all) do
     @service_instance, @service_binding, vm_ip, client = provision_and_build_service_client(plan)
-    @instance_ssh = instance_ssh(vm_ip)
+    @instance = bosh.instance(deployment_name, vm_ip)
 
-    @instance_ssh.copy(DUMP_FIXTURE_PATH, TEMP_COPY_PATH)
-    @instance_ssh.execute("sudo mv #{TEMP_COPY_PATH} #{BACKUP_PATH}")
+    bosh.scp(deployment_name, @instance, DUMP_FIXTURE_PATH, TEMP_COPY_PATH)
+    bosh.ssh(deployment_name, @instance, "sudo mv #{TEMP_COPY_PATH} #{BACKUP_PATH}")
     expect(client.read('moaning')).to_not eq('myrtle')
   end
 
   after(:all) do
-    @instance_ssh.execute('rm /tmp/moaning-dump.rdb')
+    bosh.ssh_with_error(deployment_name, @instance, 'rm /var/vcap/store/dump.rdb')
     unbind_and_deprovision(@service_binding, @service_instance, plan)
   end
 
   it 'logs that the service instance provided does not exist' do
-    output = @instance_ssh.execute("sudo #{RESTORE_BINARY} --sourceRDB #{BACKUP_PATH} --sharedVmGuid imafakeguid")
+    output, = bosh.ssh_with_error(deployment_name, @instance, "sudo #{RESTORE_BINARY} --sourceRDB #{BACKUP_PATH} --sharedVmGuid imafakeguid")
     expect(output).to include(
       'service-instance provided does not exist, please check you are on the correct VM and the instance guid is correct'
     )
@@ -138,14 +142,14 @@ describe 'restore' do
       before(:all) do
         @service_instance, @service_binding, vm_ip, @client = provision_and_build_service_client(plan)
 
-        @node_ssh = instance_ssh(vm_ip)
+        @instance = bosh.instance(deployment_name, vm_ip)
 
-        @node_ssh.copy(DUMP_FIXTURE_PATH, TEMP_COPY_PATH)
-        @node_ssh.execute("sudo mv #{TEMP_COPY_PATH} #{BACKUP_PATH}")
+        bosh.scp(deployment_name, @instance, DUMP_FIXTURE_PATH, TEMP_COPY_PATH)
+        bosh.ssh(deployment_name, @instance, "sudo mv #{TEMP_COPY_PATH} #{BACKUP_PATH}")
         expect(@client.read('moaning')).to_not eq('myrtle')
 
-        @prerestore_timestamp = @node_ssh.execute('date +%s')
-        @node_ssh.execute("sudo #{RESTORE_BINARY} #{get_restore_args(plan, @service_instance.id, BACKUP_PATH)}")
+        @prerestore_timestamp = bosh.ssh(deployment_name, @instance, 'date +%s')
+        bosh.ssh(deployment_name, @instance, "sudo #{RESTORE_BINARY} #{get_restore_args(plan, @service_instance.id, BACKUP_PATH)}")
       end
 
       after(:all) do
@@ -155,7 +159,7 @@ describe 'restore' do
       it 'restores data to the instance' do
         expect(@client.read('moaning')).to eq('myrtle')
 
-        vm_log = @node_ssh.execute('sudo cat /var/vcap/sys/log/service-backup/restore.log')
+        vm_log = bosh.ssh(deployment_name, @instance, 'sudo cat /var/vcap/sys/log/service-backup/restore.log')
         contains_expected_log = drop_log_lines_before(@prerestore_timestamp, vm_log).any? do |line|
           line.include?('Redis data restore completed successfully')
         end

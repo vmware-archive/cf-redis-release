@@ -2,7 +2,6 @@ require 'prof/environment/cloud_foundry'
 
 require 'support/redis_service_broker'
 require 'support/redis_service_client_builder'
-require 'helpers/bosh_cli_wrapper'
 require 'helpers/utilities'
 
 class FilteredStderr < StringIO
@@ -70,11 +69,6 @@ module Helpers
 
     def bosh
       Helpers::Bosh2.new
-    end
-
-    def instance_ssh(host_ip)
-      instance_group, instance_id = BOSH::Deployment.new(deployment_name).instance(host_ip)
-      BOSH::SSH.new(deployment_name, instance_group, instance_id)
     end
 
     def get_syslog_endpoint_helper

@@ -4,6 +4,10 @@ require 'aws-sdk'
 require 'digest'
 require 'json'
 
+def bosh
+  Helpers::Bosh2.new
+end
+
 describe 'backups', :skip_service_backups => true do
   MANUAL_BACKUP_CONFIG = '/var/vcap/jobs/service-backup/config/backup.yml'
   DUMP_FILE_PATTERN = /\d{8}T\d{6}Z-.*_redis_backup.rdb/
@@ -248,10 +252,10 @@ describe 'backups', :skip_service_backups => true do
   def with_remote_execution(service_name, service_plan)
     service_broker.provision_and_bind(service_name, service_plan) do |service_binding|
       host = service_binding.credentials[:host]
-      instance_ssh = instance_ssh(host)
+      instance = bosh.instance(deployment_name, host)
 
       vm_execute = Proc.new do |command|
-        instance_ssh.execute(command)
+        bosh.ssh(deployment_name, instance, command)
       end
       yield vm_execute, service_binding
     end

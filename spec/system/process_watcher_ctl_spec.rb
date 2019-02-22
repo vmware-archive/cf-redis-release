@@ -3,6 +3,10 @@ require 'aws-sdk'
 
 PROCESS_WATCHER_PATH = '/var/vcap/sys/log/monit/process-watcher_ctl.err.log'
 
+def bosh
+  Helpers::Bosh2.new
+end
+
 describe 'process-watcher startup logging' do
   it 'does not log that another processmonitor process is running' do
     clear_log_and_restart_process_watcher
@@ -37,7 +41,7 @@ end
 
 def start_fake_process_monitor
   Thread.new do
-    bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'bash -c "exec -a fakeprocessmonitor sleep 10000"')
+    bosh.ssh_with_error(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'bash -c "exec -a fakeprocessmonitor sleep 10000"')
   end
 end
 
@@ -45,3 +49,4 @@ def stop_fake_process_monitor(fake_thread)
   bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo kill `pidof fakeprocessmonitor`')
   fake_thread.kill
 end
+
