@@ -37,7 +37,7 @@ describe 'nginx' do
     it 'has the correct server_names_hash_bucket_size' do
       expect(bucket_size).to be > 0
       command = %(sudo grep "server_names_hash_bucket_size #{bucket_size}" #{CONFIG_PATH})
-      result = bosh.ssh(deployment_name, "#{Helpers::Environment::DEDICATED_NODE_JOB_NAME}/0", command)
+      result = bosh.ssh(deployment_name, "#{Helpers::Environment::BROKER_JOB_NAME}/0", command)
       expect(result.strip).not_to be_empty
     end
   end
