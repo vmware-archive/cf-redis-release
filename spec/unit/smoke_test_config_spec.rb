@@ -5,9 +5,9 @@ require 'helpers/unit_spec_utilities'
 include Helpers::Utilities
 
 RSpec.describe 'smoke-tests config' do
-  TEMPLATE_PATH = 'jobs/smoke-tests/templates/config.json.erb'
-  JOB_NAME = 'smoke-tests'
-  MINIMUM_MANIFEST = <<~MINIMUM_MANIFEST
+  TEMPLATE_PATH = 'jobs/smoke-tests/templates/config.json.erb'.freeze
+  JOB_NAME = 'smoke-tests'.freeze
+  MINIMUM_MANIFEST = <<~MINIMUM_MANIFEST.freeze
   instance_groups:
   - name: smoke-tests
     jobs:
@@ -38,7 +38,24 @@ RSpec.describe 'smoke-tests config' do
     'dedicated_node' => {
       'instances' => []
     }
-  }
+  }.freeze
+  LINKS_WITH_DEDICATED_NODES = {
+    'redis_broker' => {
+      'instances' => [
+        {
+          'address' => 'redis-broker-address'
+        }
+      ],
+      'properties' => {}
+    },
+    'dedicated_node' => {
+      'instances' => [
+        {'address' => '10.0.10.5'},
+        {'address' => '10.0.10.6'},
+        {'address' => '10.0.10.7'}
+      ]
+    }
+  }.freeze
 
   context 'when only required properties are configured' do
     it 'templates the minimum config' do
@@ -150,13 +167,7 @@ RSpec.describe 'smoke-tests config' do
   context 'when redis.broker.dedicated_nodes property is empty' do
     it 'configures testing of dedicated-vm plan using dedicated node addresses from dedicated_node link' do
       manifest = generate_manifest(MINIMUM_MANIFEST)
-      links_with_dedicated_nodes = LINKS.clone
-      links_with_dedicated_nodes['dedicated_node']['instances'] = [
-        {'address' => '10.0.10.5'},
-        {'address' => '10.0.10.6'},
-        {'address' => '10.0.10.7'}
-      ]
-      actual_template = render_template(TEMPLATE_PATH, JOB_NAME, manifest, links_with_dedicated_nodes)
+      actual_template = render_template(TEMPLATE_PATH, JOB_NAME, manifest, LINKS_WITH_DEDICATED_NODES)
 
       actual_config = JSON.parse(actual_template)
       expect(actual_config['plan_names']).to include('dedicated-vm')
@@ -168,4 +179,4 @@ RSpec.describe 'smoke-tests config' do
     end
   end
 
-  end
+end
