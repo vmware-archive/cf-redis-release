@@ -85,7 +85,8 @@ RSpec.configure do |config|
   config.filter_run_excluding skip_service_backups: !ExcludeHelper.service_backups_available?
 
   config.before(:all) do
-    redis_service_broker.deprovision_service_instances!
+    redis_service_broker.deprovision_dedicated_service_instances!
+    redis_service_broker.deprovision_shared_service_instances!
 
     if ExcludeHelper.service_backups_available?
       destinations = test_manifest['properties']['service-backup']['destinations']
