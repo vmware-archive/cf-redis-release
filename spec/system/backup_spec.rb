@@ -29,48 +29,42 @@ describe 'backups', :skip_service_backups => true do
   shared_examples 'backups are enabled' do
     describe 'service backups' do
       context 'configuration' do
-        let(:service_backup_config) do
-          with_remote_execution(service_name, service_plan) do |vm_execute|
-            config_cmd = "sudo cat #{MANUAL_BACKUP_CONFIG}"
-            YAML.load(vm_execute.call(config_cmd).gsub(/"/, ''))
-          end
+        before do
+          config_cmd = "sudo cat #{MANUAL_BACKUP_CONFIG}"
+          @service_backup_config = YAML.load(bosh.ssh(deployment_name, @instance, config_cmd).gsub(/"/, ''))
         end
 
         it 'service backups is configured correctly' do
-          with_remote_execution(service_name, service_plan) do |_, service_binding|
-            with_redis_under_stress(service_binding) do
-              expected_backup_config = {
-                "service_identifier_executable" => service_identifier_executable,
-                "source_executable" => manual_snapshot_command,
-                "cron_schedule" => cron_schedule,
-                "cleanup_executable" => manual_cleanup_command,
-                "source_folder" => source_folder
-              }
+          with_redis_under_stress(@service_binding) do
+            expected_backup_config = {
+              "service_identifier_executable" => service_identifier_executable,
+              "source_executable" => manual_snapshot_command,
+              "cron_schedule" => cron_schedule,
+              "cleanup_executable" => manual_cleanup_command,
+              "source_folder" => source_folder
+            }
 
-              expect(service_backup_config).to include(expected_backup_config)
-            end
+            expect(@service_backup_config).to include(expected_backup_config)
           end
         end
 
         context 'destinations' do
           context 's3' do
             it 'is configured correctly' do
-              with_remote_execution(service_name, service_plan) do |service_binding|
-                with_redis_under_stress(service_binding) do
-                  expected_backup_config = {
-                    "type" => 's3',
-                    "config" => {
-                      "endpoint_url" => s3_config['endpoint_url'],
-                      "access_key_id" => s3_config['access_key_id'],
-                      "secret_access_key" => s3_config['secret_access_key'],
-                      "bucket_name" => s3_config['bucket_name'],
-                      "bucket_path" => s3_config['bucket_path'],
-                      "region" => ''
-                    }
+              with_redis_under_stress(@service_binding) do
+                expected_backup_config = {
+                  "type" => 's3',
+                  "config" => {
+                    "endpoint_url" => s3_config['endpoint_url'],
+                    "access_key_id" => s3_config['access_key_id'],
+                    "secret_access_key" => s3_config['secret_access_key'],
+                    "bucket_name" => s3_config['bucket_name'],
+                    "bucket_path" => s3_config['bucket_path'],
+                    "region" => ''
                   }
+                }
 
-                  expect(service_backup_config['destinations']).to include(expected_backup_config)
-                end
+                expect(@service_backup_config['destinations']).to include(expected_backup_config)
               end
             end
           end
@@ -79,185 +73,165 @@ describe 'backups', :skip_service_backups => true do
 
       describe 'manual snapshot' do
         before do
-          with_remote_execution(service_name, service_plan) do |vm_execute|
-            clear_snapshot_logs_result = vm_execute.call("sudo truncate -s 0 #{manual_snapshot_log_file_path}")
-            expect(clear_snapshot_logs_result).to be_empty
-          end
+          clear_snapshot_logs_result = bosh.ssh(deployment_name, @instance, "sudo truncate -s 0 #{manual_snapshot_log_file_path}")
+          expect(clear_snapshot_logs_result).to be_empty
         end
 
         after do
-          with_remote_execution(service_name, service_plan) do |vm_execute|
-            cleanup_result = vm_execute.call("sudo #{manual_cleanup_command}")
-            expect(cleanup_result).to_not be_empty
-            expect(cleanup_result).to match('"event":"done","task":"perform-cleanup"')
-          end
+          cleanup_result = bosh.ssh(deployment_name, @instance, "sudo #{manual_cleanup_command}")
+          expect(cleanup_result).to_not be_empty
+          expect(cleanup_result).to match('"event":"done","task":"perform-cleanup"')
         end
 
         it 'creates an RDB dump file' do
-          with_remote_execution(service_name, service_plan) do |vm_execute|
-            result = vm_execute.call("sudo #{manual_snapshot_command}")
-            expect(result.strip).to_not be_empty
-            task_line = result.lines.select { |line|
-              line.include?('"task":"create-snapshot"') && line.include?('"event":"done"')
-            }
-            expect(task_line.length).to be > 0, 'done event not found'
+          result = bosh.ssh(deployment_name, @instance,"sudo #{manual_snapshot_command}")
+          expect(result.strip).to_not be_empty
+          task_line = result.lines.select { |line|
+            line.include?('"task":"create-snapshot"') && line.include?('"event":"done"')
+          }
+          expect(task_line.length).to be > 0, 'done event not found'
 
-            log_output = vm_execute.call("sudo cat #{manual_snapshot_log_file_path}")
-            expect(log_output).to_not be_empty
-            expected_log = log_output.lines.select { |line|
-              line.include?('"task":"create-snapshot"') && line.include?('"event":"done"')
-            }
-            expect(expected_log.length).to be > 0
+          log_output = bosh.ssh(deployment_name, @instance, "sudo cat #{manual_snapshot_log_file_path}")
+          expect(log_output).to_not be_empty
+          expected_log = log_output.lines.select { |line|
+            line.include?('"task":"create-snapshot"') && line.include?('"event":"done"')
+          }
+          expect(expected_log.length).to be > 0
 
-            ls_output = vm_execute.call("sudo ls -l #{source_folder}*redis_backup.rdb")
-            expect(ls_output).to_not be_empty
-            expect(ls_output.lines.size).to eql(1)
-            expect(ls_output.lines.first).to match(/#{source_folder}#{DUMP_FILE_PATTERN}/)
-          end
+          ls_output = bosh.ssh(deployment_name, @instance, "sudo ls -l #{source_folder}*redis_backup.rdb")
+          expect(ls_output).to_not be_empty
+          expect(ls_output.lines.size).to eql(1)
+          expect(ls_output.lines.first).to match(/#{source_folder}#{DUMP_FILE_PATTERN}/)
         end
       end
 
       describe 'manual cleanup' do
         it 'deletes the RDB dump file' do
-          with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
-            instance_id = service_binding.service_instance.id
-            filename = "20100101T010100Z-#{instance_id}_#{service_plan}_redis_backup.rdb"
+          instance_id = @service_binding.service_instance.id
+          filename = "20100101T010100Z-#{instance_id}_#{service_plan}_redis_backup.rdb"
 
-            assert_manual_cleanup_succeeds(vm_execute, filename)
-          end
+          assert_manual_cleanup_succeeds(filename)
         end
 
         it 'deletes the md5 files' do
-          with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
-            instance_id = service_binding.service_instance.id
-            filename = "20100101T010100Z-#{instance_id}_#{service_plan}_redis_backup.md5"
+          instance_id = @service_binding.service_instance.id
+          filename = "20100101T010100Z-#{instance_id}_#{service_plan}_redis_backup.md5"
 
-            assert_manual_cleanup_succeeds(vm_execute, filename)
-          end
+          assert_manual_cleanup_succeeds(filename)
         end
       end
     end
   end
 
-  shared_examples 'data and broker state is backed up' do
-    describe 'end to end' do
-      let(:s3_client) { Aws::S3::Client.new }
-
-      before do
-        clean_s3_bucket
-      end
-
-      after do
-        clean_s3_bucket
-      end
-
-      it 'uploads backup artifacts to S3 in the correct formats and removes local backup files' do
-        with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
-          client = service_client_builder(service_binding)
-          client.write('foo', 'bar')
-          with_redis_under_stress(service_binding) do
-            assert_manual_backup_succeeds(vm_execute, service_binding)
-          end
-
-          assert_rdb_file_is_valid
-
-          s3_statefile = find_s3_statefile
-          s3_statefile_contents = get_raw_file_contents s3_statefile
-          expect{JSON.parse(s3_statefile_contents)}.to_not raise_error
-          statefile_json = JSON.parse(s3_statefile_contents)
-          expect(statefile_json.keys).to contain_exactly('available_instances',
-                                                         'allocated_instances',
-                                                         'instance_bindings')
-
-          assert_statefile_is_valid
-
-          ls_result = vm_execute.call("sudo ls #{source_folder}")
-          expect(ls_result).to be_empty
-        end
-      end
-    end
-  end
-
-  shared_examples 'only data is backed up' do
-    describe 'end to end' do
-      let(:s3_client) { Aws::S3::Client.new }
-
-      before do
-        clean_s3_bucket
-      end
-
-      after do
-        clean_s3_bucket
-      end
-
-      it 'uploads data to S3 in RDB format and removes local backup files' do
-        with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
-          client = service_client_builder(service_binding)
-          client.write('foo', 'bar')
-          with_redis_under_stress(service_binding) do
-            assert_manual_backup_succeeds(vm_execute, service_binding)
-          end
-
-          assert_rdb_file_is_valid
-
-          s3_statefile = find_s3_statefile
-          expect(s3_statefile).to be_nil
-
-          ls_result = vm_execute.call("sudo ls #{source_folder}")
-          expect(ls_result).to be_empty
-        end
-      end
-    end
-  end
-
-  describe 'instance identifier' do
-    context 'with a provisioned dedicated-vm plan' do
-      let(:service_plan) { 'dedicated-vm' }
-
-      it 'returns the correct instance ID' do
-        with_remote_execution(service_name, service_plan) do |vm_execute, service_binding|
-          id = vm_execute.call("sudo #{service_identifier_executable}")
-          expect(id).to match(service_binding.service_instance.id)
-        end
-      end
-    end
-
-    context 'with provisioned shared-vm plan' do
-      let(:service_plan) { 'shared-vm' }
-
-      it 'returns the correct instance IDs' do
-        with_remote_execution(service_name, service_plan) do |_, service_binding1|
-          with_remote_execution(service_name, service_plan) do |vm_execute, service_binding2|
-            instance_ids = vm_execute.call("sudo #{service_identifier_executable}")
-            expect(instance_ids).to match(service_binding1.service_instance.id)
-            expect(instance_ids).to match(service_binding2.service_instance.id)
-          end
-        end
-      end
-    end
-  end
 
   context 'shared vm plan' do
     let(:service_plan) { 'shared-vm' }
+    let(:s3_client) { Aws::S3::Client.new }
     it_behaves_like 'backups are enabled'
-    it_behaves_like 'data and broker state is backed up'
+
+    def service
+      Helpers::Service.new(
+        name: test_manifest['properties']['redis']['broker']['service_name'],
+        plan: "#{service_plan}"
+      )
+    end
+
+    before do
+      @service_instance = service_broker.provision_instance(service.name, service.plan)
+      @service_binding = service_broker.bind_instance(@service_instance, service.name, service.plan)
+      @instance = bosh.instance(deployment_name, @service_binding.credentials[:host])
+      clean_s3_bucket
+    end
+
+    after do
+      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+      service_broker.unbind_instance(@service_binding, service_plan)
+      service_broker.deprovision_instance(@service_instance, service_plan)
+      clean_s3_bucket
+    end
+
+    describe 'end to end' do
+
+      it 'uploads backup artifacts to S3 in the correct formats and removes local backup files' do
+        client = service_client_builder(@service_binding)
+        client.write('foo', 'bar')
+        with_redis_under_stress(@service_binding) do
+          assert_manual_backup_succeeds(@service_binding)
+        end
+
+        assert_rdb_file_is_valid
+
+        s3_statefile = find_s3_statefile
+        s3_statefile_contents = get_raw_file_contents s3_statefile
+        expect{JSON.parse(s3_statefile_contents)}.to_not raise_error
+        statefile_json = JSON.parse(s3_statefile_contents)
+        expect(statefile_json.keys).to contain_exactly('available_instances',
+                                                       'allocated_instances',
+                                                       'instance_bindings')
+
+        assert_statefile_is_valid
+
+        ls_result = bosh.ssh(deployment_name, @instance,"sudo ls #{source_folder}")
+        expect(ls_result).to be_empty
+      end
+
+      it 'returns the correct instance IDs' do
+        ids = bosh.ssh(deployment_name, @instance, "sudo #{service_identifier_executable}")
+        expect(ids).to match(@service_binding.service_instance.id)
+      end
+
+
+    end
   end
 
   context 'dedicated vm plan' do
     let(:service_plan) { 'dedicated-vm' }
+    let(:s3_client) { Aws::S3::Client.new }
     it_behaves_like 'backups are enabled'
-    it_behaves_like 'only data is backed up'
-  end
 
-  def with_remote_execution(service_name, service_plan)
-    service_broker.provision_and_bind(service_name, service_plan) do |service_binding|
-      host = service_binding.credentials[:host]
-      instance = bosh.instance(deployment_name, host)
+    def service
+      Helpers::Service.new(
+        name: test_manifest['properties']['redis']['broker']['service_name'],
+        plan: "#{service_plan}"
+      )
+    end
 
-      vm_execute = Proc.new do |command|
-        bosh.ssh(deployment_name, instance, command)
+    before do
+      @service_instance = service_broker.provision_instance(service.name, service.plan)
+      @service_binding = service_broker.bind_instance(@service_instance, service.name, service.plan)
+      @instance = bosh.instance(deployment_name, @service_binding.credentials[:host])
+      clean_s3_bucket
+    end
+
+    after do
+      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+      service_broker.unbind_instance(@service_binding, service_plan)
+      service_broker.deprovision_instance(@service_instance, service_plan)
+      clean_s3_bucket
+    end
+
+    describe 'end to end' do
+      it 'uploads data to S3 in RDB format and removes local backup files' do
+
+        client = service_client_builder(@service_binding)
+        client.write('foo', 'bar')
+        with_redis_under_stress(@service_binding) do
+          assert_manual_backup_succeeds(@service_binding)
+        end
+
+        assert_rdb_file_is_valid
+
+        s3_statefile = find_s3_statefile
+        expect(s3_statefile).to be_nil
+
+        ls_result = bosh.ssh(deployment_name, @instance,"sudo ls #{source_folder}")
+        expect(ls_result).to be_empty
       end
-      yield vm_execute, service_binding
+    end
+
+    it 'returns the correct instance IDs' do
+      ids = bosh.ssh(deployment_name, @instance, "sudo #{service_identifier_executable}")
+      expect(ids).to match(@service_binding.service_instance.id)
     end
   end
 
@@ -335,8 +309,9 @@ describe 'backups', :skip_service_backups => true do
     s3_file.read.encode('UTF-8', 'UTF-8', :invalid => :replace)
   end
 
-  def assert_manual_backup_succeeds(vm, service_binding)
-    cmd_result = vm.call("sudo /var/vcap/packages/service-backup/bin/manual-backup #{MANUAL_BACKUP_CONFIG}")
+  def assert_manual_backup_succeeds(service_binding)
+    instance = bosh.instance(deployment_name, service_binding.credentials[:host])
+    cmd_result = bosh.ssh(deployment_name, instance, "sudo /var/vcap/packages/service-backup/bin/manual-backup #{MANUAL_BACKUP_CONFIG}")
     expect(cmd_result).to_not be_empty
 
     expect(cmd_result).to match(/Perform backup completed successfully/)
@@ -370,15 +345,15 @@ describe 'backups', :skip_service_backups => true do
   end
 end
 
-def assert_manual_cleanup_succeeds(vm_execute, filename)
-  result = vm_execute.call("sudo touch #{source_folder}/#{filename}; ls #{source_folder}")
+def assert_manual_cleanup_succeeds(filename)
+  result = bosh.ssh(deployment_name, @instance, "sudo touch #{source_folder}/#{filename}; ls #{source_folder}")
   expect(result).to_not be_empty
   expect(result).to match(filename)
 
-  cleanup_result = vm_execute.call("sudo #{manual_cleanup_command}")
+  cleanup_result = bosh.ssh(deployment_name, @instance, "sudo #{manual_cleanup_command}")
   expect(cleanup_result).to_not be_empty
   expect(cleanup_result).to match('"event":"done","task":"perform-cleanup"')
 
-  ls_result = vm_execute.call("sudo ls #{source_folder}")
+  ls_result = bosh.ssh(deployment_name, @instance, "sudo ls #{source_folder}")
   expect(ls_result).to_not match(filename)
 end
