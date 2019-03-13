@@ -6,9 +6,15 @@ set -e
     exit 0
 <% end %>
 
-source /var/vcap/packages/golang-1.11-linux/bosh/runtime.env
-export GOPATH=$GOPATH:/var/vcap/packages/cf-redis-smoke-tests
+export GOROOT=$(readlink -nf /var/vcap/packages/go)
+export PATH=${GOROOT}/bin:${PATH}
+
+export GOPATH=/var/vcap/packages/cf-redis-smoke-tests
+export PATH=${GOPATH}/bin:${PATH}
+
+export GOCACHE=/tmp/gocache
 
 cd /var/vcap/packages/cf-redis-smoke-tests/src/github.com/pivotal-cf/cf-redis-smoke-tests
 export PATH=$PATH:/var/vcap/packages/cf-cli-6-linux/bin
+
 CGO_ENABLED=0 GO111MODULE=off CONFIG_PATH=/var/vcap/jobs/smoke-tests/config.json /var/vcap/packages/ginkgo/ginkgo -r -p -nodes=2

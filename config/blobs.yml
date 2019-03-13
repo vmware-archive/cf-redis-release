@@ -6,6 +6,10 @@ ginkgo/ginkgo:
   size: 10583320
   object_id: 375645ba-af16-4ced-67aa-9f14a03f7c18
   sha: e5697ace4ec310cc6bc1ac157b26dd254faa93ac
+go/go1.12.linux-amd64.tar.gz:
+  size: 127228112
+  object_id: cb8547ce-cfd6-4ce8-6912-5798737f370c
+  sha: 8715ddcd08e9d5ddf3e09c1af7c69bf4f23847ae
 nginx/nginx-1.8.0.tar.gz:
   size: 832104
   object_id: 77904c0d-6bb2-4e3e-b981-16828770f7a2

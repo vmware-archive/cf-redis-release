@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -e
+
+tar xzf go/go*.linux-amd64.tar.gz
+cp -R go/* ${BOSH_INSTALL_TARGET}

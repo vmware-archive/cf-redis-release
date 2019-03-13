@@ -1,0 +1,4 @@
+---
+name: go
+files:
+- go/go1.12.linux-amd64.tar.gz
