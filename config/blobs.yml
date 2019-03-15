@@ -6,7 +6,7 @@ ginkgo/ginkgo:
   size: 10583320
   object_id: 375645ba-af16-4ced-67aa-9f14a03f7c18
   sha: e5697ace4ec310cc6bc1ac157b26dd254faa93ac
-go/go1.12.1linux-amd64.tar.gz:
+go/go1.12.1.linux-amd64.tar.gz:
   size: 127906702
   object_id: ded59354-41eb-4f83-6a0b-dd2a553da549
   sha: 502e00384c70aa6dad333b06fba903367150f2cd
