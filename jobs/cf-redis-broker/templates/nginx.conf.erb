@@ -10,7 +10,7 @@ error_log /var/vcap/sys/log/cf-redis-broker/nginx/error.log;
 <% if_p("syslog_aggregator.address", "syslog_aggregator.port") do %>
   # The max tag length is 32, so we must truncate the broker name to a max of 14
   # characters
-  <% error_tag = p('redis.broker.name').capitalize[0...14].gsub(/\-/, "_") %>
+  <% error_tag = p('redis.broker.name').gsub(/[^A-Z0-9\-\s]/i, '').capitalize[0...14].gsub(/\-/, "_") %>
   error_log syslog:server=localhost,facility=local0,tag=Cf<%= error_tag %>BrokerNginxError error;
 <% end %>
 
@@ -50,7 +50,7 @@ http {
     <% if_p("syslog_aggregator.address", "syslog_aggregator.port") do %>
       # The max tag length is 32, so we must truncate the broker name to a max of 13
       # characters
-      <% access_tag = p('redis.broker.name').capitalize[0...13].gsub(/\-/, "_") %>
+      <% access_tag = p('redis.broker.name').gsub(/[^A-Z0-9\-\s]/i, '').capitalize[0...13].gsub(/\-/, "_") %>
       access_log syslog:server=localhost,facility=local0,severity=debug,tag=Cf<%= access_tag %>BrokerNginxAccess combined;
     <% end %>
   }
