@@ -44,7 +44,7 @@
     end
   end
 
-  unless dedicated_node_addresses.empty?
+  unless dedicated_node_addresses.empty? || p('redis.broker.enable_deprecate_dedicated_service_access')
     config['plan_names'].push('dedicated-vm')
 
     dedicated_node_addresses.each do |node|

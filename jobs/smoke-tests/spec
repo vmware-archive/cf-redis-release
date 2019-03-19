@@ -55,6 +55,9 @@ properties:
   redis.broker.dedicated_nodes:
     description: List of node IPs for the dedicated plan
     default: []
+  redis.broker.enable_deprecate_dedicated_service_access:
+    description: 'If set to true broker-registrar errand will disable access to dedicated-vm plan'
+    default: false
   retry.max_attempts:
     description: Maximum number of attempts when making CF API calls
     default: 10
