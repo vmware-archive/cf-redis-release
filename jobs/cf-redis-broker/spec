@@ -76,6 +76,12 @@ properties:
   redis.bg_rewrite_aof_command:
     default: "06368efbfc3749d09b6ec60a0b54e4b5"
     description: The name of the obfuscated redis BGREWRITEAOF command.
+  redis.eval_command:
+    default: "EVAL"
+    description: The name of the obfuscated redis EVAL command.
+  redis.evalsha_command:
+    default: "EVALSHA"
+    description: The name of the obfuscated redis EVALSHA command.
   redis.client_timeout:
     default: 0
     description: Close the connection after a client is idle for N seconds (0 to disable)
