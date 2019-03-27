@@ -9,7 +9,7 @@ describe 'metrics', :skip_metrics => true do
     @origin_tag = test_manifest['properties']['service_metrics']['origin']
     @outFile = Tempfile.new('smetrics')
     @pid = spawn(
-      "cf log-stream #{deployment_name}",
+      "cf log-stream",
       [:out, :err] => [@outFile.path, 'w']
     )
   end
