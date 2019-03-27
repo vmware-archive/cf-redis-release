@@ -9,11 +9,7 @@ describe 'metrics', :skip_metrics => true do
     @origin_tag = test_manifest['properties']['service_metrics']['origin']
     @outFile = Tempfile.new('smetrics')
     @pid = spawn(
-      {
-        'DOPPLER_ADDR' => doppler_address,
-        'CF_ACCESS_TOKEN' => cf_auth_token
-      },
-      'firehose',
+      'cf log-stream p-redis',
       [:out, :err] => [@outFile.path, 'w']
     )
   end
@@ -41,7 +37,8 @@ describe 'metrics', :skip_metrics => true do
        /p-redis/info/stats/total_commands_processed
        /p-redis/info/stats/total_connections_received
        /p-redis/info/memory/mem_fragmentation_ratio
-       /p-redis/info/stats/evicted_keys /p-redis/info/server/uptime_in_seconds
+       /p-redis/info/stats/evicted_keys
+       /p-redis/info/server/uptime_in_seconds
        /p-redis/info/server/uptime_in_days
        /p-redis/info/persistence/rdb_last_bgsave_status].each do |metric_name|
       it "contains #{metric_name} metric for all dedicated nodes" do
@@ -55,20 +52,19 @@ describe 'metrics', :skip_metrics => true do
   def assert_metric(metric_name, job_name, job_index)
     metric = find_metric(metric_name, job_name, job_index)
 
-    expect(metric).to match(/value:\d/)
-    expect(metric).to include("origin:\"#{@origin_tag}\"")
-    expect(metric).to include(%Q(deployment:"#{deployment_name}"))
-    expect(metric).to include('eventType:ValueMetric')
-    expect(metric).to match(/timestamp:\d/)
-    expect(metric).to match(/index:"[\dabcdef-]*"/)
-    expect(metric).to match(/ip:"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"/)
+    expect(metric).to match(/"value":\d+/)
+    expect(metric).to include("\"origin\":\"#{@origin_tag}\"")
+    expect(metric).to include("\"deployment\":\"#{deployment_name}\"")
+    expect(metric).to match(/"timestamp":"\d+"/)
+    expect(metric).to match(/"index":"[\dabcdef-]*"/)
+    expect(metric).to match(/"ip":"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"/)
   end
 
   def find_metric(metric_name, job_name, job_index)
     job_id = loggregator_agent_id_from_job_index(job_name, job_index)
     60.times do
-      File.open(firehose_out_file, 'r') do |file|
-        regex = /(?=.*job:"#{job_name}")(?=.*index:"#{job_id}")(?=.*name:"#{metric_name}")/
+      File.open(rlp_gateway_out_file, 'r') do |file|
+        regex = /(?=.*"job":"#{job_name}")(?=.*"index":"#{job_id}")(?=.*"#{metric_name}")/
         matches = file.readlines.grep(regex)
         return matches[0] unless matches.empty?
       end
@@ -83,7 +79,7 @@ describe 'metrics', :skip_metrics => true do
              'sudo cat /var/vcap/jobs/loggregator_agent/config/bpm.yml | grep AGENT_INDEX | cut -d \" -f2')
   end
 
-  def firehose_out_file
+  def rlp_gateway_out_file
     @outFile.path
   end
 end

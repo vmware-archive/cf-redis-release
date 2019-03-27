@@ -29,10 +29,6 @@ module Helpers
       ENV['CF_PASSWORD'] || 'admin'
     end
 
-    def doppler_address
-      ENV['DOPPLER_ADDRESS'] || 'wss://doppler.bosh-lite.com:4443'
-    end
-
     def target_cf
       `cf api --skip-ssl-validation #{cf_api}`
     end

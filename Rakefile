@@ -1,15 +1,9 @@
 desc 'run all the specs'
 task spec: %w(spec:unit spec:system)
 
-desc 'Installs noaa'
-task :install_noaa do
-  `go get github.com/cloudfoundry/noaa/samples/firehose`
-end
 
 namespace :spec do
   require 'rspec/core/rake_task'
-
-  task :system => :install_noaa
 
   desc 'run all of the system tests'
   RSpec::Core::RakeTask.new(:system) do |t|
