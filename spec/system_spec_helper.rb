@@ -29,7 +29,7 @@ module Helpers
       ENV['CF_PASSWORD'] || 'admin'
     end
 
-    def target_cf
+    def cf_target
       `cf api --skip-ssl-validation #{cf_api}`
     end
 
@@ -38,7 +38,7 @@ module Helpers
     end
 
     def cf_auth_token
-      target_cf
+      cf_target
       cf_login
       `cf oauth-token | tail -n 1`.strip!
     end

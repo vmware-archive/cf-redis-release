@@ -8,6 +8,8 @@ describe 'metrics', :skip_metrics => true do
     end.first['instances']
     @origin_tag = test_manifest['properties']['service_metrics']['origin']
     @outFile = Tempfile.new('smetrics')
+    cf_target
+    cf_login
     @pid = spawn(
       "cf log-stream",
       [:out, :err] => [@outFile.path, 'w']
