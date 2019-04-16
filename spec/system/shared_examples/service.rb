@@ -1,65 +1,102 @@
 shared_examples_for 'a service that has distinct instances' do
-  it 'has distinct instances' do
-    service_broker.provision_and_bind(service.name, service.plan) do |binding1|
-      service_client1 = service_client_builder(binding1)
-      service_client1.write('test_key', 'test_value')
+  before(:all) do
+    @service_instance = service_broker.provision_instance(service.name, service.plan)
+    @service_binding = service_broker.bind_instance(@service_instance, service.name, service.plan)
+  end
 
-      service_broker.provision_and_bind(service.name, service.plan) do |binding2|
-        service_client2 = service_client_builder(binding2)
-        service_client2.write('test_key', 'another_test_value')
-        expect(service_client1.read('test_key')).to eq('test_value')
-        expect(service_client2.read('test_key')).to eq('another_test_value')
-      end
-    end
+  after(:all) do
+    service_plan = service_broker.service_plan(service.name, service.plan)
+    service_broker.unbind_instance(@service_binding, service_plan)
+    service_broker.deprovision_instance(@service_instance, service_plan)
+  end
+
+  it 'has distinct instances' do
+    service_client1 = service_client_builder(@service_binding)
+    service_client1.write('test_key', 'test_value')
+
+    service_instance2 = service_broker.provision_instance(service.name, service.plan)
+    service_binding2 = service_broker.bind_instance(service_instance2, service.name, service.plan)
+
+    service_client2 = service_client_builder(service_binding2)
+    service_client2.write('test_key', 'another_test_value')
+    expect(service_client1.read('test_key')).to eq('test_value')
+    expect(service_client2.read('test_key')).to eq('another_test_value')
+
+    service_plan = service_broker.service_plan(service.name, service.plan)
+    service_broker.unbind_instance(service_binding2, service_plan)
+    service_broker.deprovision_instance(service_instance2, service_plan)
   end
 end
 
 shared_examples_for 'a service that can be shared by multiple applications' do
+  before(:all) do
+    @service_instance = service_broker.provision_instance(service.name, service.plan)
+    @service_binding = service_broker.bind_instance(@service_instance, service.name, service.plan)
+  end
+
+  after(:all) do
+    service_plan = service_broker.service_plan(service.name, service.plan)
+    service_broker.unbind_instance(@service_binding, service_plan)
+    service_broker.deprovision_instance(@service_instance, service_plan)
+  end
+
   it 'allows two applications to share the same instance' do
-    service_broker.provision_instance(service.name, service.plan) do |service_instance|
-      service_broker.bind_instance(service_instance, service.name, service.plan) do |binding1|
-        service_client1 = service_client_builder(binding1)
-        service_client1.write('shared_test_key', 'test_value')
-        expect(service_client1.read('shared_test_key')).to eq('test_value')
+    service_client1 = service_client_builder(@service_binding)
+    service_client1.write('shared_test_key', 'test_value')
+    expect(service_client1.read('shared_test_key')).to eq('test_value')
 
-        service_broker.bind_instance(service_instance, service.name, service.plan) do |binding2|
-          service_client2 = service_client_builder(binding2)
-          expect(service_client2.read('shared_test_key')).to eq('test_value')
-        end
+    service_binding2 = service_broker.bind_instance(@service_instance, service.name, service.plan)
+    service_client2 = service_client_builder(service_binding2)
+    expect(service_client2.read('shared_test_key')).to eq('test_value')
+    expect(service_client1.read('shared_test_key')).to eq('test_value')
 
-        expect(service_client1.read('shared_test_key')).to eq('test_value')
-      end
-    end
+    service_plan = service_broker.service_plan(service.name, service.plan)
+    service_broker.unbind_instance(service_binding2, service_plan)
   end
 end
 
 shared_examples_for 'a service which preserves data across binding and unbinding' do
   it 'preserves data across binding and unbinding' do
-    service_broker.provision_instance(service.name, service.plan) do |service_instance|
-      service_broker.bind_instance(service_instance, service.name, service.plan) do |binding|
-        service_client_builder(binding).write('unbound_test_key', 'test_value')
-      end
+    @service_instance = service_broker.provision_instance(service.name, service.plan)
+    @service_binding = service_broker.bind_instance(@service_instance, service.name, service.plan)
+    service_client_builder(@service_binding).write('unbound_test_key', 'test_value')
 
-      service_broker.bind_instance(service_instance, service.name, service.plan) do |binding|
-        expect(service_client_builder(binding).read('unbound_test_key')).to eq('test_value')
-      end
-    end
+    service_plan = service_broker.service_plan(service.name, service.plan)
+    service_broker.unbind_instance(@service_binding, service_plan)
+    @service_binding = service_broker.bind_instance(@service_instance, service.name, service.plan)
+
+    expect(service_client_builder(@service_binding).read('unbound_test_key')).to eq('test_value')
+
+    # this is not in an `after`-block, because the @service_binding gets re-assigned
+    # once control exits the `it` block
+    service_plan = service_broker.service_plan(service.name, service.plan)
+    service_broker.unbind_instance(@service_binding, service_plan)
+    service_broker.deprovision_instance(@service_instance, service_plan)
   end
 end
 
 shared_examples_for 'a service which preserves data when recreating the broker VM' do
+  before(:all) do
+    @service_instance = service_broker.provision_instance(service.name, service.plan)
+    @service_binding = service_broker.bind_instance(@service_instance, service.name, service.plan)
+  end
+
+  after(:all) do
+    service_plan = service_broker.service_plan(service.name, service.plan)
+    service_broker.unbind_instance(@service_binding, service_plan)
+    service_broker.deprovision_instance(@service_instance, service_plan)
+  end
+
   it 'preserves data when recreating vms' do
-    service_broker.provision_and_bind(service.name, service.plan) do |binding|
-      service_client = service_client_builder(binding)
-      service_client.write('test_key', 'test_value')
-      expect(service_client.read('test_key')).to eq('test_value')
+    service_client = service_client_builder(@service_binding)
+    service_client.write('test_key', 'test_value')
+    expect(service_client.read('test_key')).to eq('test_value')
 
-      [environment.bosh_service_broker_job_name].each do |job_name|
-        bosh.recreate(deployment_name, job_name)
-      end
-
-      expect(service_client.read('test_key')).to eq('test_value')
+    [environment.bosh_service_broker_job_name].each do |job_name|
+      bosh.recreate(deployment_name, job_name)
     end
+
+    expect(service_client.read('test_key')).to eq('test_value')
   end
 end
 

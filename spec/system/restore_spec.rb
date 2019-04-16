@@ -179,7 +179,7 @@ end
 
 def unbind_and_deprovision(service_binding, service_instance, plan)
   service_name = test_manifest['properties']['redis']['broker']['service_name']
-  service_plan = service_broker.catalog.service_plan(service_name, plan)
+  service_plan = service_broker.service_plan(service_name, plan)
 
   service_broker.unbind_instance(service_binding, service_plan)
   service_broker.deprovision_instance(service_instance, service_plan)

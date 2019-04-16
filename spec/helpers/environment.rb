@@ -1,6 +1,8 @@
 require 'prof/environment/cloud_foundry'
 
 require 'support/redis_service_broker'
+require 'helpers/new_service_broker'
+require 'helpers/new_json_http_client'
 require 'support/redis_service_client_builder'
 require 'helpers/utilities'
 
@@ -64,7 +66,20 @@ module Helpers
     end
 
     def service_broker
-      environment.service_broker
+      broker_registrar_properties = begin
+        environment.bosh_manifest.job('broker-registrar').properties.fetch('broker')
+      rescue RuntimeError
+        # for colocated errands, the errand's instance group might not exist
+        environment.bosh_manifest.properties.fetch('broker')
+      end
+
+      Helpers::NewServiceBroker.new(
+        url: URI::HTTPS.build(host: broker_registrar_properties.fetch('host')),
+        username: broker_registrar_properties.fetch('username'),
+        password: broker_registrar_properties.fetch('password'),
+        http_client: Helpers::NewHttpJsonClient.new,
+        broker_api_version: '2.13'
+      )
     end
 
     def bosh

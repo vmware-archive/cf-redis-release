@@ -24,7 +24,7 @@ describe 'shared plan' do
     end
 
     after(:all) do
-      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service.name, service.plan)
 
       service_broker.deprovision_instance(@service_instance, service_plan)
     end
@@ -46,7 +46,7 @@ describe 'shared plan' do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
 
       @predeprovision_timestamp = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'date +%s')
-      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service.name, service.plan)
 
       service_broker.deprovision_instance(@service_instance, service_plan)
     end
@@ -77,7 +77,7 @@ describe 'shared plan' do
     end
 
     after(:all) do
-      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service.name, service.plan)
 
       service_broker.unbind_instance(@service_binding, service_plan)
       service_broker.deprovision_instance(@service_instance, service_plan)
@@ -112,7 +112,7 @@ describe 'shared plan' do
     end
 
     after(:all) do
-      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service.name, service.plan)
 
       service_broker.unbind_instance(@service_binding, service_plan)
       service_broker.deprovision_instance(@service_instance, service_plan)
@@ -169,7 +169,7 @@ describe 'shared plan' do
         manifest['properties']['redis']['config_command'] = 'configalias'
       end
 
-      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service.name, service.plan)
       service_broker.unbind_instance(@service_binding, service_plan)
       service_broker.deprovision_instance(@service_instance, service_plan)
     end
@@ -233,7 +233,7 @@ describe 'shared plan' do
 
       expect(bosh.wait_for_process_start(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'process-watcher')).to eq(true)
 
-      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service.name, service.plan)
 
       service_broker.unbind_instance(@service_binding, service_plan)
       service_broker.deprovision_instance(@service_instance, service_plan)
@@ -259,7 +259,7 @@ describe 'shared plan' do
 
       expect(bosh.wait_for_process_start(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'process-watcher')).to eq(true)
 
-      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service.name, service.plan)
 
       service_broker.unbind_instance(@service_binding, service_plan)
       service_broker.deprovision_instance(@service_instance, service_plan)

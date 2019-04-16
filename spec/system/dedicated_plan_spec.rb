@@ -46,7 +46,7 @@ describe 'dedicated plan' do
     end
 
     after(:all) do
-      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service.name, service.plan)
 
       service_broker.unbind_instance(@binding, service_plan)
       service_broker.deprovision_instance(@service_instance, service_plan)
@@ -94,7 +94,7 @@ describe 'dedicated plan' do
       @service_instance = service_broker.provision_instance(service.name, service.plan)
       @predeprovision_timestamp = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'date +%s')
 
-      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service.name, service.plan)
       service_broker.deprovision_instance(@service_instance, service_plan)
     end
 
@@ -118,7 +118,7 @@ describe 'dedicated plan' do
     end
 
     after(:all) do
-      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service.name, service.plan)
 
       service_broker.unbind_instance(@binding, service_plan)
       service_broker.deprovision_instance(@service_instance, service_plan)
@@ -142,32 +142,31 @@ describe 'dedicated plan' do
       @service_instances = allocate_all_instances!
       service_instance = @service_instances.pop
 
-      service_broker.bind_instance(service_instance, service.name, service.plan) do |service_binding|
-        @old_credentials = service_binding.credentials
-        @old_client = service_client_builder(service_binding)
+      service_binding = service_broker.bind_instance(service_instance, service.name, service.plan)
+      @old_credentials = service_binding.credentials
+      @old_client = service_client_builder(service_binding)
 
-        @old_client.write('test_key', 'test_value')
-        expect(@old_client.read('test_key')).to eq('test_value')
+      @old_client.write('test_key', 'test_value')
+      expect(@old_client.read('test_key')).to eq('test_value')
 
-        host = service_binding.credentials[:host]
+      host = service_binding.credentials[:host]
 
-        @instance = bosh.instance(deployment_name, host)
+      @instance = bosh.instance(deployment_name, host)
 
-        aof_contents = bosh.ssh(deployment_name, @instance,
-                                'sudo cat /var/vcap/store/redis/appendonly.aof')
-        expect(aof_contents).to include('test_value')
+      aof_contents = bosh.ssh(deployment_name, @instance,
+                              'sudo cat /var/vcap/store/redis/appendonly.aof')
+      expect(aof_contents).to include('test_value')
 
-        @script_sha = @old_client.script_load('return 1')
-        expect(@old_client.script_exists(@script_sha)).to be true
+      @script_sha = @old_client.script_load('return 1')
+      expect(@old_client.script_exists(@script_sha)).to be true
 
-        @original_config_maxmem = @old_client.config.fetch('maxmemory-policy')
-        @old_client.write_config('maxmemory-policy', 'allkeys-lru')
-        expect(@old_client.config.fetch('maxmemory-policy')).to eql('allkeys-lru')
-        expect(@old_client.config.fetch('maxmemory-policy')).to_not eql(@original_config_maxmem)
-      end
+      @original_config_maxmem = @old_client.config.fetch('maxmemory-policy')
+      @old_client.write_config('maxmemory-policy', 'allkeys-lru')
+      expect(@old_client.config.fetch('maxmemory-policy')).to eql('allkeys-lru')
+      expect(@old_client.config.fetch('maxmemory-policy')).to_not eql(@original_config_maxmem)
 
-
-      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service.name, service.plan)
+      service_broker.unbind_instance(service_binding, service_plan)
       service_broker.deprovision_instance(service_instance, service_plan)
 
       @service_instance = service_broker.provision_instance(service.name, service.plan)
@@ -175,7 +174,7 @@ describe 'dedicated plan' do
     end
 
     after(:all) do
-      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service.name, service.plan)
 
       service_broker.unbind_instance(@service_binding, service_plan)
       service_broker.deprovision_instance(@service_instance, service_plan)
@@ -232,7 +231,7 @@ describe 'dedicated plan' do
     end
 
     it 'successfully deprovisions' do
-      service_plan = service_broker.catalog.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service.name, service.plan)
 
       service_broker.unbind_instance(@service_binding, service_plan)
       service_broker.deprovision_instance(@service_instance, service_plan)
