@@ -1,16 +1,16 @@
 require 'system_spec_helper'
 require 'system/shared_examples/redis_instance'
 require 'system/shared_examples/service'
-require 'helpers/service'
 
 LUA_INFINITE_LOOP = 'while true do end'
 
 describe 'dedicated plan' do
-  def service
-    Helpers::Service.new(
-      name: test_manifest['properties']['redis']['broker']['service_name'],
-      plan: 'dedicated-vm'
-    )
+  def service_name
+    test_manifest['properties']['redis']['broker']['service_name']
+  end
+
+  def service_plan_name
+    'dedicated-vm'
   end
 
   def bosh
@@ -41,12 +41,12 @@ describe 'dedicated plan' do
   describe 'redis provisioning' do
     before(:all) do
       @preprovision_timestamp = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'date +%s')
-      @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @binding = service_broker.bind_instance(@service_instance, service.name, service.plan)
+      @service_instance = service_broker.provision_instance(service_name, service_plan_name)
+      @binding = service_broker.bind_instance(@service_instance, service_name, service_plan_name)
     end
 
     after(:all) do
-      service_plan = service_broker.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service_name, service_plan_name)
 
       service_broker.unbind_instance(@binding, service_plan)
       service_broker.deprovision_instance(@service_instance, service_plan)
@@ -91,10 +91,10 @@ describe 'dedicated plan' do
 
   describe 'redis deprovisioning' do
     before(:all) do
-      @service_instance = service_broker.provision_instance(service.name, service.plan)
+      @service_instance = service_broker.provision_instance(service_name, service_plan_name)
       @predeprovision_timestamp = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'date +%s')
 
-      service_plan = service_broker.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service_name, service_plan_name)
       service_broker.deprovision_instance(@service_instance, service_plan)
     end
 
@@ -112,13 +112,13 @@ describe 'dedicated plan' do
 
   describe 'recreating instance' do
     before(:all) do
-      @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @binding = service_broker.bind_instance(@service_instance, service.name, service.plan)
+      @service_instance = service_broker.provision_instance(service_name, service_plan_name)
+      @binding = service_broker.bind_instance(@service_instance, service_name, service_plan_name)
       @client = service_client_builder(@binding)
     end
 
     after(:all) do
-      service_plan = service_broker.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service_name, service_plan_name)
 
       service_broker.unbind_instance(@binding, service_plan)
       service_broker.deprovision_instance(@service_instance, service_plan)
@@ -142,7 +142,7 @@ describe 'dedicated plan' do
       @service_instances = allocate_all_instances!
       service_instance = @service_instances.pop
 
-      service_binding = service_broker.bind_instance(service_instance, service.name, service.plan)
+      service_binding = service_broker.bind_instance(service_instance, service_name, service_plan_name)
       @old_credentials = service_binding.credentials
       @old_client = service_client_builder(service_binding)
 
@@ -165,16 +165,16 @@ describe 'dedicated plan' do
       expect(@old_client.config.fetch('maxmemory-policy')).to eql('allkeys-lru')
       expect(@old_client.config.fetch('maxmemory-policy')).to_not eql(@original_config_maxmem)
 
-      service_plan = service_broker.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service_name, service_plan_name)
       service_broker.unbind_instance(service_binding, service_plan)
       service_broker.deprovision_instance(service_instance, service_plan)
 
-      @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @service_binding = service_broker.bind_instance(@service_instance, service.name, service.plan)
+      @service_instance = service_broker.provision_instance(service_name, service_plan_name)
+      @service_binding = service_broker.bind_instance(@service_instance, service_name, service_plan_name)
     end
 
     after(:all) do
-      service_plan = service_broker.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service_name, service_plan_name)
 
       service_broker.unbind_instance(@service_binding, service_plan)
       service_broker.deprovision_instance(@service_instance, service_plan)
@@ -220,8 +220,8 @@ describe 'dedicated plan' do
 
   describe 'scripts running' do
     before(:all) do
-      @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @service_binding = service_broker.bind_instance(@service_instance, service.name, service.plan)
+      @service_instance = service_broker.provision_instance(service_name, service_plan_name)
+      @service_binding = service_broker.bind_instance(@service_instance, service_name, service_plan_name)
 
       new_client = service_client_builder(@service_binding)
       @infinite_loop_sha = new_client.script_load(LUA_INFINITE_LOOP)
@@ -231,7 +231,7 @@ describe 'dedicated plan' do
     end
 
     it 'successfully deprovisions' do
-      service_plan = service_broker.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service_name, service_plan_name)
 
       service_broker.unbind_instance(@service_binding, service_plan)
       service_broker.deprovision_instance(@service_instance, service_plan)
@@ -243,5 +243,5 @@ def allocate_all_instances!
   max_instances = test_manifest['instance_groups'].select do |instance_group|
     instance_group['name'] == Helpers::Environment::DEDICATED_NODE_JOB_NAME
   end.first['instances']
-  max_instances.times.map { service_broker.provision_instance(service.name, service.plan) }
+  max_instances.times.map { service_broker.provision_instance(service_name, service_plan_name) }
 end

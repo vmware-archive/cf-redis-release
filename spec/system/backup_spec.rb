@@ -125,26 +125,26 @@ describe 'backups', :skip_service_backups => true do
 
 
   context 'shared vm plan' do
-    let(:service_plan) { 'shared-vm' }
     let(:s3_client) { Aws::S3::Client.new }
     it_behaves_like 'backups are enabled'
 
-    def service
-      Helpers::Service.new(
-        name: test_manifest['properties']['redis']['broker']['service_name'],
-        plan: "#{service_plan}"
-      )
+    def service_name
+      test_manifest['properties']['redis']['broker']['service_name']
+    end
+
+    def service_plan_name
+      'shared-vm'
     end
 
     before do
-      @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @service_binding = service_broker.bind_instance(@service_instance, service.name, service.plan)
+      @service_instance = service_broker.provision_instance(service_name, service_plan_name)
+      @service_binding = service_broker.bind_instance(@service_instance, service_name, service_plan_name)
       @instance = bosh.instance(deployment_name, @service_binding.credentials[:host])
       clean_s3_bucket
     end
 
     after do
-      service_plan = service_broker.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service_name, service_plan_name)
       service_broker.unbind_instance(@service_binding, service_plan)
       service_broker.deprovision_instance(@service_instance, service_plan)
       clean_s3_bucket
@@ -185,26 +185,26 @@ describe 'backups', :skip_service_backups => true do
   end
 
   context 'dedicated vm plan' do
-    let(:service_plan) { 'dedicated-vm' }
     let(:s3_client) { Aws::S3::Client.new }
     it_behaves_like 'backups are enabled'
 
-    def service
-      Helpers::Service.new(
-        name: test_manifest['properties']['redis']['broker']['service_name'],
-        plan: "#{service_plan}"
-      )
+    def service_name
+      test_manifest['properties']['redis']['broker']['service_name']
+    end
+
+    def service_plan_name
+      'dedicated-vm'
     end
 
     before do
-      @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @service_binding = service_broker.bind_instance(@service_instance, service.name, service.plan)
+      @service_instance = service_broker.provision_instance(service_name, service_plan_name)
+      @service_binding = service_broker.bind_instance(@service_instance, service_name, service_plan_name)
       @instance = bosh.instance(deployment_name, @service_binding.credentials[:host])
       clean_s3_bucket
     end
 
     after do
-      service_plan = service_broker.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service_name, service_plan_name)
       service_broker.unbind_instance(@service_binding, service_plan)
       service_broker.deprovision_instance(@service_instance, service_plan)
       clean_s3_bucket

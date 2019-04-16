@@ -1,7 +1,6 @@
 require 'logger'
 require 'system_spec_helper'
 require 'rspec/eventually'
-require 'helpers/service'
 
 describe 'logging' do
   SYSLOG_FILE = "/var/log/syslog"
@@ -37,13 +36,6 @@ describe 'logging' do
   end
 
   describe 'redis broker' do
-    def service
-      Helpers::Service.new(
-        name: test_manifest['properties']['redis']['broker']['service_name'],
-        plan: 'shared-vm'
-      )
-    end
-
     before(:all) do
       bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, "sudo /var/vcap/bosh/bin/monit restart #{Helpers::Environment::BROKER_JOB_NAME}")
       expect(bosh.wait_for_process_start(deployment_name, Helpers::Environment::BROKER_JOB_NAME, Helpers::Environment::BROKER_JOB_NAME)).to be true
@@ -69,16 +61,17 @@ describe 'logging' do
   describe 'dedicated redis process' do
     REDIS_SERVER_STARTED_PATTERN = 'Ready to accept connections'
 
-    def service
-      Helpers::Service.new(
-        name: test_manifest['properties']['redis']['broker']['service_name'],
-        plan: 'dedicated-vm'
-      )
+    def service_name
+      test_manifest['properties']['redis']['broker']['service_name']
+    end
+
+    def service_plan_name
+      'dedicated-vm'
     end
 
     before(:all) do
-      @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @binding = service_broker.bind_instance(@service_instance, service.name, service.plan)
+      @service_instance = service_broker.provision_instance(service_name, service_plan_name)
+      @binding = service_broker.bind_instance(@service_instance, service_name, service_plan_name)
       @redis_server_port_pattern = "Running mode=.*, port=#{@binding.credentials[:port]}"
 
       @host = @binding.credentials[:host]
@@ -87,7 +80,7 @@ describe 'logging' do
     end
 
     after(:all) do
-      service_plan = service_broker.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service_name, service_plan_name)
 
       service_broker.unbind_instance(@binding, service_plan)
       service_broker.deprovision_instance(@service_instance, service_plan)

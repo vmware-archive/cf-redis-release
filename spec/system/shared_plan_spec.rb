@@ -2,7 +2,6 @@ require 'system_spec_helper'
 require 'support/redis_service_client'
 require 'system/shared_examples/redis_instance'
 require 'system/shared_examples/service'
-require 'helpers/service'
 require 'helpers/bosh2_cli'
 
 def bosh
@@ -10,21 +9,23 @@ def bosh
 end
 
 describe 'shared plan' do
-  def service
-    Helpers::Service.new(
-      name: test_manifest['properties']['redis']['broker']['service_name'],
-      plan: 'shared-vm'
-    )
+  def service_name
+    test_manifest['properties']['redis']['broker']['service_name']
   end
+
+  def service_plan_name
+    'shared-vm'
+  end
+
 
   describe 'redis provisioning' do
     before(:all) do
       @preprovision_timestamp = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'date +%s')
-      @service_instance       = service_broker.provision_instance(service.name, service.plan)
+      @service_instance       = service_broker.provision_instance(service_name, service_plan_name)
     end
 
     after(:all) do
-      service_plan = service_broker.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service_name, service_plan_name)
 
       service_broker.deprovision_instance(@service_instance, service_plan)
     end
@@ -43,10 +44,10 @@ describe 'shared plan' do
 
   describe 'redis deprovisioning' do
     before(:all) do
-      @service_instance = service_broker.provision_instance(service.name, service.plan)
+      @service_instance = service_broker.provision_instance(service_name, service_plan_name)
 
       @predeprovision_timestamp = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'date +%s')
-      service_plan = service_broker.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service_name, service_plan_name)
 
       service_broker.deprovision_instance(@service_instance, service_plan)
     end
@@ -65,8 +66,8 @@ describe 'shared plan' do
 
   context 'when recreating vms' do
     before(:all) do
-      @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @service_binding  = service_broker.bind_instance(@service_instance, service.name, service.plan)
+      @service_instance = service_broker.provision_instance(service_name, service_plan_name)
+      @service_binding  = service_broker.bind_instance(@service_instance, service_name, service_plan_name)
 
       @service_client = service_client_builder(@service_binding)
       @service_client.write('test_key', 'test_value')
@@ -77,7 +78,7 @@ describe 'shared plan' do
     end
 
     after(:all) do
-      service_plan = service_broker.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service_name, service_plan_name)
 
       service_broker.unbind_instance(@service_binding, service_plan)
       service_broker.deprovision_instance(@service_instance, service_plan)
@@ -107,12 +108,12 @@ describe 'shared plan' do
 
   describe 'redis configuration' do
     before(:all) do
-      @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @service_binding  = service_broker.bind_instance(@service_instance, service.name, service.plan)
+      @service_instance = service_broker.provision_instance(service_name, service_plan_name)
+      @service_binding  = service_broker.bind_instance(@service_instance, service_name, service_plan_name)
     end
 
     after(:all) do
-      service_plan = service_broker.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service_name, service_plan_name)
 
       service_broker.unbind_instance(@service_binding, service_plan)
       service_broker.deprovision_instance(@service_instance, service_plan)
@@ -156,8 +157,8 @@ describe 'shared plan' do
         manifest['properties']['redis']['config_command'] = 'configalias'
       end
 
-      @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @service_binding  = service_broker.bind_instance(@service_instance, service.name, service.plan)
+      @service_instance = service_broker.provision_instance(service_name, service_plan_name)
+      @service_binding  = service_broker.bind_instance(@service_instance, service_name, service_plan_name)
 
       redis_client1 = service_client_builder(@service_binding)
       redis_client1.write('test', 'foobar')
@@ -169,7 +170,7 @@ describe 'shared plan' do
         manifest['properties']['redis']['config_command'] = 'configalias'
       end
 
-      service_plan = service_broker.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service_name, service_plan_name)
       service_broker.unbind_instance(@service_binding, service_plan)
       service_broker.deprovision_instance(@service_instance, service_plan)
     end
@@ -206,8 +207,8 @@ describe 'shared plan' do
 
   context 'when repeatedly draining a redis instance' do
     before(:all) do
-      @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @service_binding  = service_broker.bind_instance(@service_instance, service.name, service.plan)
+      @service_instance = service_broker.provision_instance(service_name, service_plan_name)
+      @service_binding  = service_broker.bind_instance(@service_instance, service_name, service_plan_name)
 
       ps_output = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo ps aux | grep redis-serve[r]')
       expect(ps_output.strip).not_to be_empty
@@ -233,7 +234,7 @@ describe 'shared plan' do
 
       expect(bosh.wait_for_process_start(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'process-watcher')).to eq(true)
 
-      service_plan = service_broker.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service_name, service_plan_name)
 
       service_broker.unbind_instance(@service_binding, service_plan)
       service_broker.deprovision_instance(@service_instance, service_plan)
@@ -247,8 +248,8 @@ describe 'shared plan' do
 
   describe 'process destroyer' do
     before do
-      @service_instance = service_broker.provision_instance(service.name, service.plan)
-      @service_binding  = service_broker.bind_instance(@service_instance, service.name, service.plan)
+      @service_instance = service_broker.provision_instance(service_name, service_plan_name)
+      @service_binding  = service_broker.bind_instance(@service_instance, service_name, service_plan_name)
 
       ps_output = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'sudo ps aux | grep redis-serve[r]')
       expect(ps_output).not_to be_empty
@@ -259,7 +260,7 @@ describe 'shared plan' do
 
       expect(bosh.wait_for_process_start(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'process-watcher')).to eq(true)
 
-      service_plan = service_broker.service_plan(service.name, service.plan)
+      service_plan = service_broker.service_plan(service_name, service_plan_name)
 
       service_broker.unbind_instance(@service_binding, service_plan)
       service_broker.deprovision_instance(@service_instance, service_plan)

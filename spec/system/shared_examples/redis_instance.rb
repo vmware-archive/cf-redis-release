@@ -1,11 +1,11 @@
 shared_examples_for 'a redis instance' do
   before(:all) do
-    @service_instance = service_broker.provision_instance(service.name, service.plan)
-    @service_binding = service_broker.bind_instance(@service_instance, service.name, service.plan)
+    @service_instance = service_broker.provision_instance(service_name, service_plan_name)
+    @service_binding = service_broker.bind_instance(@service_instance, service_name, service_plan_name)
   end
 
   after(:all) do
-    service_plan = service_broker.service_plan(service.name, service.plan)
+    service_plan = service_broker.service_plan(service_name, service_plan_name)
     service_broker.unbind_instance(@service_binding, service_plan)
     service_broker.deprovision_instance(@service_instance, service_plan)
   end
