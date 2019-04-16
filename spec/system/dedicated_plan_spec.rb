@@ -46,10 +46,8 @@ describe 'dedicated plan' do
     end
 
     after(:all) do
-      service_plan = service_broker.service_plan(service_name, service_plan_name)
-
-      service_broker.unbind_instance(@binding, service_plan)
-      service_broker.deprovision_instance(@service_instance, service_plan)
+      service_broker.unbind_instance(@binding, service_name, service_plan_name)
+      service_broker.deprovision_instance(@service_instance, service_name, service_plan_name)
     end
 
     describe 'configuration' do
@@ -94,8 +92,7 @@ describe 'dedicated plan' do
       @service_instance = service_broker.provision_instance(service_name, service_plan_name)
       @predeprovision_timestamp = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'date +%s')
 
-      service_plan = service_broker.service_plan(service_name, service_plan_name)
-      service_broker.deprovision_instance(@service_instance, service_plan)
+      service_broker.deprovision_instance(@service_instance,service_name, service_plan_name)
     end
 
     it 'logs instance deprovisioning' do
@@ -118,10 +115,8 @@ describe 'dedicated plan' do
     end
 
     after(:all) do
-      service_plan = service_broker.service_plan(service_name, service_plan_name)
-
-      service_broker.unbind_instance(@binding, service_plan)
-      service_broker.deprovision_instance(@service_instance, service_plan)
+      service_broker.unbind_instance(@binding, service_name, service_plan_name)
+      service_broker.deprovision_instance(@service_instance,service_name, service_plan_name)
     end
 
     it 'retains data and keeps the same credentials after recreating the node' do
@@ -165,22 +160,19 @@ describe 'dedicated plan' do
       expect(@old_client.config.fetch('maxmemory-policy')).to eql('allkeys-lru')
       expect(@old_client.config.fetch('maxmemory-policy')).to_not eql(@original_config_maxmem)
 
-      service_plan = service_broker.service_plan(service_name, service_plan_name)
-      service_broker.unbind_instance(service_binding, service_plan)
-      service_broker.deprovision_instance(service_instance, service_plan)
+      service_broker.unbind_instance(service_binding, service_name, service_plan_name)
+      service_broker.deprovision_instance(service_instance, service_name, service_plan_name)
 
       @service_instance = service_broker.provision_instance(service_name, service_plan_name)
       @service_binding = service_broker.bind_instance(@service_instance, service_name, service_plan_name)
     end
 
     after(:all) do
-      service_plan = service_broker.service_plan(service_name, service_plan_name)
-
-      service_broker.unbind_instance(@service_binding, service_plan)
-      service_broker.deprovision_instance(@service_instance, service_plan)
+      service_broker.unbind_instance(@service_binding,service_name, service_plan_name)
+      service_broker.deprovision_instance(@service_instance, service_name, service_plan_name)
 
       @service_instances.each do |service_instance|
-        service_broker.deprovision_instance(service_instance, service_plan)
+        service_broker.deprovision_instance(service_instance, service_name, service_plan_name)
       end
     end
 
@@ -231,10 +223,8 @@ describe 'dedicated plan' do
     end
 
     it 'successfully deprovisions' do
-      service_plan = service_broker.service_plan(service_name, service_plan_name)
-
-      service_broker.unbind_instance(@service_binding, service_plan)
-      service_broker.deprovision_instance(@service_instance, service_plan)
+      service_broker.unbind_instance(@service_binding,service_name, service_plan_name)
+      service_broker.deprovision_instance(@service_instance, service_name, service_plan_name)
     end
   end
 end

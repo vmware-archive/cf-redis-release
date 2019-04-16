@@ -5,9 +5,8 @@ shared_examples_for 'a service that has distinct instances' do
   end
 
   after(:all) do
-    service_plan = service_broker.service_plan(service_name, service_plan_name)
-    service_broker.unbind_instance(@service_binding, service_plan)
-    service_broker.deprovision_instance(@service_instance, service_plan)
+    service_broker.unbind_instance(@service_binding, service_name, service_plan_name)
+    service_broker.deprovision_instance(@service_instance, service_name, service_plan_name)
   end
 
   it 'has distinct instances' do
@@ -22,9 +21,8 @@ shared_examples_for 'a service that has distinct instances' do
     expect(service_client1.read('test_key')).to eq('test_value')
     expect(service_client2.read('test_key')).to eq('another_test_value')
 
-    service_plan = service_broker.service_plan(service_name, service_plan_name)
-    service_broker.unbind_instance(service_binding2, service_plan)
-    service_broker.deprovision_instance(service_instance2, service_plan)
+    service_broker.unbind_instance(service_binding2, service_name, service_plan_name)
+    service_broker.deprovision_instance(service_instance2, service_name, service_plan_name)
   end
 end
 
@@ -35,9 +33,8 @@ shared_examples_for 'a service that can be shared by multiple applications' do
   end
 
   after(:all) do
-    service_plan = service_broker.service_plan(service_name, service_plan_name)
-    service_broker.unbind_instance(@service_binding, service_plan)
-    service_broker.deprovision_instance(@service_instance, service_plan)
+    service_broker.unbind_instance(@service_binding, service_name, service_plan_name)
+    service_broker.deprovision_instance(@service_instance, service_name, service_plan_name)
   end
 
   it 'allows two applications to share the same instance' do
@@ -50,8 +47,7 @@ shared_examples_for 'a service that can be shared by multiple applications' do
     expect(service_client2.read('shared_test_key')).to eq('test_value')
     expect(service_client1.read('shared_test_key')).to eq('test_value')
 
-    service_plan = service_broker.service_plan(service_name, service_plan_name)
-    service_broker.unbind_instance(service_binding2, service_plan)
+    service_broker.unbind_instance(service_binding2, service_name, service_plan_name)
   end
 end
 
@@ -61,17 +57,15 @@ shared_examples_for 'a service which preserves data across binding and unbinding
     @service_binding = service_broker.bind_instance(@service_instance, service_name, service_plan_name)
     service_client_builder(@service_binding).write('unbound_test_key', 'test_value')
 
-    service_plan = service_broker.service_plan(service_name, service_plan_name)
-    service_broker.unbind_instance(@service_binding, service_plan)
+    service_broker.unbind_instance(@service_binding,service_name, service_plan_name)
     @service_binding = service_broker.bind_instance(@service_instance, service_name, service_plan_name)
 
     expect(service_client_builder(@service_binding).read('unbound_test_key')).to eq('test_value')
 
     # this is not in an `after`-block, because the @service_binding gets re-assigned
     # once control exits the `it` block
-    service_plan = service_broker.service_plan(service_name, service_plan_name)
-    service_broker.unbind_instance(@service_binding, service_plan)
-    service_broker.deprovision_instance(@service_instance, service_plan)
+    service_broker.unbind_instance(@service_binding,service_name, service_plan_name)
+    service_broker.deprovision_instance(@service_instance, service_name, service_plan_name)
   end
 end
 
@@ -82,9 +76,8 @@ shared_examples_for 'a service which preserves data when recreating the broker V
   end
 
   after(:all) do
-    service_plan = service_broker.service_plan(service_name, service_plan_name)
-    service_broker.unbind_instance(@service_binding, service_plan)
-    service_broker.deprovision_instance(@service_instance, service_plan)
+    service_broker.unbind_instance(@service_binding,service_name, service_plan_name)
+    service_broker.deprovision_instance(@service_instance, service_name, service_plan_name)
   end
 
   it 'preserves data when recreating vms' do

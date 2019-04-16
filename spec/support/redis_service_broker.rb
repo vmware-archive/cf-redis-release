@@ -16,20 +16,16 @@ module Support
     end
 
     def deprovision_dedicated_service_instances!
-      service_plan = @service_broker.service_plan(service_name, "dedicated-vm")
-
       service_instances.each do |service_instance|
         puts "Found service instance #{service_instance.id.inspect}"
-        service_broker.deprovision_instance(service_instance, service_plan)
+        service_broker.deprovision_instance(service_instance, service_name, "dedicated-vm")
       end
     end
 
     def deprovision_shared_service_instances!
-      service_plan = @service_broker.service_plan(service_name, "shared-vm")
-
       service_instances.each do |service_instance|
         puts "Found service instance #{service_instance.id.inspect}"
-        service_broker.deprovision_instance(service_instance, service_plan)
+        service_broker.deprovision_instance(service_instance, service_name, "shared-vm")
       end
     end
 

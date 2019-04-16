@@ -10,20 +10,22 @@ module Helpers
     end
 
     def provision_instance(service_name, plan_name)
-      plan = api.catalog.service_plan(service_name, plan_name)
+      plan = service_plan(service_name, plan_name)
       api.provision_instance(plan)
     end
 
-    def deprovision_instance(service_instance, plan)
+    def deprovision_instance(service_instance, service_name, plan_name)
+      plan = service_plan(service_name, plan_name)
       api.deprovision_instance(service_instance, plan)
     end
 
     def bind_instance(service_instance, service_name, plan_name)
-      plan = api.catalog.service_plan(service_name, plan_name)
+      plan = service_plan(service_name, plan_name)
       api.bind_instance(service_instance, plan)
     end
 
-    def unbind_instance(service_instance, plan)
+    def unbind_instance(service_instance, service_name, plan_name)
+      plan = service_plan(service_name, plan_name)
       api.unbind_instance(service_instance, plan)
     end
 

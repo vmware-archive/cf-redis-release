@@ -80,10 +80,8 @@ describe 'logging' do
     end
 
     after(:all) do
-      service_plan = service_broker.service_plan(service_name, service_plan_name)
-
-      service_broker.unbind_instance(@binding, service_plan)
-      service_broker.deprovision_instance(@service_instance, service_plan)
+      service_broker.unbind_instance(@binding, service_name, service_plan_name)
+      service_broker.deprovision_instance(@service_instance, service_name, service_plan_name)
       @log.info("Deprovisioned dedicated instance #{@host} for tests")
     end
 

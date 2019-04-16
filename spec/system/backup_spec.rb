@@ -108,14 +108,14 @@ describe 'backups', :skip_service_backups => true do
       describe 'manual cleanup' do
         it 'deletes the RDB dump file' do
           instance_id = @service_binding.service_instance.id
-          filename = "20100101T010100Z-#{instance_id}_#{service_plan}_redis_backup.rdb"
+          filename = "20100101T010100Z-#{instance_id}_#{service_plan_name}_redis_backup.rdb"
 
           assert_manual_cleanup_succeeds(filename)
         end
 
         it 'deletes the md5 files' do
           instance_id = @service_binding.service_instance.id
-          filename = "20100101T010100Z-#{instance_id}_#{service_plan}_redis_backup.md5"
+          filename = "20100101T010100Z-#{instance_id}_#{service_plan_name}_redis_backup.md5"
 
           assert_manual_cleanup_succeeds(filename)
         end
@@ -144,9 +144,8 @@ describe 'backups', :skip_service_backups => true do
     end
 
     after do
-      service_plan = service_broker.service_plan(service_name, service_plan_name)
-      service_broker.unbind_instance(@service_binding, service_plan)
-      service_broker.deprovision_instance(@service_instance, service_plan)
+      service_broker.unbind_instance(@service_binding, service_name, service_plan_name)
+      service_broker.deprovision_instance(@service_instance, service_name, service_plan_name)
       clean_s3_bucket
     end
 
@@ -204,9 +203,8 @@ describe 'backups', :skip_service_backups => true do
     end
 
     after do
-      service_plan = service_broker.service_plan(service_name, service_plan_name)
-      service_broker.unbind_instance(@service_binding, service_plan)
-      service_broker.deprovision_instance(@service_instance, service_plan)
+      service_broker.unbind_instance(@service_binding, service_name, service_plan_name)
+      service_broker.deprovision_instance(@service_instance, service_name, service_plan_name)
       clean_s3_bucket
     end
 
@@ -317,7 +315,7 @@ describe 'backups', :skip_service_backups => true do
     expect(cmd_result).to match(/Perform backup completed successfully/)
     expect(cmd_result).to match(/Upload backup completed successfully/)
     expect(cmd_result).to match(/Cleanup completed successfully/)
-    expect(cmd_result).to include("#{service_plan}: #{service_binding.service_instance.id}")
+    expect(cmd_result).to include("#{service_plan_name}: #{service_binding.service_instance.id}")
   end
 
   def assert_rdb_file_is_valid

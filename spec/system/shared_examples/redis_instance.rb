@@ -5,9 +5,8 @@ shared_examples_for 'a redis instance' do
   end
 
   after(:all) do
-    service_plan = service_broker.service_plan(service_name, service_plan_name)
-    service_broker.unbind_instance(@service_binding, service_plan)
-    service_broker.deprovision_instance(@service_instance, service_plan)
+    service_broker.unbind_instance(@service_binding, service_name, service_plan_name)
+    service_broker.deprovision_instance(@service_instance, service_name, service_plan_name)
   end
 
   describe 'redis configuration' do
