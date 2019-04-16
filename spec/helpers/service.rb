@@ -3,7 +3,7 @@
 require 'helpers/plan'
 
 module Helpers
-  class NewService
+  class Service
     def initialize(args = {})
       @id          = args.fetch(:id)
       @name        = args.fetch(:name)

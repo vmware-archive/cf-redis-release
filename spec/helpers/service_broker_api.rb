@@ -4,9 +4,9 @@ require 'helpers/service_instance'
 require 'helpers/instance_binding'
 
 module Helpers
-  class NewServiceBrokerApi
+  class ServiceBrokerApi
 
-    def initialize(url:, username:, password:, http_client: NewHttpJsonClient.new, broker_api_version:)
+    def initialize(url:, username:, password:, http_client: HttpJsonClient.new, broker_api_version:)
       @http_client = http_client
 
       @url = URI(url)

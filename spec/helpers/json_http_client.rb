@@ -20,7 +20,7 @@ module Helpers
     end
   end
 
-  class NewHttpJsonClient
+  class HttpJsonClient
     def initialize(http_proxy: HttpProxyNull.new)
       @http_proxy = http_proxy
     end

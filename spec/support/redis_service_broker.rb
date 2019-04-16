@@ -1,5 +1,5 @@
 require 'helpers/service_instance'
-require 'helpers/new_service_broker_api'
+require 'helpers/service_broker_api'
 
 module Support
   class RedisServiceBroker

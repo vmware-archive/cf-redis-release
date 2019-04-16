@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-require 'helpers/new_service'
+require 'helpers/service'
 
 module Helpers
   class Catalog
     attr_reader :services
 
     def initialize(args = {})
-      @services = args.fetch(:services).map { |s| Helpers::NewService.new(s) }
+      @services = args.fetch(:services).map { |s| Helpers::Service.new(s) }
     end
 
     def ==(other)

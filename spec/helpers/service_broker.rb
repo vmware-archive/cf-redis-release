@@ -1,12 +1,12 @@
 # frozen_string_literal: true
-require 'helpers/new_service_broker_api'
+require 'helpers/service_broker_api'
 
 module Helpers
-  class NewServiceBroker
+  class ServiceBroker
 
     def initialize(args = {})
       api_args = args.reject { |k, _v| k == :api }
-      @api = args.fetch(:api) { Helpers::NewServiceBrokerApi.new(api_args) }
+      @api = args.fetch(:api) { Helpers::ServiceBrokerApi.new(api_args) }
     end
 
     def provision_instance(service_name, plan_name)
