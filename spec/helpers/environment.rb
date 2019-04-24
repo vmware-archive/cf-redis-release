@@ -23,60 +23,47 @@ module Helpers
     BROKER_JOB_NAME = 'cf-redis-broker'
     DEDICATED_NODE_JOB_NAME = 'dedicated-node'
 
-    def environment
-      bosh_manifest_yaml = File.read(ENV.fetch('BOSH_MANIFEST'))
-
-      @manifest_hash = YAML.load(bosh_manifest_yaml)
-      if ENV.key?('BOSH_ENVIRONMENT')
-        @ssh_gateway_host = URI.parse(ENV['BOSH_ENVIRONMENT']).host
-        @ssh_gateway_username = 'vcap'
-        @ssh_gateway_password = 'c1oudc0w'
-      end
-
-      if ENV.key?('JUMPBOX_HOST')
-        @ssh_gateway_host        = parse_host(ENV['JUMPBOX_HOST'])
-        @ssh_gateway_username    = ENV.fetch('JUMPBOX_USERNAME')
-        @ssh_gateway_password    = ENV['JUMPBOX_PASSWORD']         if ENV.key?('JUMPBOX_PASSWORD')
-        @ssh_gateway_private_key = ENV['JUMPBOX_PRIVATE_KEY_PATH'] if ENV.key?('JUMPBOX_PRIVATE_KEY_PATH')
-      end
-
-    end
-
-    def get_jumpbox_gateway_options
-      options = {}
-      if ENV.key?('JUMPBOX_HOST')
-        options[:ssh_gateway_host]        = parse_host(ENV['JUMPBOX_HOST'])
-        options[:ssh_gateway_username]    = ENV.fetch('JUMPBOX_USERNAME')
-        options[:ssh_gateway_password]    = ENV['JUMPBOX_PASSWORD']         if ENV.key?('JUMPBOX_PASSWORD')
-        options[:ssh_gateway_private_key] = ENV['JUMPBOX_PRIVATE_KEY_PATH'] if ENV.key?('JUMPBOX_PRIVATE_KEY_PATH')
-      end
-      options
-    end
 
     def redis_service_broker
       Support::RedisServiceBroker.new(service_broker, test_manifest['properties']['redis']['broker']['service_name'])
     end
 
     def service_broker
-      environment
+      @service_broker ||= begin
+        bosh_manifest_yaml = File.read(ENV.fetch('BOSH_MANIFEST'))
 
-      broker_registrar_properties = begin
-        job = @manifest_hash.fetch('instance_groups').detect { |j| j.fetch('name') == 'broker-registrar' }
-        if job.nil?
-          # for colocated errands, the errand's instance group might not exist
-          @manifest_hash.fetch('properties').fetch('broker')
-        else
-          job.fetch('properties').fetch('broker')
+        @manifest_hash = YAML.load(bosh_manifest_yaml)
+        if ENV.key?('BOSH_ENVIRONMENT')
+          @ssh_gateway_host = URI.parse(ENV['BOSH_ENVIRONMENT']).host
+          @ssh_gateway_username = 'vcap'
+          @ssh_gateway_password = 'c1oudc0w'
         end
-      end
 
-      Helpers::ServiceBroker.new(
-        url: URI::HTTPS.build(host: broker_registrar_properties.fetch('host')),
-        username: broker_registrar_properties.fetch('username'),
-        password: broker_registrar_properties.fetch('password'),
-        http_client: Helpers::HttpJsonClient.new,
-        broker_api_version: '2.13'
-      )
+        if ENV.key?('JUMPBOX_HOST')
+          @ssh_gateway_host = parse_host(ENV['JUMPBOX_HOST'])
+          @ssh_gateway_username = ENV.fetch('JUMPBOX_USERNAME')
+          @ssh_gateway_password = ENV['JUMPBOX_PASSWORD'] if ENV.key?('JUMPBOX_PASSWORD')
+          @ssh_gateway_private_key = ENV['JUMPBOX_PRIVATE_KEY_PATH'] if ENV.key?('JUMPBOX_PRIVATE_KEY_PATH')
+        end
+
+        broker_registrar_properties = begin
+          job = @manifest_hash.fetch('instance_groups').detect { |j| j.fetch('name') == 'broker-registrar' }
+          if job.nil?
+            # for colocated errands, the errand's instance group might not exist
+            @manifest_hash.fetch('properties').fetch('broker')
+          else
+            job.fetch('properties').fetch('broker')
+          end
+        end
+
+        Helpers::ServiceBroker.new(
+          url: URI::HTTPS.build(host: broker_registrar_properties.fetch('host')),
+          username: broker_registrar_properties.fetch('username'),
+          password: broker_registrar_properties.fetch('password'),
+          http_client: Helpers::HttpJsonClient.new,
+          broker_api_version: '2.13'
+        )
+      end
     end
 
     def bosh
@@ -92,6 +79,18 @@ module Helpers
                                           syslog_endpoint.port,
                                           gateway_executor)
     end
+
+    def get_jumpbox_gateway_options
+      options = {}
+      if ENV.key?('JUMPBOX_HOST')
+        options[:ssh_gateway_host]        = parse_host(ENV['JUMPBOX_HOST'])
+        options[:ssh_gateway_username]    = ENV.fetch('JUMPBOX_USERNAME')
+        options[:ssh_gateway_password]    = ENV['JUMPBOX_PASSWORD']         if ENV.key?('JUMPBOX_PASSWORD')
+        options[:ssh_gateway_private_key] = ENV['JUMPBOX_PRIVATE_KEY_PATH'] if ENV.key?('JUMPBOX_PRIVATE_KEY_PATH')
+      end
+      options
+    end
+
 
     # net-ssh makes a deprecated call to `timeout`. We ignore these messages
     # because they pollute logs.
