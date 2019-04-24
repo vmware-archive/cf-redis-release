@@ -92,7 +92,7 @@ module Helpers
     end
 
     def ssh_gateway
-      opts = { paranoid: :never }
+      opts = { verify_host_key: :never }
       if @gateway_private_key
         opts[:keys] = [@gateway_private_key]
       else
