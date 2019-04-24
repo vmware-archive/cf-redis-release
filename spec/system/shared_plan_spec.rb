@@ -68,8 +68,8 @@ describe 'shared plan' do
       @service_client.write('test_key', 'test_value')
       expect(@service_client.read('test_key')).to eq('test_value')
 
-      bosh.stop(deployment_name, environment.bosh_service_broker_job_name)
-      bosh.recreate(deployment_name, environment.bosh_service_broker_job_name)
+      bosh.stop(deployment_name, Helpers::Environment::BROKER_JOB_NAME)
+      bosh.recreate(deployment_name, Helpers::Environment::BROKER_JOB_NAME)
     end
 
     after(:all) do
@@ -85,11 +85,11 @@ describe 'shared plan' do
   context 'when stopping the broker vm'  do
     before(:all) do
       @prestop_timestamp = bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, 'date +%s')
-      bosh.stop(deployment_name, environment.bosh_service_broker_job_name)
+      bosh.stop(deployment_name, Helpers::Environment::BROKER_JOB_NAME)
     end
 
     after(:all) do
-      bosh.start(deployment_name, environment.bosh_service_broker_job_name)
+      bosh.start(deployment_name, Helpers::Environment::BROKER_JOB_NAME)
     end
 
     it 'logs redis broker shutdown' do

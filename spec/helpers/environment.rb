@@ -1,8 +1,7 @@
-require 'prof/environment/cloud_foundry'
-
 require 'support/redis_service_broker'
 require 'helpers/service_broker'
 require 'helpers/json_http_client'
+require 'helpers/ssh_gateway'
 require 'support/redis_service_client_builder'
 require 'helpers/utilities'
 
@@ -25,29 +24,22 @@ module Helpers
     DEDICATED_NODE_JOB_NAME = 'dedicated-node'
 
     def environment
-      @environment ||= begin
-        options = {
-          bosh_manifest_path: ENV.fetch('BOSH_MANIFEST'),
-          bosh_service_broker_job_name: BROKER_JOB_NAME
-        }
-        options[:bosh_target]        = ENV['BOSH_ENVIRONMENT']         if ENV.key?('BOSH_ENVIRONMENT')
-        options[:bosh_username]      = ENV['BOSH_USERNAME']            if ENV.key?('BOSH_USERNAME')
-        options[:bosh_password]      = ENV['BOSH_PASSWORD']            if ENV.key?('BOSH_PASSWORD')
-        options[:bosh_ca_cert_path]  = ENV['BOSH_CA_CERT_PATH']        if ENV.key?('BOSH_CA_CERT_PATH')
-        options[:bosh_env_login]     = ENV['BOSH_ENV_LOGIN'] == 'true'
-        options[:broker_api_version] = '2.13'
+      bosh_manifest_yaml = File.read(ENV.fetch('BOSH_MANIFEST'))
 
-        if ENV.key?('BOSH_ENVIRONMENT')
-          options[:ssh_gateway_host]     = URI.parse(ENV['BOSH_ENVIRONMENT']).host
-          options[:ssh_gateway_username] = 'vcap'
-          options[:ssh_gateway_password] = 'c1oudc0w'
-        end
-
-        options.merge! get_jumpbox_gateway_options
-
-        options[:use_proxy] = ENV['USE_PROXY'] == 'true'
-        Prof::Environment::CloudFoundry.new(options)
+      @manifest_hash = YAML.load(bosh_manifest_yaml)
+      if ENV.key?('BOSH_ENVIRONMENT')
+        @ssh_gateway_host = URI.parse(ENV['BOSH_ENVIRONMENT']).host
+        @ssh_gateway_username = 'vcap'
+        @ssh_gateway_password = 'c1oudc0w'
       end
+
+      if ENV.key?('JUMPBOX_HOST')
+        @ssh_gateway_host        = parse_host(ENV['JUMPBOX_HOST'])
+        @ssh_gateway_username    = ENV.fetch('JUMPBOX_USERNAME')
+        @ssh_gateway_password    = ENV['JUMPBOX_PASSWORD']         if ENV.key?('JUMPBOX_PASSWORD')
+        @ssh_gateway_private_key = ENV['JUMPBOX_PRIVATE_KEY_PATH'] if ENV.key?('JUMPBOX_PRIVATE_KEY_PATH')
+      end
+
     end
 
     def get_jumpbox_gateway_options
@@ -66,11 +58,16 @@ module Helpers
     end
 
     def service_broker
+      environment
+
       broker_registrar_properties = begin
-        environment.bosh_manifest.job('broker-registrar').properties.fetch('broker')
-      rescue RuntimeError
-        # for colocated errands, the errand's instance group might not exist
-        environment.bosh_manifest.properties.fetch('broker')
+        job = @manifest_hash.fetch('instance_groups').detect { |j| j.fetch('name') == 'broker-registrar' }
+        if job.nil?
+          # for colocated errands, the errand's instance group might not exist
+          @manifest_hash.fetch('properties').fetch('broker')
+        else
+          job.fetch('properties').fetch('broker')
+        end
       end
 
       Helpers::ServiceBroker.new(
@@ -101,7 +98,19 @@ module Helpers
     # After using the filtered stderr we ensure to reassign the original stderr
     # stream.
     def ssh_gateway
-      gateway = environment.ssh_gateway
+      opts = {
+        gateway_host: @ssh_gateway_host,
+        gateway_username: @ssh_gateway_username,
+      }
+
+      if @ssh_gateway_private_key
+        opts[:gateway_private_key] = @ssh_gateway_private_key
+      else
+        opts[:gateway_password] = @ssh_gateway_password
+      end
+
+
+      gateway = Helpers::SshGateway.new(opts)
 
       def gateway.execute_on(*args, &block)
         original_stderr = $stderr

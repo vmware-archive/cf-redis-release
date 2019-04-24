@@ -1,8 +1,7 @@
 require 'yaml'
 require 'helpers/environment'
 require 'helpers/utilities'
-require 'prof/external_spec/spec_helper'
-require 'prof/matchers/only_support_ssl_with_cipher_set'
+require 'rspec_junit_formatter'
 require 'aws-sdk'
 
 ROOT = File.expand_path('..', __dir__)
@@ -79,6 +78,11 @@ RSpec.configure do |config|
   config.full_backtrace = true
   config.filter_run_excluding skip_metrics: !ExcludeHelper.metrics_available?
   config.filter_run_excluding skip_service_backups: !ExcludeHelper.service_backups_available?
+
+  config.formatter = :documentation
+  config.add_formatter RSpecJUnitFormatter, 'rspec.xml'
+  config.full_backtrace = true
+
 
   config.before(:all) do
     redis_service_broker.deprovision_dedicated_service_instances!

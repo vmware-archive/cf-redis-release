@@ -3,9 +3,13 @@ source 'https://rubygems.org'
 ruby '2.6.0'
 
 gem 'aws-sdk'
-gem 'bosh_cli'
+gem 'bosh-template'
+gem 'net-scp'
+gem 'net-ssh'
+gem 'net-ssh-gateway'
 gem 'redis', '4.1.0'
 gem 'rake'
+gem 'rspec_junit_formatter'
 gem 'process_helper'
 
 group :test do
@@ -18,5 +22,4 @@ group :test do
   gem 'rspec-instafail'
   gem 'rspec-eventually'
 
-  gem 'prof', '0.44.0'
 end
