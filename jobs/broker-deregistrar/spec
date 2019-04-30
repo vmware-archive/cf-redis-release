@@ -1,7 +1,6 @@
 ---
 name: broker-deregistrar
 packages:
-- cf-cli-6-linux
 templates:
   errand.sh.erb: bin/run
 properties:

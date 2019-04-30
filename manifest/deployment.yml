@@ -53,6 +53,8 @@ instance_groups:
     release: cf-redis
   - name: cleanup-metadata-if-dedicated-disabled
     release: cf-redis
+  - name: cf-cli-6-linux
+    release: cf-cli
 
 - instances: ((dedicated_node_count))
   name: dedicated-node
@@ -120,6 +122,8 @@ releases:
   version: ((bpm_version))
 - name: syslog
   version: ((syslog_version))
+- name: cf-cli
+  version: ((cf_cli_version))
 
 stemcells:
 - alias: default
