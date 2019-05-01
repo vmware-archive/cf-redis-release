@@ -22,6 +22,7 @@ module Helpers
 
     BROKER_JOB_NAME = 'cf-redis-broker'
     DEDICATED_NODE_JOB_NAME = 'dedicated-node'
+    METRICS_JOB_NAME = 'service-metrics'
 
 
     def redis_service_broker

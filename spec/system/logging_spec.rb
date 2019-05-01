@@ -16,6 +16,7 @@ describe 'logging' do
       before do
         bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, "sudo /var/vcap/bosh/bin/monit restart #{Helpers::Environment::BROKER_JOB_NAME}")
         expect(bosh.wait_for_process_start(deployment_name, Helpers::Environment::BROKER_JOB_NAME, Helpers::Environment::BROKER_JOB_NAME)).to be true
+        expect(bosh.wait_for_process_start(deployment_name, Helpers::Environment::BROKER_JOB_NAME, Helpers::Environment::METRICS_JOB_NAME)).to be true
       end
 
       it 'forwards logs' do
@@ -39,6 +40,7 @@ describe 'logging' do
     before(:all) do
       bosh.ssh(deployment_name, Helpers::Environment::BROKER_JOB_NAME, "sudo /var/vcap/bosh/bin/monit restart #{Helpers::Environment::BROKER_JOB_NAME}")
       expect(bosh.wait_for_process_start(deployment_name, Helpers::Environment::BROKER_JOB_NAME, Helpers::Environment::BROKER_JOB_NAME)).to be true
+      expect(bosh.wait_for_process_start(deployment_name, Helpers::Environment::BROKER_JOB_NAME, Helpers::Environment::METRICS_JOB_NAME)).to be true
     end
 
     it 'allows log access via bosh' do
