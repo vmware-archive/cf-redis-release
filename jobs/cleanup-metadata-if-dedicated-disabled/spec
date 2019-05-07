@@ -1,6 +1,7 @@
 ---
 name: cleanup-metadata-if-dedicated-disabled
 packages:
+- cf-cli-6-linux
 templates:
   errand.sh.erb: bin/run
 properties:
