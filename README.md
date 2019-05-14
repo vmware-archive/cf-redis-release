@@ -3,7 +3,7 @@
 This repository contains a BOSH release for a Cloud Foundry Redis service
 broker. It supports shared-vm plans. Dedicated-vm plans are being deprecated.
 
-> There is no active feature development for this repository. The repository will be supported until July 31st 2019, after which we will continue to support open source Redis deployments in a different repo that we will share and link here.
+**There is no active feature development for this repository. The repository will be supported until July 31st 2019, after which we will continue to support open source Redis deployments in a different repo that we will share and link here.**
 
 ```shell
 git clone https://github.com/pivotal-cf/cf-redis-release ~/workspace/cf-redis-release
