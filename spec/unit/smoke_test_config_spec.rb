@@ -76,7 +76,7 @@ RSpec.describe 'smoke-tests config' do
         'existing_user' => "a-username",
         'existing_user_password' => "a-password",
         'use_existing_space' => true,
-        'use_existing_space' => 'a-space-name'
+        'use_existing_space' => 'a-space-name',
         'skip_ssl_validation' => false,
         'name_prefix' => "cf-redis-smoke-tests",
         'service_name' => 'p-redis',
