@@ -1,5 +1,4 @@
 ---
-director_uuid: ((director_uuid))
 name: ((deployment_name))
 
 instance_groups:
