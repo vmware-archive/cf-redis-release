@@ -3,7 +3,7 @@
 docker_status=$(boot2docker status)
 
 if [ "$docker_status" != "running" ]; then
-  echo -e "Docker is not running. You can start it up by running:\n\nboot2docker start"
+  echo -e 'Docker is not running. You can start it up by running:\n\nboot2docker start'
   exit 1
 fi
 
