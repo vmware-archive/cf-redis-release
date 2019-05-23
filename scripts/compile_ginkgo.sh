@@ -10,7 +10,7 @@ mkdir "${GOPATH}/src"
 cp -R "${PROJECT_DIR}/src/cf-redis-smoke-tests/vendor/" "${GOPATH}/src/"
 
 go_version="$(go version)"
-ginkgo_sha="$(cat "${PROJECT_DIR}/src/cf-redis-smoke-tests/vendor/manifest" | jq --raw-output '.dependencies | map(select(.importpath == "github.com/onsi/ginkgo")) | .[0].revision')"
+ginkgo_sha="$( jq --raw-output '.dependencies | map(select(.importpath == "github.com/onsi/ginkgo")) | .[0].revision' "${PROJECT_DIR}/src/cf-redis-smoke-tests/vendor/manifest" )"
 
 pushd "$GOPATH"
   GOOS=linux GOARCH=amd64 go build github.com/onsi/ginkgo/ginkgo
