@@ -19,7 +19,7 @@ check_args() {
 export_bosh_ca_cert_path() {
   if [ -n "$BOSH_CA_CERT" ]
   then
-    local path="$(mktemp -d)/bosh.crt"
+    local path; path="$(mktemp -d)/bosh.crt"
     echo -e "$BOSH_CA_CERT" > "$path"
     chmod 400 "$path"
     export BOSH_CA_CERT_PATH=$path
@@ -29,7 +29,7 @@ export_bosh_ca_cert_path() {
 export_jumpbox_private_key_path() {
   if [ -n "$JUMPBOX_PRIVATE_KEY" ]
   then
-    local jumpbox_key_path="$(mktemp -d)/jumpbox.pem"
+    local jumpbox_key_path; jumpbox_key_path="$(mktemp -d)/jumpbox.pem"
     echo -e "$JUMPBOX_PRIVATE_KEY" > "$jumpbox_key_path"
     chmod 400 "$jumpbox_key_path"
     export JUMPBOX_PRIVATE_KEY_PATH=$jumpbox_key_path
