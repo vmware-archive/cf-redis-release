@@ -14,7 +14,15 @@ export PATH=${GOPATH}/bin:${PATH}
 
 export GOCACHE=/tmp/gocache
 
-cd /var/vcap/packages/cf-redis-smoke-tests/src/github.com/pivotal-cf/cf-redis-smoke-tests
+
 export PATH=$PATH:/var/vcap/packages/cf-cli-6-linux/bin
 
+export API_URL=$(grep -Po '"api": *\K"[^"]*"' ../config.json | sed -e 's/^"//' -e 's/"$//')
+
+cf api $API_URL --skip-ssl-validation
+cf auth admin $(grep -Po '"admin_password": *\K"[^"]*"' ../config.json | sed -e 's/^"//' -e 's/"$//')
+cf create-org system
+cf create-space pivotal-services -o system
+
+cd /var/vcap/packages/cf-redis-smoke-tests/src/github.com/pivotal-cf/cf-redis-smoke-tests
 CGO_ENABLED=0 GO111MODULE=off CONFIG_PATH=/var/vcap/jobs/smoke-tests/config.json /var/vcap/packages/ginkgo/ginkgo -r -p -nodes=2
