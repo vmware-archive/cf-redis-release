@@ -746,7 +746,7 @@ GEM
       pry (~> 0.10)
     rainbow (3.0.0)
     rake (12.3.2)
-    redis (4.1.1)
+    redis (4.1.2)
     reverse_markdown (1.1.0)
       nokogiri
     rspec (3.8.0)
@@ -808,7 +808,7 @@ DEPENDENCIES
   pry
   pry-byebug
   rake
-  redis (= 4.1.1)
+  redis (= 4.1.2)
   rspec
   rspec-eventually
   rspec-instafail
