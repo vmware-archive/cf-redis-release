@@ -18,11 +18,23 @@ export GOCACHE=/tmp/gocache
 export PATH=$PATH:/var/vcap/packages/cf-cli-6-linux/bin
 
 export API_URL=$(grep -Po '"api": *\K"[^"]*"' ../jobs/smoke-tests/config.json | sed -e 's/^"//' -e 's/"$//')
+export ADMIN_NAME=admin
+export ADMIN_PASSWORD=$(grep -Po '"admin_password": *\K"[^"]*"' ../jobs/smoke-tests/config.json | sed -e 's/^"//' -e 's/"$//')
 
 cf api $API_URL --skip-ssl-validation
-cf auth admin $(grep -Po '"admin_password": *\K"[^"]*"' ../jobs/smoke-tests/config.json | sed -e 's/^"//' -e 's/"$//')
+
+if [ -z $ADMIN_PASSWORD ]
+    then
+        export ADMIN_NAME=$(grep -Po '"admin_client": *\K"[^"]*"' ../jobs/smoke-tests/config.json | sed -e 's/^"//' -e 's/"$//')
+        export ADMIN_PASSWORD=$(grep -Po '"admin_client_secret": *\K"[^"]*"' ../jobs/smoke-tests/config.json | sed -e 's/^"//' -e 's/"$//')
+        cf auth $ADMIN_NAME $ADMIN_PASSWORD --client-credentials
+else
+    cf auth $ADMIN_NAME $ADMIN_PASSWORD
+fi
+
 cf create-org system
 cf create-space pivotal-services -o system
+
 
 cd /var/vcap/packages/cf-redis-smoke-tests/src/github.com/pivotal-cf/cf-redis-smoke-tests
 CGO_ENABLED=0 GO111MODULE=off CONFIG_PATH=/var/vcap/jobs/smoke-tests/config.json /var/vcap/packages/ginkgo/ginkgo -r -p -nodes=2
