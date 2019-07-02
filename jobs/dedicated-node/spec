@@ -25,6 +25,10 @@ packages:
 provides:
 - name: dedicated_node
   type: dedicated_node
+- name: redis
+  type: redis-link
+  properties:
+  - redis.maxclients
 
 properties:
   redis.version:
@@ -125,7 +129,7 @@ properties:
     description: The length of the slow log. There is no limit to this length. Just be aware that it will consume memory. You can reclaim memory used by the slow log with SLOWLOG RESET.
     default: 128
 
-  redis.limits.maxclients:
+  redis.maxclients:
     default: 10000
     description: Set the max number of connected clients at the same time
 
