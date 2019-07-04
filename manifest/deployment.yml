@@ -29,6 +29,8 @@ instance_groups:
   jobs:
   - name: cf-redis-broker
     release: cf-redis
+  - name: cf-cli-6-linux
+    release: cf-cli
   - name: route_registrar
     release: routing
     consumes:
@@ -119,6 +121,8 @@ releases:
   version: ((bpm_version))
 - name: syslog
   version: ((syslog_version))
+- name: cf-cli
+  version: latest
 
 stemcells:
 - alias: default
