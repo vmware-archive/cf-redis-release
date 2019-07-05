@@ -124,7 +124,7 @@ describe 'shared plan' do
 
       it 'runs correct version of redis' do
         service_client = service_client_builder(@service_binding)
-        expect(service_client.info('redis_version')).to eq('5.0.4')
+        expect(service_client.info('redis_version')).to start_with('5.')
       end
     end
 
