@@ -70,7 +70,7 @@ shared_examples 'it errors when passed an incorrect guid' do |service_plan_name|
   it 'logs that the service instance provided does not exist' do
     output, = bosh.ssh_with_error(deployment_name, @instance, "sudo #{RESTORE_BINARY} --sourceRDB #{BACKUP_PATH} --sharedVmGuid imafakeguid")
     expect(output).to include(
-      'service-instance provided does not exist, please check you are on the correct VM and the instance guid is correct'
+      'No changes were performed. Problem with redis config'
     )
     expect(broker_registered?).to be true
   end
