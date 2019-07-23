@@ -12,8 +12,6 @@ instance_groups:
   persistent_disk_type: ((default_persistent_disk_type))
   properties:
     route_registrar:
-      routing_api:
-        skip_ssl_validation: true
       routes:
       - health_check:
           name: ((broker_name))
