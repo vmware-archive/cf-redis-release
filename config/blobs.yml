@@ -18,10 +18,6 @@ redis/redis-4.0.14.tar.gz:
   size: 1755956
   object_id: cc434809-cd0e-405d-4889-0a13f5e5cb74
   sha: 7d22c1c67c430e518323afea2fd19621f3505467
-redis/redis-5.0.4.tar.gz:
-  size: 1982962
-  object_id: 75c416f5-3950-4469-5821-07c429e00416
-  sha: 4eeb899dce9030bc30882cd3d340e111fc48ed4c
 redis/redis-5.0.5.tar.gz:
   size: 1975750
   object_id: 53426c04-48ec-4c57-4b92-2396df21d27b
